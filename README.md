@@ -1,6 +1,6 @@
 # servbot
 
-Servbot is port of my chat engine that is used on etozhebot on twitch.tv, which is currently written in Node.js
+Servbot is chat engine in work that will be used on etozhebot on twitch.tv, which is currently written in Node.js
 
 # Dependencies
 
