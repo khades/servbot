@@ -1,0 +1,9 @@
+{
+    "botUserName": "botname_changeme", // Username of bot
+    "oauthKey": "oauth:changemeeeeee", // Oauth key of chat for the user, can be found here - http://www.twitchapps.com/tmi/
+    "channels": [
+        "changeme1",
+        "changeme2"
+    ], // Lists of channel that bot should serve
+    "dbName": "changeme3" // name of mongo database
+}
