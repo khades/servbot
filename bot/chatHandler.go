@@ -20,7 +20,8 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			{
 				commaIndex := strings.Index(message.Params[1], ":")
 				if commaIndex != -1 {
-					mods := strings.Split(message.Params[1][commaIndex+1:], ", ")
+					log.Printf("Channel %v: got mods list", message.Params[0])
+					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
 					repos.PushMods(message.Params[0], mods)
 				}
 			}
@@ -102,8 +103,8 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		for _, value := range repos.Config.Channels {
 			client.Write("JOIN #" + value)
 		}
-		services.SendModsCommand()
 		IrcClientInstance = IrcClient{Client: client, Ready: true}
+		IrcClientInstance.SendModsCommand()
 		log.Println("Bot is started")
 	}
 }

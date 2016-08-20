@@ -1,9 +1,11 @@
 package bot
 
 import (
+	"log"
+
 	"github.com/belak/irc"
-	"github.com/hoisie/mustache"
 	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/repos"
 )
 
 // IrcClient struct handles stuff we use aftr
@@ -14,6 +16,7 @@ type IrcClient struct {
 
 // SendRaw is wrapper to Write
 func (ircClient IrcClient) SendRaw(message string) {
+	log.Println(ircClient.Ready)
 	if ircClient.Ready {
 		ircClient.Client.Write(message)
 	}
@@ -24,11 +27,9 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 	// TODO Внешний контейнер для темплейтов
 	if ircClient.Ready {
 		if message.User != "" {
-			publicTemplate, _ := mustache.ParseString("PRIVMSG # {{ message.Channel }} @{{ message.User }} {{message.Body}")
-			ircClient.Client.Write(publicTemplate.Render(message))
+			ircClient.Client.Write(basicTemplatesInstance.PublicTemplate.Render(message))
 		} else {
-			publicNonTargetedTemplate, _ := mustache.ParseString("PRIVMSG # {{ message.Channel }} {{message.Body}")
-			ircClient.Client.Write(publicNonTargetedTemplate.Render(message))
+			ircClient.Client.Write(basicTemplatesInstance.PublicNonTargetedTemplate.Render(message))
 		}
 	}
 }
@@ -36,9 +37,16 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 // SendPrivate  writes data in private to a user
 func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
-		// TODO Внешний контейнер для темплейтов
-		privateTemplate, _ := mustache.ParseString("PRIVMSG #jtv /w {{ privateMessage.user }} Channel #{{ privateMessage.channe }}: {{ privateMessage.body }}")
-		ircClient.Client.Write(privateTemplate.Render(message))
+		ircClient.Client.Write(basicTemplatesInstance.PrivateTemplate.Render(message))
+	}
+}
+
+// SendModsCommand runs mod command
+func (ircClient IrcClient) SendModsCommand() {
+	if ircClient.Ready {
+		for _, value := range repos.Config.Channels {
+			ircClient.SendPublic(models.OutgoingMessage{Channel: value, Body: ".mods"})
+		}
 	}
 }
 
