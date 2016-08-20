@@ -1,0 +1,109 @@
+package bot
+
+import (
+	"log"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/belak/irc"
+	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/repos"
+)
+
+var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
+	//log.Println(message.String())
+	msgID, found := message.Tags.GetTag("msg-id")
+	if found {
+		switch msgID {
+		case "room_mods":
+			{
+				commaIndex := strings.Index(message.Params[1], ":")
+				if commaIndex != -1 {
+					mods := strings.Split(message.Params[1][commaIndex+1:], ", ")
+					repos.PushMods(message.Params[0], mods)
+				}
+			}
+		case "resub":
+			{
+				msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
+				user, userFound := message.Tags.GetTag("display-name")
+				channel := message.Params[0]
+
+				if msgParamMonthsFound && userFound && channel != "" {
+					resubCount, resubCountError := strconv.Atoi(msgParamMonths)
+					if resubCountError == nil {
+						formedMessage := models.ChatMessage{
+							Channel:          channel,
+							User:             user,
+							IsMod:            false,
+							IsSub:            true,
+							Date:             time.Now(),
+							SubscriptionInfo: &models.SubscriptionInfo{Count: resubCount}}
+						repos.LogMessage(formedMessage)
+						log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
+					}
+				}
+			}
+		}
+	}
+
+	if message.User == "twitchnotify" {
+		user, userFound := message.Tags.GetTag("display-name")
+		channel := message.Params[0]
+		if userFound && channel != "" {
+			formedMessage := models.ChatMessage{
+				Channel:          channel,
+				User:             user,
+				IsMod:            false,
+				IsSub:            true,
+				Date:             time.Now(),
+				SubscriptionInfo: &models.SubscriptionInfo{Count: 1}}
+			repos.LogMessage(formedMessage)
+			log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
+		}
+	}
+	if message.Command == "CLEARCHAT" {
+		banDuration, banDurationFound := message.Tags.GetTag("ban-duration")
+		intBanDuration := 0
+		if banDurationFound {
+			parsedValue, parseError := strconv.Atoi(banDuration)
+			if parseError == nil {
+				intBanDuration = parsedValue
+			}
+		}
+		banReason, _ := message.Tags.GetTag("ban-reason")
+		user := message.Params[1]
+		channel := message.Params[0]
+		formedMessage := models.ChatMessage{
+			Channel: channel,
+			User:    user,
+			IsMod:   false,
+			IsSub:   true,
+			Date:    time.Now(),
+			BanInfo: &models.BanInfo{Duration: intBanDuration, Reason: banReason}}
+		repos.LogMessage(formedMessage)
+		log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
+	}
+	if message.Command == "PRIVMSG" {
+		formedMessage := models.ChatMessage{
+			Channel:     message.Params[0],
+			User:        message.User,
+			MessageBody: message.Params[1],
+			IsMod:       message.Tags["mod"] == "1",
+			IsSub:       message.Tags["subscriber"] == "1",
+			Date:        time.Now()}
+		repos.LogMessage(formedMessage)
+	}
+	if message.Command == "001" {
+		client.Write("CAP REQ twitch.tv/tags")
+		client.Write("CAP REQ twitch.tv/membership")
+		client.Write("CAP REQ twitch.tv/commands")
+		for _, value := range repos.Config.Channels {
+			client.Write("JOIN #" + value)
+		}
+		services.SendModsCommand()
+		IrcClientInstance = IrcClient{Client: client, Ready: true}
+		log.Println("Bot is started")
+	}
+}

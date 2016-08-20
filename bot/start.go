@@ -8,6 +8,11 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
+type chatClient struct {
+	Client *irc.Client
+	Ready  bool
+}
+
 // Start starts the bot
 func Start() {
 	conn, err := net.Dial("tcp", "irc.chat.twitch.tv:6667")
@@ -21,8 +26,11 @@ func Start() {
 		User:    repos.Config.BotUserName,
 		Name:    repos.Config.BotUserName,
 		Handler: chatHandler}
+	chatClient := irc.NewClient(conn, config)
+	log.Println("Bot is starting...")
 
-	clientError := irc.NewClient(conn, config).Run()
+	clientError := chatClient.Run()
 	log.Fatalln(clientError)
+	IrcClientInstance = IrcClient{Ready: false}
 	conn.Close()
 }

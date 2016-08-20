@@ -8,5 +8,5 @@ import (
 //LogMessage logs the chat message for showing it later
 func LogMessage(message models.ChatMessage) {
 	Db.C("messageLogs").Insert(message)
-	Db.C("chatUsers").Upsert(bson.M{"channel": message.Channel}, bson.M{"$addToSet": bson.M{"users": message.Username}})
+	Db.C("channelUsers").Upsert(models.ChannelSelector{Channel: message.Channel}, bson.M{"$addToSet": bson.M{"users": message.User}})
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/khades/servbot/models"
 )
 
-func readConfig() models.ConfigModel {
+func readConfig() models.Config {
 	var configfile string
 	flag.StringVar(&configfile, "config", "config.json", "defines configuration file for application")
 
@@ -18,7 +18,7 @@ func readConfig() models.ConfigModel {
 	if err != nil {
 		log.Fatal("Config file is missing: ", configfile)
 	}
-	var config models.ConfigModel
+	var config models.Config
 	error := json.Unmarshal(file, &config)
 	if error != nil {
 		log.Fatal("json read error", error)

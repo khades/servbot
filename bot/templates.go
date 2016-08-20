@@ -41,13 +41,9 @@ func (template templateContainer) get(channel string, commandName string) (bool,
 
 func (template templateContainer) update(channel string, commandName string, templateBody string, user string) {
 	dbTemplate, templateError := mustache.ParseString(templateBody)
-
 	if templateError == nil {
 		key := channel + ":" + commandName
-
 		template.templateMap[key] = dbTemplate
 		repos.PutChannelTemplate(user, channel, commandName, templateBody)
 	}
 }
-
-// func (template templateContainer) remove(channel string, commandName string, template string, user string)

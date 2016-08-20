@@ -7,12 +7,14 @@ import (
 
 // ChatMessage describes processed twitch message with essential information on it
 type ChatMessage struct {
-	Channel     string
-	Username    string
-	MessageBody string
-	IsMod       bool
-	IsSub       bool
-	Date        time.Time
+	Channel          string
+	User             string
+	IsMod            bool
+	IsSub            bool
+	Date             time.Time
+	MessageBody      string            `bson:",omitempty"`
+	SubscriptionInfo *SubscriptionInfo `bson:",omitempty"`
+	BanInfo          *BanInfo          `bson:",omitempty"`
 }
 
 func (chatMessage ChatMessage) isCommand() (bool, ChatCommand) {
