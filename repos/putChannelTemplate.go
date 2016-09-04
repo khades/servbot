@@ -18,4 +18,14 @@ func PutChannelTemplate(user string, channel string, commandName string, aliasTo
 				"aliasto":  aliasTo},
 			"$push": bson.M{
 				"history": &models.TemplateHistoryItem{Template: template, User: user, Date: time.Now()}}})
+	if aliasTo == commandName {
+		Db.C("templates").UpdateAll(
+			models.TemplateAliasSelector{Channel: channel, AliasTo: aliasTo},
+			bson.M{
+				"$set": bson.M{
+					"template": template,
+					"aliasto":  aliasTo},
+				"$push": bson.M{
+					"history": &models.TemplateHistoryItem{Template: template, User: user, Date: time.Now()}}})
+	}
 }
