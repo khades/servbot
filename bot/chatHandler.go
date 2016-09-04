@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/belak/irc"
+	"github.com/khades/servbot/commandHandlers"
+	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -22,7 +24,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				if commaIndex != -1 {
 					log.Printf("Channel %v: got mods list", message.Params[0])
 					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
-					repos.PushMods(message.Params[0], mods)
+					repos.PushMods(message.Params[0][1:], mods)
 				}
 			}
 		case "resub":
@@ -88,13 +90,18 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 	}
 	if message.Command == "PRIVMSG" {
 		formedMessage := models.ChatMessage{
-			Channel:     message.Params[0],
+			Channel:     message.Params[0][1:],
 			User:        message.User,
 			MessageBody: message.Params[1],
 			IsMod:       message.Tags["mod"] == "1",
 			IsSub:       message.Tags["subscriber"] == "1",
 			Date:        time.Now()}
 		repos.LogMessage(formedMessage)
+		isCommand, commandBody := formedMessage.IsCommand()
+		if isCommand {
+			handlerFunction := commandHandlers.Router.Go(commandBody.Command)
+			handlerFunction(true, &formedMessage, commandBody, &IrcClientInstance)
+		}
 	}
 	if message.Command == "001" {
 		client.Write("CAP REQ twitch.tv/tags")
@@ -103,7 +110,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		for _, value := range repos.Config.Channels {
 			client.Write("JOIN #" + value)
 		}
-		IrcClientInstance = IrcClient{Client: client, Ready: true}
+		IrcClientInstance = ircClient.IrcClient{Client: client, Ready: true}
 		IrcClientInstance.SendModsCommand()
 		log.Println("Bot is started")
 	}

@@ -1,4 +1,4 @@
-package bot
+package ircClient
 
 import (
 	"log"
@@ -13,15 +13,15 @@ type basicTemplates struct {
 }
 
 func generateTemplates() basicTemplates {
-	publicTemplate, publicTemplateError := mustache.ParseString("PRIVMSG #{{ Channel }} @{{ User }} {{Body}}")
+	publicTemplate, publicTemplateError := mustache.ParseString("PRIVMSG #{{ Channel }} :@{{ User }} {{Body}}")
 	if publicTemplateError != nil {
 		log.Panicln(publicTemplateError)
 	}
-	publicNonTargetedTemplate, publicNonTargetedTemplateError := mustache.ParseString("PRIVMSG #{{ Channel }} {{Body}}")
+	publicNonTargetedTemplate, publicNonTargetedTemplateError := mustache.ParseString("PRIVMSG #{{ Channel }} :{{Body}}")
 	if publicNonTargetedTemplateError != nil {
 		log.Panicln(publicNonTargetedTemplateError)
 	}
-	privateTemplate, privateTemplateError := mustache.ParseString("PRIVMSG #jtv /w {{ User }} Channel #{{ Channel }}: {{ Body }}")
+	privateTemplate, privateTemplateError := mustache.ParseString("PRIVMSG #jtv /w {{ User }} Channel #{{ Channel }} as:{{ Body }}")
 	if privateTemplateError != nil {
 		log.Panicln(privateTemplateError)
 	}

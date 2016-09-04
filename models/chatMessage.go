@@ -17,7 +17,7 @@ type ChatMessage struct {
 	BanInfo          *BanInfo          `bson:",omitempty"`
 }
 
-func (chatMessage ChatMessage) isCommand() (bool, ChatCommand) {
+func (chatMessage ChatMessage) IsCommand() (bool, ChatCommand) {
 	chatCommand := ChatCommand{}
 	isCommand := strings.HasPrefix(chatMessage.MessageBody, "!")
 	if isCommand {

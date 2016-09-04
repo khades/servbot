@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/belak/irc"
+	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/repos"
 )
 
@@ -31,6 +32,6 @@ func Start() {
 
 	clientError := chatClient.Run()
 	log.Fatalln(clientError)
-	IrcClientInstance = IrcClient{Ready: false}
+	IrcClientInstance = ircClient.IrcClient{Ready: false}
 	conn.Close()
 }

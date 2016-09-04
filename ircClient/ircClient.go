@@ -1,7 +1,8 @@
-package bot
+package ircClient
 
 import (
 	"log"
+	"time"
 
 	"github.com/belak/irc"
 	"github.com/khades/servbot/models"
@@ -10,8 +11,14 @@ import (
 
 // IrcClient struct handles stuff we use aftr
 type IrcClient struct {
-	Client *irc.Client
-	Ready  bool
+	Client  *irc.Client
+	Bounces map[string]time.Time
+	Ready   bool
+}
+
+// SendDebounced prevents from sending data too frequent
+func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage) {
+	ircClient.SendPublic(message.Message)
 }
 
 // SendRaw is wrapper to Write
@@ -24,11 +31,12 @@ func (ircClient IrcClient) SendRaw(message string) {
 
 // SendPublic writes data to a public chat
 func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
-	// TODO Внешний контейнер для темплейтов
 	if ircClient.Ready {
 		if message.User != "" {
+			log.Println(basicTemplatesInstance.PublicTemplate.Render(message))
 			ircClient.Client.Write(basicTemplatesInstance.PublicTemplate.Render(message))
 		} else {
+			log.Println(basicTemplatesInstance.PublicNonTargetedTemplate.Render(message))
 			ircClient.Client.Write(basicTemplatesInstance.PublicNonTargetedTemplate.Render(message))
 		}
 	}
@@ -49,6 +57,3 @@ func (ircClient IrcClient) SendModsCommand() {
 		}
 	}
 }
-
-// IrcClientInstance is concrete irc client we work with
-var IrcClientInstance = IrcClient{Ready: false}
