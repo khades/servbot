@@ -48,10 +48,11 @@ func getStatus(channel string) {
 	}
 	if !responseBody.Stream.CreatedAt.IsZero() {
 		status = models.StreamStatus{
-			Online: true,
-			Game:   responseBody.Stream.Channel.Game,
-			Title:  responseBody.Stream.Channel.Status,
-			Start:  &responseBody.Stream.CreatedAt}
+			Online:      true,
+			Description: "я кот",
+			Game:        responseBody.Stream.Channel.Game,
+			Title:       responseBody.Stream.Channel.Status,
+			Start:       responseBody.Stream.CreatedAt}
 	}
 	// else {
 	// 	repos.SetStreamStatusOffline(channel)

@@ -3,7 +3,7 @@ package commandHandlers
 import (
 	"log"
 
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/repos"
 )
 

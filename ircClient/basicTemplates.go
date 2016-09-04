@@ -3,7 +3,7 @@ package ircClient
 import (
 	"log"
 
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 )
 
 type basicTemplates struct {

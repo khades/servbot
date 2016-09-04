@@ -1,6 +1,7 @@
 package commandHandlers
 
 import (
+	"log"
 	"strings"
 
 	"github.com/khades/servbot/ircClient"
@@ -26,14 +27,23 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				Body:    "Создание команды: Запрещено зацикливать команды",
 				User:    chatMessage.User})
 		} else {
-			repos.PutChannelTemplate(chatMessage.User, chatMessage.Channel, commandName, commandName, template)
-			Template.updateTemplate(chatMessage.Channel, commandName, template)
+			templateError := Template.updateTemplate(chatMessage.Channel, commandName, template)
+			if templateError == nil {
+				repos.PutChannelTemplate(chatMessage.User, chatMessage.Channel, commandName, commandName, template)
+				Template.updateAliases(chatMessage.Channel, commandName, template)
+				repos.PushCommandsForChannel(chatMessage.Channel)
+				ircClient.SendPublic(models.OutgoingMessage{
+					Channel: chatMessage.Channel,
+					Body:    "Создание команды: Ну в принципе готово VoHiYo",
+					User:    chatMessage.User})
+			} else {
+				log.Println(templateError)
+				ircClient.SendPublic(models.OutgoingMessage{
+					Channel: chatMessage.Channel,
+					Body:    "Создание команды: Невалидный шаблон для команды etmSad",
+					User:    chatMessage.User})
+			}
 
-			Template.updateAliases(chatMessage.Channel, commandName, template)
-			ircClient.SendPublic(models.OutgoingMessage{
-				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Ну в принципе готово VoHiYo",
-				User:    chatMessage.User})
 		}
 	} else {
 		ircClient.SendPublic(models.OutgoingMessage{

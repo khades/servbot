@@ -33,11 +33,12 @@ func (ircClient IrcClient) SendRaw(message string) {
 func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 	if ircClient.Ready {
 		if message.User != "" {
-			log.Println(basicTemplatesInstance.PublicTemplate.Render(message))
-			ircClient.Client.Write(basicTemplatesInstance.PublicTemplate.Render(message))
+			formedMessage, _ := basicTemplatesInstance.PublicTemplate.Render(message)
+
+			ircClient.Client.Write(formedMessage)
 		} else {
-			log.Println(basicTemplatesInstance.PublicNonTargetedTemplate.Render(message))
-			ircClient.Client.Write(basicTemplatesInstance.PublicNonTargetedTemplate.Render(message))
+			formedMessage, _ := basicTemplatesInstance.PublicNonTargetedTemplate.Render(message)
+			ircClient.Client.Write(formedMessage)
 		}
 	}
 }
@@ -45,7 +46,8 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 // SendPrivate  writes data in private to a user
 func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
-		ircClient.Client.Write(basicTemplatesInstance.PrivateTemplate.Render(message))
+		formedMessage, _ := basicTemplatesInstance.PrivateTemplate.Render(message)
+		ircClient.Client.Write(formedMessage)
 	}
 }
 

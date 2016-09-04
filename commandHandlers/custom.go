@@ -1,22 +1,37 @@
 package commandHandlers
 
 import (
+	"log"
+
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/repos"
 )
 
 // Custom handler does template job
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	template := Template.get(chatMessage.Channel, chatCommand.Command)
 	if template != nil {
-		message := template.Render(chatMessage)
+		redirected := false
+		values, _ := repos.GetChannelInfo(chatMessage.Channel)
+		message, templateError := template.Render(values)
 
+		log.Println(templateError)
+		log.Println(message)
+		if templateError != nil {
+			message = "Ошибка в шаблоне команды, обратитесь к модератору etmSad"
+		}
+		user := chatMessage.User
+		if chatCommand.Body != "" {
+			user = chatCommand.Body
+			redirected = true
+		}
 		ircClient.SendDebounced(models.OutgoingDebouncedMessage{
 			Message: models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				User:    chatMessage.User,
+				User:    user,
 				Body:    message},
 			Command:    chatCommand.Command,
-			Redirected: false})
+			Redirected: redirected})
 	}
 }
