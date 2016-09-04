@@ -14,40 +14,53 @@ type templateContainer struct {
 // Template is service DUUH
 var Template = templateContainer{make(map[string]*mustache.Template)}
 
-func (template templateContainer) get(channel string, commandName string) (bool, *mustache.Template) {
+func (template templateContainer) get(channel string, commandName string) *mustache.Template {
 	key := channel + ":" + commandName
 	cachedCompiledTemplate, exists := template.templateMap[key]
 	if exists {
-		return true, cachedCompiledTemplate
+		log.Print("We found template")
+		if cachedCompiledTemplate != nil {
+			return cachedCompiledTemplate
+		}
+		return nil
 	}
 
 	result, error := repos.GetChannelTemplate(channel, commandName)
 
 	if error != nil {
-		log.Print(error)
-		template.templateMap[key] = nil
-		return false, nil
-	}
 
-	if result.Template == "" {
+		log.Print(error)
+		log.Print("Nothing's found")
+
 		template.templateMap[key] = nil
-		return false, nil
+		return nil
+	}
+	log.Println(result.Template)
+	if result.Template == "" {
+		log.Print("We found template, but it is empty")
+
+		template.templateMap[key] = nil
+		return nil
 	}
 
 	dbTemplate, templateError := mustache.ParseString(result.Template)
 
 	if templateError != nil {
 		log.Print(error)
-		return false, nil
+		return nil
 
 	}
 
 	template.templateMap[key] = dbTemplate
-	return true, dbTemplate
+	return dbTemplate
 
 }
+func (template templateContainer) updateTemplate(channel string, commandName string, templateBody string) error {
+	if templateBody == "" {
+		template.templateMap[channel+":"+commandName] = nil
+		return nil
+	}
 
-func (template templateContainer) update(channel string, commandName string, templateBody string) error {
 	compiledTemplate, templateError := mustache.ParseString(templateBody)
 
 	if templateError != nil {
@@ -55,10 +68,21 @@ func (template templateContainer) update(channel string, commandName string, tem
 		return templateError
 	}
 
-	templates, error := repos.GetChannelAliasedTemplates(channel, commandName)
+	template.templateMap[channel+":"+commandName] = compiledTemplate
 
+	return nil
+}
+func (template templateContainer) updateAliases(channel string, commandName string, templateBody string) error {
+	compiledTemplate, templateError := mustache.ParseString(templateBody)
+
+	if templateError != nil {
+		log.Println(templateError)
+		return templateError
+	}
+	templates, error := repos.GetChannelAliasedTemplates(channel, commandName)
+	log.Println(templates)
 	if error != nil {
-		log.Panic(error)
+		return error
 	}
 
 	for _, item := range templates {

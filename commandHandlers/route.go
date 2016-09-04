@@ -16,4 +16,5 @@ func (router RouterStruct) Go(command string) CommandHandler {
 
 // Router aa
 var Router = RouterStruct{routes: map[string]CommandHandler{
-	"new": New}}
+	"new":   New,
+	"alias": Alias}}

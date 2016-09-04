@@ -10,7 +10,6 @@ import (
 
 func main() {
 	log.Println("Starting...")
-	services.CheckStreamStatus()
 
 	ticker := time.NewTicker(time.Second * 15)
 	go func() {

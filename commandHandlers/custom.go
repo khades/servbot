@@ -7,8 +7,8 @@ import (
 
 // Custom handler does template job
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	found, template := Template.get(chatMessage.Channel, chatCommand.Command)
-	if found {
+	template := Template.get(chatMessage.Channel, chatCommand.Command)
+	if template != nil {
 		message := template.Render(chatMessage)
 
 		ircClient.SendDebounced(models.OutgoingDebouncedMessage{
