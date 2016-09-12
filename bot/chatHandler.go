@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -44,6 +45,21 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 							Date:             time.Now(),
 							SubscriptionInfo: &models.SubscriptionInfo{Count: resubCount}}
 						repos.LogMessage(formedMessage)
+						channelInfo, error := repos.GetChannelInfo(channel)
+
+						if error == nil && channelInfo.SubAlert.Enabled == true {
+							messageBody := strings.TrimSpace(fmt.Sprintf("%s %s%s",
+								channelInfo.SubAlert.RepeatPrefix,
+								strings.Repeat(channelInfo.SubAlert.RepeatBody+" ", formedMessage.SubscriptionInfo.Count),
+								channelInfo.SubAlert.RepeatPostfix))
+							if messageBody != "" {
+								IrcClientInstance.SendPublic(models.OutgoingMessage{
+									Body:    messageBody,
+									Channel: channel,
+									User:    user})
+							}
+						}
+
 						log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
 					}
 				}
@@ -63,6 +79,13 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				Date:             time.Now(),
 				SubscriptionInfo: &models.SubscriptionInfo{Count: 1}}
 			repos.LogMessage(formedMessage)
+			channelInfo, error := repos.GetChannelInfo(channel)
+			if error == nil && channelInfo.SubAlert.Enabled == true && channelInfo.SubAlert.FirstMessage != "" {
+				IrcClientInstance.SendPublic(models.OutgoingMessage{
+					Body:    channelInfo.SubAlert.FirstMessage,
+					Channel: channel,
+					User:    user})
+			}
 			log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
 		}
 	}

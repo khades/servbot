@@ -11,6 +11,8 @@ import (
 type ChannelInfo struct {
 	Channel      string
 	StreamStatus StreamStatus
+	Banme        Banme
+	SubAlert     SubAlert
 	Mods         []string
 	Commands     []string
 }
