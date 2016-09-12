@@ -8,7 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// PutChannelTemplate is setting
+// PutChannelTemplate puts template into database
 func PutChannelTemplate(user string, channel string, commandName string, aliasTo string, template string) {
 	Db.C("templates").Upsert(
 		models.TemplateSelector{Channel: channel, CommandName: commandName},

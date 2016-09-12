@@ -1,6 +1,6 @@
 package models
 
-// SubscriptionInfo describes info about chat command duh
+// SubscriptionInfo shows how many times user is subscribed to a channel
 type SubscriptionInfo struct {
 	Count int
 }

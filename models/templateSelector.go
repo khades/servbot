@@ -1,6 +1,6 @@
 package models
 
-//TemplateSelector defines format of query from templates collection
+//TemplateSelector is query selector for specific channel and command without aliases
 type TemplateSelector struct {
 	Channel     string
 	CommandName string

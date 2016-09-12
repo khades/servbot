@@ -8,7 +8,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-// Alias sets copy of other command
+// Alias creates alias of existing command by copying its content and setting that it is alias to a parent command
 func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	if chatMessage.IsMod {
 		commandName := ""

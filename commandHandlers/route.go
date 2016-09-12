@@ -5,7 +5,7 @@ type RouterStruct struct {
 	routes map[string]CommandHandler
 }
 
-// Go returns command for route
+// Go returns from router to work with
 func (router RouterStruct) Go(command string) CommandHandler {
 	handler, found := router.routes[command]
 	if found {
@@ -14,7 +14,7 @@ func (router RouterStruct) Go(command string) CommandHandler {
 	return Custom
 }
 
-// Router aa
+// Router explicitly maps input chat command to a handler
 var Router = RouterStruct{routes: map[string]CommandHandler{
 	"new":   New,
 	"alias": Alias}}

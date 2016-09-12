@@ -29,5 +29,5 @@ func readConfig() models.Config {
 	return config
 }
 
-// Config is object about config
+// Config represents config file as object
 var Config = readConfig()

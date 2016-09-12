@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// ChannelInfo describes data of
+// ChannelInfo describes all information about channel
 type ChannelInfo struct {
 	Channel      string
 	StreamStatus StreamStatus

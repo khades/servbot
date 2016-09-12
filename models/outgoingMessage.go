@@ -1,6 +1,6 @@
 package models
 
-// OutgoingMessage describes info about chat command duh
+// OutgoingMessage defines message that is send to a server
 type OutgoingMessage struct {
 	Channel string
 	Body    string

@@ -11,7 +11,7 @@ type templateContainer struct {
 	templateMap map[string]*mustache.Template
 }
 
-// Template is service DUUH
+// Template is object, that updates and compiles templates which stored in memory, being backed up with database
 var Template = templateContainer{make(map[string]*mustache.Template)}
 
 func (template templateContainer) get(channel string, commandName string) *mustache.Template {

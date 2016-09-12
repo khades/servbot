@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// TemplateHistoryItem describestem of chat template history
+// TemplateHistoryItem describes history of chat command
 type TemplateHistoryItem struct {
 	Template string
 	User     string

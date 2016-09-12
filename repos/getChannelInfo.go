@@ -1,11 +1,10 @@
 package repos
 
 import (
-
 	"github.com/khades/servbot/models"
 )
 
-// GetChannelInfo is setting
+// GetChannelInfo gets channel info
 func GetChannelInfo(channel string) (*models.ChannelInfo, error) {
 	item, found := channelInfoRepositoryObject.dataArray[channel]
 	if found {

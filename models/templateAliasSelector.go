@@ -1,6 +1,6 @@
 package models
 
-//TemplateAliasSelector defines format of query from templates collection
+//TemplateAliasSelector is query selector for specific channel and command aliases
 type TemplateAliasSelector struct {
 	Channel string
 	AliasTo string

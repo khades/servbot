@@ -10,14 +10,14 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-// IrcClient struct handles stuff we use aftr
+// IrcClient struct defines object that will send messages to a twitch server
 type IrcClient struct {
 	Client  *irc.Client
 	Bounces map[string]time.Time
 	Ready   bool
 }
 
-// SendDebounced prevents from sending data too frequent
+// SendDebounced prevents from sending data too frequent in public chat sending it to a PM
 func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage) {
 	key := fmt.Sprintf("%s-%s", message.Message.Channel, message.Command)
 	if ircClient.Bounces == nil {
@@ -34,13 +34,12 @@ func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage
 
 // SendRaw is wrapper to Write
 func (ircClient IrcClient) SendRaw(message string) {
-	log.Println(ircClient.Ready)
 	if ircClient.Ready {
 		ircClient.Client.Write(message)
 	}
 }
 
-// SendPublic writes data to a public chat
+// SendPublic writes data to a specified chat
 func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 	if ircClient.Ready {
 		if message.User != "" {
@@ -51,7 +50,7 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 	}
 }
 
-// SendPrivate  writes data in private to a user
+// SendPrivate writes data in private to a user
 func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
 		log.Println(message.Channel)

@@ -6,7 +6,7 @@ import (
 	"github.com/khades/servbot/models"
 )
 
-// PushStreamStatus updates list of mods on channel
+// PushStreamStatus updates stream status (start of stream, topic of stream)
 func PushStreamStatus(channel string, streamStatus models.StreamStatus) {
 	channelInfo, _ := GetChannelInfo(channel)
 	if channelInfo != nil {

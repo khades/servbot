@@ -14,7 +14,7 @@ type chatClient struct {
 	Ready  bool
 }
 
-// Start starts the bot
+// Start function dials up connection for chathandler
 func Start() {
 	conn, err := net.Dial("tcp", "irc.chat.twitch.tv:6667")
 	if err != nil {

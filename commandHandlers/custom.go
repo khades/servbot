@@ -8,7 +8,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-// Custom handler does template job
+// Custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	template := Template.get(chatMessage.Channel, chatCommand.Command)
 	if template != nil {

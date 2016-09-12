@@ -9,7 +9,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-// New works with new command that adds template
+// New creates or modifies mustache templates for channel
 func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	if chatMessage.IsMod {
 		commandName := ""
