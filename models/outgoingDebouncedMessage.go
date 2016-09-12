@@ -4,5 +4,5 @@ package models
 type OutgoingDebouncedMessage struct {
 	Message    OutgoingMessage
 	Command    string
-	Redirected bool
+	RedirectTo string
 }

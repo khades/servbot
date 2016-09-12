@@ -28,7 +28,10 @@ func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage
 		ircClient.SendPrivate(message.Message)
 	} else {
 		ircClient.Bounces[key] = time.Now()
-		ircClient.SendPublic(message.Message)
+		ircClient.SendPublic(models.OutgoingMessage{
+			Channel: message.Message.Channel,
+			Body:    message.Message.Body,
+			User:    message.RedirectTo})
 	}
 }
 
@@ -54,7 +57,7 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
 		log.Println(message.Channel)
-		ircClient.Client.Write(fmt.Sprintf("PRIVMSG #jtv :/w %s Channel #%s: %s", message.User, message.Channel, message.Body))
+		ircClient.Client.Write(fmt.Sprintf("PRIVMSG #jtv :/w %s Channel %s: %s", message.User, message.Channel, message.Body))
 	}
 }
 
