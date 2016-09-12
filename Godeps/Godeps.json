@@ -1,0 +1,40 @@
+{
+	"ImportPath": "github.com/khades/servbot",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/belak/irc",
+			"Rev": "7fe84c6a834f768e75ee8347674cda73a9b02ec8"
+		},
+		{
+			"ImportPath": "github.com/cbroglie/mustache",
+			"Rev": "422aa0d3b491c9ab8f74578f7e0098373ff51ad0"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Comment": "r2016.08.01-1-g0108465",
+			"Rev": "01084657862d7b12d3b10ffd0394357abf8f8bc2"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/bson",
+			"Comment": "r2016.08.01-1-g0108465",
+			"Rev": "01084657862d7b12d3b10ffd0394357abf8f8bc2"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/json",
+			"Comment": "r2016.08.01-1-g0108465",
+			"Rev": "01084657862d7b12d3b10ffd0394357abf8f8bc2"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/sasl",
+			"Comment": "r2016.08.01-1-g0108465",
+			"Rev": "01084657862d7b12d3b10ffd0394357abf8f8bc2"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/scram",
+			"Comment": "r2016.08.01-1-g0108465",
+			"Rev": "01084657862d7b12d3b10ffd0394357abf8f8bc2"
+		}
+	]
+}

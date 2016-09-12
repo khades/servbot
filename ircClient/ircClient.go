@@ -1,6 +1,7 @@
 package ircClient
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -18,7 +19,17 @@ type IrcClient struct {
 
 // SendDebounced prevents from sending data too frequent
 func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage) {
-	ircClient.SendPublic(message.Message)
+	key := fmt.Sprintf("%s-%s", message.Message.Channel, message.Command)
+	if ircClient.Bounces == nil {
+		ircClient.Bounces = make(map[string]time.Time)
+	}
+	bounce, found := ircClient.Bounces[key]
+	if found && int(time.Now().Sub(bounce).Seconds()) < 15 {
+		ircClient.SendPrivate(message.Message)
+	} else {
+		ircClient.Bounces[key] = time.Now()
+		ircClient.SendPublic(message.Message)
+	}
 }
 
 // SendRaw is wrapper to Write
@@ -33,12 +44,9 @@ func (ircClient IrcClient) SendRaw(message string) {
 func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 	if ircClient.Ready {
 		if message.User != "" {
-			formedMessage, _ := basicTemplatesInstance.PublicTemplate.Render(message)
-
-			ircClient.Client.Write(formedMessage)
+			ircClient.Client.Write(fmt.Sprintf("PRIVMSG #%s :@%s %s", message.Channel, message.User, message.Body))
 		} else {
-			formedMessage, _ := basicTemplatesInstance.PublicNonTargetedTemplate.Render(message)
-			ircClient.Client.Write(formedMessage)
+			ircClient.Client.Write(fmt.Sprintf("PRIVMSG #%s :%s", message.Channel, message.Body))
 		}
 	}
 }
@@ -46,8 +54,8 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 // SendPrivate  writes data in private to a user
 func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
-		formedMessage, _ := basicTemplatesInstance.PrivateTemplate.Render(message)
-		ircClient.Client.Write(formedMessage)
+		log.Println(message.Channel)
+		ircClient.Client.Write(fmt.Sprintf("PRIVMSG #jtv :/w %s Channel #%s: %s", message.User, message.Channel, message.Body))
 	}
 }
 

@@ -18,7 +18,7 @@ func (template templateContainer) get(channel string, commandName string) *musta
 	key := channel + ":" + commandName
 	cachedCompiledTemplate, exists := template.templateMap[key]
 	if exists {
-		log.Print("We found template")
+		// log.Print("We found template")
 		if cachedCompiledTemplate != nil {
 			return cachedCompiledTemplate
 		}
@@ -29,15 +29,15 @@ func (template templateContainer) get(channel string, commandName string) *musta
 
 	if error != nil {
 
-		log.Print(error)
-		log.Print("Nothing's found")
+		// log.Print(error)
+		// log.Print("Nothing's found")
 
 		template.templateMap[key] = nil
 		return nil
 	}
 	log.Println(result.Template)
 	if result.Template == "" {
-		log.Print("We found template, but it is empty")
+		// log.Print("We found template, but it is empty")
 
 		template.templateMap[key] = nil
 		return nil
@@ -46,7 +46,7 @@ func (template templateContainer) get(channel string, commandName string) *musta
 	dbTemplate, templateError := mustache.ParseString(result.Template)
 
 	if templateError != nil {
-		log.Print(error)
+		// log.Print(error)
 		return nil
 
 	}
@@ -64,7 +64,7 @@ func (template templateContainer) updateTemplate(channel string, commandName str
 	compiledTemplate, templateError := mustache.ParseString(templateBody)
 
 	if templateError != nil {
-		log.Println(templateError)
+		//	log.Println(templateError)
 		return templateError
 	}
 
@@ -76,11 +76,11 @@ func (template templateContainer) updateAliases(channel string, commandName stri
 	compiledTemplate, templateError := mustache.ParseString(templateBody)
 
 	if templateError != nil {
-		log.Println(templateError)
+		//	log.Println(templateError)
 		return templateError
 	}
 	templates, error := repos.GetChannelAliasedTemplates(channel, commandName)
-	log.Println(templates)
+	//	log.Println(templates)
 	if error != nil {
 		return error
 	}
