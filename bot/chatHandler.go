@@ -33,7 +33,6 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
 				user, userFound := message.Tags.GetTag("display-name")
 				channel := message.Params[0]
-
 				if msgParamMonthsFound && userFound && channel != "" {
 					resubCount, resubCountError := strconv.Atoi(msgParamMonths)
 					if resubCountError == nil {
@@ -46,7 +45,6 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 							SubscriptionInfo: &models.SubscriptionInfo{Count: resubCount}}
 						repos.LogMessage(formedMessage)
 						channelInfo, error := repos.GetChannelInfo(channel)
-
 						if error == nil && channelInfo.SubAlert.Enabled == true {
 							messageBody := strings.TrimSpace(fmt.Sprintf("%s %s%s",
 								channelInfo.SubAlert.RepeatPrefix,
@@ -59,7 +57,6 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 									User:    user})
 							}
 						}
-
 						log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
 					}
 				}
