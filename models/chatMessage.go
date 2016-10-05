@@ -11,6 +11,7 @@ type ChatMessage struct {
 	User             string
 	IsMod            bool
 	IsSub            bool
+	IsPrime          bool
 	Date             time.Time
 	MessageBody      string            `bson:",omitempty"`
 	SubscriptionInfo *SubscriptionInfo `bson:",omitempty"`

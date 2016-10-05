@@ -15,7 +15,7 @@ import (
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
-	//log.Println(message.String())
+	log.Println(message.String())
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
@@ -73,6 +73,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				User:             user,
 				IsMod:            false,
 				IsSub:            true,
+				IsPrime:          strings.Contains(message.String(), "Twitch Prime"),
 				Date:             time.Now(),
 				SubscriptionInfo: &models.SubscriptionInfo{Count: 1}}
 			repos.LogMessage(formedMessage)
@@ -115,6 +116,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			MessageBody: message.Params[1],
 			IsMod:       message.Tags["mod"] == "1",
 			IsSub:       message.Tags["subscriber"] == "1",
+			IsPrime:     strings.Contains(message.Tags["badges"].Encode(), "premium/1"),
 			Date:        time.Now()}
 		repos.LogMessage(formedMessage)
 		isCommand, commandBody := formedMessage.IsCommand()
@@ -123,6 +125,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			handlerFunction(true, &formedMessage, commandBody, &IrcClientInstance)
 		}
 	}
+
 	if message.Command == "001" {
 		client.Write("CAP REQ twitch.tv/tags")
 		client.Write("CAP REQ twitch.tv/membership")

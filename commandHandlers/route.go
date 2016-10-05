@@ -11,7 +11,7 @@ func (router RouterStruct) Go(command string) CommandHandler {
 	if found {
 		return handler
 	}
-	return Custom
+	return Nothing
 }
 
 // Router explicitly maps input chat command to a handler
