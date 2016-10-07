@@ -15,7 +15,7 @@ import (
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
-	log.Println(message.String())
+	//	log.Println(message.String())
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
@@ -23,7 +23,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			{
 				commaIndex := strings.Index(message.Params[1], ":")
 				if commaIndex != -1 {
-					log.Printf("Channel %v: got mods list", message.Params[0])
+					//				log.Printf("Channel %v: got mods list", message.Params[0])
 					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
 					repos.PushMods(message.Params[0][1:], mods)
 				}
@@ -57,7 +57,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 									User:    user})
 							}
 						}
-						log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
+						//log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
 					}
 				}
 			}
@@ -84,7 +84,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 					Channel: channel,
 					User:    user})
 			}
-			log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
+			//	log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
 		}
 	}
 	if message.Command == "CLEARCHAT" {
@@ -107,7 +107,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			Date:    time.Now(),
 			BanInfo: &models.BanInfo{Duration: intBanDuration, Reason: banReason}}
 		repos.LogMessage(formedMessage)
-		log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
+		//	log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
 	}
 	if message.Command == "PRIVMSG" {
 		formedMessage := models.ChatMessage{

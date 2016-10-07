@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -42,7 +43,7 @@ func getStatus(channel string) {
 	defer resp.Body.Close()
 
 	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
-
+	log.Println(responseBody)
 	if marshallError != nil {
 		return
 	}
