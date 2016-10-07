@@ -32,6 +32,7 @@ func CheckStreamStatus() {
 }
 
 func getStatus(channel string) {
+	log.Println("Started check")
 	var responseBody = new(responseBody)
 	url := "https://api.twitch.tv/kraken/streams/" + channel + "?client_id=c5w8oif66lg711pfrh86h8od3sek43d"
 	resp, respError := http.Get(url)
