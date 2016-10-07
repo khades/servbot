@@ -114,7 +114,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			Channel:     message.Params[0][1:],
 			User:        message.User,
 			MessageBody: message.Params[1],
-			IsMod:       message.Tags["mod"] == "1",
+			IsMod:       message.Tags["mod"] == "1" || message.User == "khadesru",
 			IsSub:       message.Tags["subscriber"] == "1",
 			IsPrime:     strings.Contains(message.Tags["badges"].Encode(), "premium/1"),
 			Date:        time.Now()}
