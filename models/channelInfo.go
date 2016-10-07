@@ -19,7 +19,11 @@ type ChannelInfo struct {
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {
-	return strings.Join(channelInfo.Commands, ", ")
+	coms := []string{}
+	for _, word := range channelInfo.Commands {
+		coms = append(coms, "!"+word)
+	}
+	return strings.Join(coms, ", ")
 }
 
 // GetStreamDuration Helper Command for time for mustashe
