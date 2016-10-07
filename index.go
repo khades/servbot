@@ -21,6 +21,8 @@ func main() {
 	}()
 
 	minuteTicker := time.NewTicker(time.Minute)
+	services.CheckStreamStatus()
+
 	go func() {
 		for {
 			tick := <-minuteTicker.C
