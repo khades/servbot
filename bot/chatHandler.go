@@ -68,9 +68,6 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		log.Println("Got first sub")
 		user := strings.Split(message.Params[1], " ")[0]
 		channel := message.Params[0]
-		log.Println(user)
-		log.Println(channel)
-
 		if user != "" && channel != "" {
 			formedMessage := models.ChatMessage{
 				Channel:          channel,
