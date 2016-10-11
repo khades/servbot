@@ -1,6 +1,8 @@
 package repos
 
 import (
+	"log"
+
 	"github.com/khades/servbot/models"
 )
 
@@ -15,6 +17,7 @@ func GetChannelInfo(channel string) (*models.ChannelInfo, error) {
 	if error != nil {
 		return nil, error
 	}
+	log.Println(dbObject)
 	channelInfoRepositoryObject.dataArray[channel] = dbObject
 	return dbObject, error
 }
