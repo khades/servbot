@@ -15,7 +15,7 @@ import (
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
-	//	log.Println(message.String())
+	log.Println(message.String())
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
@@ -57,7 +57,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 									User:    user})
 							}
 						}
-						//log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
+						log.Printf("Channel %v: %v resubbed for %v months\n", formedMessage.Channel, formedMessage.User, formedMessage.SubscriptionInfo.Count)
 					}
 				}
 			}
@@ -84,7 +84,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 					Channel: channel,
 					User:    user})
 			}
-			//	log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
+			log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
 		}
 	}
 	if message.Command == "CLEARCHAT" {
