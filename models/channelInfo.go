@@ -10,9 +10,9 @@ import (
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
 	Channel      string
-	StreamStatus StreamStatus `bson:",inline"`
-	Banme        Banme        `bson:",inline"`
-	SubAlert     SubAlert     `bson:",inline"`
+	StreamStatus StreamStatus
+	Banme        Banme
+	SubAlert     SubAlert
 	Mods         []string
 	Commands     []string
 }
