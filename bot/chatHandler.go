@@ -66,13 +66,12 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 
 	if message.User == "twitchnotify" {
 		log.Println("Got first sub")
-		user, userFound := message.Tags.GetTag("display-name")
-		log.Println(message.Tags.String())
+		user := strings.Split(message.Params[1], " ")[0]
 		channel := message.Params[0]
 		log.Println(user)
 		log.Println(channel)
 
-		if userFound && channel != "" {
+		if user != "" && channel != "" {
 			formedMessage := models.ChatMessage{
 				Channel:          channel,
 				User:             user,
