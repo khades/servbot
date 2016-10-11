@@ -32,7 +32,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			{
 				msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
 				user, userFound := message.Tags.GetTag("display-name")
-				channel := message.Params[0]
+				channel := message.Params[0][1:]
 				if msgParamMonthsFound && userFound && channel != "" {
 					resubCount, resubCountError := strconv.Atoi(msgParamMonths)
 					if resubCountError == nil {
@@ -67,7 +67,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 	if message.User == "twitchnotify" {
 		log.Println("Got first sub")
 		user := strings.Split(message.Params[1], " ")[0]
-		channel := message.Params[0]
+		channel := message.Params[0][1:]
 		if user != "" && channel != "" {
 			formedMessage := models.ChatMessage{
 				Channel:          channel,
