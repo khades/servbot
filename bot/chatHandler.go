@@ -15,7 +15,7 @@ import (
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
-	log.Println(message.String())
+	//	log.Println(message.String())
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
@@ -65,6 +65,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 	}
 
 	if message.User == "twitchnotify" {
+		log.Println("Got first sub")
 		user, userFound := message.Tags.GetTag("display-name")
 		channel := message.Params[0]
 		if userFound && channel != "" {
