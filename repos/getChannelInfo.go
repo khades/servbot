@@ -15,6 +15,7 @@ func GetChannelInfo(channel string) (*models.ChannelInfo, error) {
 	var dbObject = &models.ChannelInfo{}
 	error := Db.C("channelInfo").Find(models.ChannelSelector{Channel: channel}).One(dbObject)
 	if error != nil {
+		log.Println("Error ", error)
 		return nil, error
 	}
 	log.Println(dbObject)
