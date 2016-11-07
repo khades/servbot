@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/khades/servbot/models"
 )
 
@@ -23,9 +24,12 @@ func readConfig() models.Config {
 	if error != nil {
 		log.Fatal("json read error", error)
 	}
-	if config.OauthKey == "" || config.BotUserName == "" || config.DbName == "" {
-		log.Fatal("config.json has invalid format")
+	result, err := govalidator.ValidateStruct(config)
+	if result == false || err != nil {
+		log.Fatal("config.json has invalid format: ", err)
+
 	}
+
 	return config
 }
 

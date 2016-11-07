@@ -10,12 +10,10 @@ import (
 
 func main() {
 	log.Println("Starting...")
-
 	ticker := time.NewTicker(time.Second * 15)
 	go func() {
 		for {
-			tick := <-ticker.C
-			log.Print(tick)
+			<-ticker.C
 			bot.IrcClientInstance.SendModsCommand()
 		}
 	}()
@@ -25,10 +23,10 @@ func main() {
 
 	go func() {
 		for {
-			tick := <-minuteTicker.C
-			log.Print(tick)
+			<-minuteTicker.C
 			services.CheckStreamStatus()
 		}
 	}()
+	// go httpbackend.Start()
 	bot.Start()
 }

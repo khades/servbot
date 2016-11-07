@@ -1,9 +1,10 @@
 package models
 
-// ConfigModel defines nasfasf
+// Config defines nasfasf
 type Config struct {
-	OauthKey    string `json:",omitempty"`
-	BotUserName string `json:",omitempty"`
+	OauthKey    string `valid:"required"`
+	BotUserName string `valid:"required"`
 	Channels    []string
-	DbName      string `json:",omitempty"`
+	DbName      string `valid:"required"`
+	ClientKey   string `valid:"required"`
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/khades/servbot/models"
@@ -18,70 +19,44 @@ type stream struct {
 type channelInfo struct {
 	Status string
 	Game   string
+	Name   string
 }
 
-type responseBody struct {
-	Stream stream
+type responseBodyStruct struct {
+	Streams []stream
 }
 
 // CheckStreamStatus runs gettting all data from all channels bot applied to
 func CheckStreamStatus() {
-	for _, value := range repos.Config.Channels {
-		go getStatus(value)
+	streams := make(map[string]models.StreamStatus)
+	for _, channel := range repos.Config.Channels {
+		streams[channel] = models.StreamStatus{
+			Online: false}
 	}
-}
 
-func getStatus(channel string) {
-	var responseBody = new(responseBody)
-	url := "https://api.twitch.tv/kraken/streams/" + channel + "?client_id=c5w8oif66lg711pfrh86h8od3sek43d"
+	var responseBody = new(responseBodyStruct)
+	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(repos.Config.Channels, ",") + "&client_id=" + repos.Config.ClientKey
 	resp, respError := http.Get(url)
-	var status = models.StreamStatus{
-		Online: false}
 	if respError != nil {
 		return
 	}
 	defer resp.Body.Close()
 
 	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
-	log.Println(responseBody)
 	if marshallError != nil {
 		return
 	}
-	if !responseBody.Stream.CreatedAt.IsZero() {
-		status = models.StreamStatus{
+
+	for _, status := range responseBody.Streams {
+		log.Println(status)
+		streams[status.Channel.Name] = models.StreamStatus{
 			Online:      true,
 			Description: "я кот",
-			Game:        responseBody.Stream.Channel.Game,
-			Title:       responseBody.Stream.Channel.Status,
-			Start:       responseBody.Stream.CreatedAt}
+			Game:        status.Channel.Game,
+			Title:       status.Channel.Status,
+			Start:       status.CreatedAt}
 	}
-	// else {
-	// 	repos.SetStreamStatusOffline(channel)
-	// }
-	repos.PushStreamStatus(channel, status)
-
+	for channel, status := range streams {
+		repos.PushStreamStatus(channel, status)
+	}
 }
-
-// func getOfflineStatus(channel string) {
-// 	var responseBody = new(channelInfo)
-// 	url := "https://api.twitch.tv/kraken/channels/" + channel
-// 	resp, respError := http.Get(url)
-
-// 	if respError != nil {
-// 		return
-// 	}
-// 	defer resp.Body.Close()
-
-// 	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
-
-// 	if marshallError != nil {
-// 		return
-// 	}
-
-// 	status := models.StreamStatus{
-// 		Online: false,
-// 		Game:   responseBody.Game,
-// 		Title:  responseBody.Status}
-// 	repos.PushStreamStatus(channel, status)
-
-// }
