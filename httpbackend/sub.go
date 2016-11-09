@@ -23,14 +23,13 @@ func sub(next sessionHandler) sessionHandler {
 			if respError == nil && (resp.StatusCode == 200 || resp.StatusCode == 204) {
 				isSub = true
 			}
+			repos.SetIfSubToChannel(session.Username, channel, isSub)
 			defer resp.Body.Close()
 		}
 		if isSub == true {
 			next(w, r, session)
-
 		} else {
 			http.Error(w, "You're not sub", http.StatusForbidden)
-
 		}
 	}
 }
