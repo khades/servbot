@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 	"github.com/kidstuff/mongostore"
 
@@ -24,6 +25,10 @@ func Start() {
 	mux := goji.NewMux()
 	//	mux.Handle(pat.New("/logs/*"), logs)
 	mux.HandleFunc(pat.Get("/hello/:name"), hello)
+	mux.HandleFunc(pat.Get("/:channel/isMod"), withSession(mod(func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
+		fmt.Fprintf(w, "Hello, %s, you're moderator of that channel!", session.Username)
+
+	})))
 	mux.HandleFunc(pat.Get("/oauth"), oauth)
 	mux.HandleFunc(pat.Get("/oauth/initiate"), withSession(oauthInitiate))
 	http.ListenAndServe("localhost:8000", mux)

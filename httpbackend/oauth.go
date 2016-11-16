@@ -40,7 +40,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
+		http.Error(w, "Twitch Error, Cant get auth token, Connection problem", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -51,24 +51,26 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 
 			log.Println(string(body))
 		} else {
+			log.Println("We didnt parsed body of first 400 error")
+
 			log.Println(err)
-			log.Println("we didnt parsed body")
 		}
+		http.Error(w, "Twitch Error, Cant get auth token, Got code 400", http.StatusUnprocessableEntity)
+		return
 	}
 	var tokenStruct = new(tokenResponse)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
 	if marshallError != nil {
 		log.Println(marshallError)
-		http.Error(w, "Twitch Error, first Marshalling", http.StatusUnprocessableEntity)
+		http.Error(w, "Twitch Error, Can't marshall oauth token", http.StatusUnprocessableEntity)
 		return
 	}
 	url := "https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID + "&oauth_token=" + tokenStruct.Token
-	log.Println(url)
 	nameResp, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
+		http.Error(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -79,24 +81,22 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 			log.Println(string(body))
 		} else {
 			log.Println(err)
-			log.Println("we didnt parsed body")
+			log.Println("We didnt parsed body of username request")
 		}
+		http.Error(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
+		return
 	}
 	var usernameStruct = new(nameResponse)
 
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
 	if nameMarshallError != nil {
 		log.Println(marshallError)
-		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
+		http.Error(w, "Twitch Error, Cant marshall username", http.StatusUnprocessableEntity)
 		return
 	}
-	log.Println("We got credentials of ", usernameStruct.Name)
-	log.Println(nameResp.Body)
-
 	session, err := repos.GetSession(r)
 	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token}
 	session.Save(r, w)
 	fmt.Fprintf(w, "Hello, %s!", usernameStruct.Name)
-
 	defer resp.Body.Close()
 }
