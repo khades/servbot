@@ -25,13 +25,14 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Incoming Twitch code is missing", http.StatusUnprocessableEntity)
 		return
 	}
-	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token",
-		url.Values{
-			"client_id":     {repos.Config.ClientID},
-			"client_secret": {repos.Config.ClientSecret},
-			"grant_type":    {"authorization_code"},
-			"redirect_uri":  {repos.Config.AppOauthURL},
-			"code":          {code}})
+	postValues := url.Values{
+		"client_id":     {repos.Config.ClientID},
+		"client_secret": {repos.Config.ClientSecret},
+		"grant_type":    {"authorization_code"},
+		"redirect_uri":  {repos.Config.AppOauthURL},
+		"code":          {code}}
+	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
+	log.Println(resp.Status)
 	//"state":         {}
 	if err != nil {
 		log.Println(err)
