@@ -16,7 +16,6 @@ type tdjTrack struct {
 // CheckTwitchDJTrack checks last playing track
 func CheckTwitchDJTrack() {
 	channels := repos.GetTwitchDJEnabledChannels()
-	log.Println(len(channels))
 	for _, channel := range channels {
 		checkOneTwitchDJTrack(channel)
 	}
@@ -25,6 +24,7 @@ func CheckTwitchDJTrack() {
 func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	status := models.TwitchDJ{ID: channel.TwitchDJ.ID}
 	defer repos.PushTwitchDJ(&channel.Channel, &status)
+	log.Printf("Checking %s twitchDj track \n", channel.Channel)
 	resp, error := http.Get("https://twitch-dj.ru/includes/back.php?func=get_track&channel=" + channel.TwitchDJ.ID)
 	defer resp.Body.Close()
 
