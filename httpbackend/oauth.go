@@ -45,7 +45,8 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err == nil {
-		log.Println(body)
+
+		log.Println(string(body))
 	} else {
 		log.Println(err)
 		log.Println("we didnt parsed body")
