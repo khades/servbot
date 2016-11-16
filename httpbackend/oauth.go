@@ -44,7 +44,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	if err == nil {
 		log.Println(body)
 	} else {
 		log.Println(err)
