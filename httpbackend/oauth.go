@@ -2,6 +2,7 @@ package httpbackend
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,7 +15,7 @@ type tokenResponse struct {
 	Token string `json:"access_token"`
 }
 type nameResponse struct {
-	Username string `json:"name"`
+	Name string
 }
 
 func oauth(w http.ResponseWriter, r *http.Request) {
@@ -58,10 +59,13 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
 		return
 	}
-	log.Println("We got credentials of ", usernameStruct.Username)
+	log.Println("We got credentials of ", usernameStruct.Name)
 	log.Println(nameResp.Body)
+
 	session, err := repos.GetSession(r)
-	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Username, Key: tokenStruct.Token}
+	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token}
 	session.Save(r, w)
+	fmt.Fprintf(w, "Hello, %s!", usernameStruct.Name)
+
 	defer resp.Body.Close()
 }
