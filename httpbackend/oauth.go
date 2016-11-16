@@ -44,12 +44,15 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
 
-		log.Println(string(body))
-	} else {
-		log.Println(err)
-		log.Println("we didnt parsed body")
+	if resp.StatusCode == 400 {
+		if err == nil {
+
+			log.Println(string(body))
+		} else {
+			log.Println(err)
+			log.Println("we didnt parsed body")
+		}
 	}
 	var tokenStruct = new(tokenResponse)
 
@@ -59,13 +62,24 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
 		return
 	}
-	nameResp, err := http.Get("https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID + "&oauth_token=" + tokenStruct.Token)
+	url := "https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID + "&oauth_token=" + tokenStruct.Token
+	log.Println(url)
+	nameResp, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
 		return
 	}
 
+	if nameResp.StatusCode == 400 {
+		if err == nil {
+
+			log.Println(string(body))
+		} else {
+			log.Println(err)
+			log.Println("we didnt parsed body")
+		}
+	}
 	var usernameStruct = new(nameResponse)
 
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
