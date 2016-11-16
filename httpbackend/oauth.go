@@ -47,6 +47,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(body)
 	} else {
+		log.Println(err)
 		log.Println("we didnt parsed body")
 	}
 	var tokenStruct = new(tokenResponse)
