@@ -25,9 +25,11 @@ func Start() {
 	mux := goji.NewMux()
 	//	mux.Handle(pat.New("/logs/*"), logs)
 	mux.HandleFunc(pat.Get("/hello/:name"), hello)
-	mux.HandleFunc(pat.Get("/:channel/isMod"), withSession(mod(func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
+	mux.HandleFunc(pat.Get("/isMod/:channel"), withSession(mod(func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
 		fmt.Fprintf(w, "Hello, %s, you're moderator of that channel!", session.Username)
-
+	})))
+	mux.HandleFunc(pat.Get("/isSub/:channel"), withSession(sub(func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
+		fmt.Fprintf(w, "Hello, %s, you're moderator of that channel!", session.Username)
 	})))
 	mux.HandleFunc(pat.Get("/oauth"), oauth)
 	mux.HandleFunc(pat.Get("/oauth/initiate"), withSession(oauthInitiate))
