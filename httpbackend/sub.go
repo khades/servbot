@@ -16,14 +16,14 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 			http.Error(w, "channel is not defined", http.StatusUnprocessableEntity)
 			return
 		}
-		isSub, found := repos.GetIfSubToChannel(session.Username, channel)
+		isSub, found := repos.GetIfSubToChannel(&session.Username, &channel)
 		if found == false {
 			url := "https://api.twitch.tv/kraken/users/" + session.Username + "/subscriptions/" + channel + "?oauth_token=" + session.Key
 			resp, respError := http.Get(url)
 			if respError == nil && (resp.StatusCode == 200 || resp.StatusCode == 204) {
 				isSub = true
 			}
-			repos.SetIfSubToChannel(session.Username, channel, isSub)
+			repos.SetIfSubToChannel(&session.Username, &channel, &isSub)
 			defer resp.Body.Close()
 		}
 		if isSub == true {

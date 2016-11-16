@@ -16,7 +16,7 @@ func mod(next sessionHandlerFunc) sessionHandlerFunc {
 			http.Error(w, "channel is not defined", http.StatusUnprocessableEntity)
 			return
 		}
-		channelInfo, error := repos.GetChannelInfo(channel)
+		channelInfo, error := repos.GetChannelInfo(&channel)
 		if error != nil {
 			http.Error(w, error.Error(), http.StatusInternalServerError)
 			return

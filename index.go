@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/khades/servbot/bot"
+	"github.com/khades/servbot/httpbackend"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/services"
 )
 
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(2)
 
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
@@ -40,18 +41,15 @@ func main() {
 		}
 	}(&wg)
 
-	// go func(wg *sync.WaitGroup) {
-	// 	//defer wg.Done()
-	// 	wg.Add(1)
-	// 	httpbackend.Start()
-
-	// }(&wg)
+	go func(wg *sync.WaitGroup) {
+		httpbackend.Start()
+		wg.Done()
+	}(&wg)
 
 	go func(wg *sync.WaitGroup) {
 		bot.Start()
 		wg.Done()
 	}(&wg)
-	//bot.Start()
 
 	wg.Wait()
 	log.Println("Quitting...")
