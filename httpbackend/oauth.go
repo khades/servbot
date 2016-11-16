@@ -14,8 +14,11 @@ import (
 type tokenResponse struct {
 	Token string `json:"access_token"`
 }
+type nameResponse struct {
+	Username string `json:"name"`
+}
 
-func oauth(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
+func oauth(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	if code == "" {
 		http.Error(w, "Incoming Twitch code is missing", http.StatusUnprocessableEntity)
@@ -36,14 +39,31 @@ func oauth(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
 		return
 	}
-	var responseBody = new(tokenResponse)
+	var tokenStruct = new(tokenResponse)
 
-	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
+	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
 	if marshallError != nil {
 		log.Println(marshallError)
 		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
 		return
 	}
+	nameResp, err := http.Get("https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID + "&oauth_token=" + tokenStruct.Token)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
+		return
+	}
 
+	var usernameStruct = new(nameResponse)
+	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
+	if nameMarshallError != nil {
+		log.Println(marshallError)
+		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
+		return
+	}
+	log.Println("We got credentials of ", usernameStruct.Username)
+	session, err := repos.GetSession(r)
+	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Username, Key: tokenStruct.Token}
+	session.Save(r, w)
 	defer resp.Body.Close()
 }

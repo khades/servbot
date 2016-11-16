@@ -24,7 +24,7 @@ func Start() {
 	mux := goji.NewMux()
 	//	mux.Handle(pat.New("/logs/*"), logs)
 	mux.HandleFunc(pat.Get("/hello/:name"), hello)
-	mux.HandleFunc(pat.Get("/oauth"), withSession(oauth))
+	mux.HandleFunc(pat.Get("/oauth"), oauth)
 	mux.HandleFunc(pat.Get("/oauth/initiate"), withSession(oauthInitiate))
 	http.ListenAndServe("localhost:8000", mux)
 }

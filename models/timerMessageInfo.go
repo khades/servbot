@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// TimedMessageInfo describes
+// TimerMessageInfo describes moobot-like automatic messages to chat
 type TimerMessageInfo struct {
 	ID                string
 	Channel           string
