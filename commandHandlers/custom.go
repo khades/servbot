@@ -3,6 +3,8 @@ package commandHandlers
 import (
 	"log"
 
+	"html"
+
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -28,7 +30,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 			Message: models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				User:    user,
-				Body:    message},
+				Body:    html.UnescapeString(message)},
 			Command:    chatCommand.Command,
 			RedirectTo: redirectTo})
 	}
