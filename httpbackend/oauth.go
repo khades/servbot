@@ -12,6 +12,11 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
+type requestError struct {
+	Error   string
+	Status  string
+	Message string
+}
 type tokenResponse struct {
 	Token string `json:"access_token"`
 }
@@ -31,9 +36,20 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		"grant_type":    {"authorization_code"},
 		"redirect_uri":  {repos.Config.AppOauthURL},
 		"code":          {code}}
-	log.Println(postValues.Encode())
 	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
-	log.Println(resp.Status)
+
+	if resp.StatusCode == 400 {
+		var errorResponse = new(requestError)
+		marshallError := json.NewDecoder(resp.Body).Decode(errorResponse)
+		if marshallError == nil {
+			log.Println(errorResponse)
+			http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
+			return
+		}
+		log.Println("i even didnt demarshaled request")
+		return
+
+	}
 	//"state":         {}
 	if err != nil {
 		log.Println(err)
