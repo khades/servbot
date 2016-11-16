@@ -12,6 +12,7 @@ type ChannelInfo struct {
 	Channel      string
 	StreamStatus StreamStatus
 	Banme        Banme
+	TwitchDJ     TwitchDJ
 	Mods         []string
 	Commands     []string
 }

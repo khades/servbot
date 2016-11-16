@@ -13,7 +13,7 @@ func mod(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
 		channel := pat.Param(r, "channel")
 		if channel == "" {
-			http.Error(w, "channel is not defined", http.StatusUnprocessableEntity)
+			http.Error(w, "Сhannel variable is not defined", http.StatusUnprocessableEntity)
 			return
 		}
 		channelInfo, error := repos.GetChannelInfo(&channel)

@@ -15,6 +15,8 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
+	services.CheckTwitchDJTrack()
+	services.CheckStreamStatus()
 
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
@@ -29,8 +31,17 @@ func main() {
 		}
 	}(&wg)
 
+	thirtyTicker := time.NewTicker(time.Second * 30)
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-thirtyTicker.C
+			wg.Add(1)
+			services.CheckTwitchDJTrack()
+			wg.Done()
+		}
+	}(&wg)
+
 	minuteTicker := time.NewTicker(time.Minute)
-	services.CheckStreamStatus()
 
 	go func(wg *sync.WaitGroup) {
 		for {
