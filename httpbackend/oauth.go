@@ -59,6 +59,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("We got credentials of ", usernameStruct.Username)
+	log.Println(nameResp.Body)
 	session, err := repos.GetSession(r)
 	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Username, Key: tokenStruct.Token}
 	session.Save(r, w)
