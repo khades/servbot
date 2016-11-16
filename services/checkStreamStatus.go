@@ -34,13 +34,13 @@ func CheckStreamStatus() {
 			Online: false}
 	}
 
-	var responseBody = new(responseBodyStruct)
-	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(repos.Config.Channels, ",") + "&client_id=" + repos.Config.ClientKey
+	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(repos.Config.Channels, ",") + "&client_id=" + repos.Config.ClientID
 	resp, respError := http.Get(url)
 	if respError != nil {
 		return
 	}
 	defer resp.Body.Close()
+	var responseBody = new(responseBodyStruct)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
 	if marshallError != nil {
@@ -50,13 +50,12 @@ func CheckStreamStatus() {
 	for _, status := range responseBody.Streams {
 		log.Println(status)
 		streams[status.Channel.Name] = models.StreamStatus{
-			Online:      true,
-			Description: "я кот",
-			Game:        status.Channel.Game,
-			Title:       status.Channel.Status,
-			Start:       status.CreatedAt}
+			Online: true,
+			Game:   status.Channel.Game,
+			Title:  status.Channel.Status,
+			Start:  status.CreatedAt}
 	}
 	for channel, status := range streams {
-		repos.PushStreamStatus(channel, status)
+		repos.PushStreamStatus(&channel, &status)
 	}
 }

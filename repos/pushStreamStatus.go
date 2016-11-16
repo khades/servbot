@@ -7,12 +7,12 @@ import (
 )
 
 // PushStreamStatus updates stream status (start of stream, topic of stream)
-func PushStreamStatus(channel string, streamStatus models.StreamStatus) {
+func PushStreamStatus(channel *string, streamStatus *models.StreamStatus) {
 	channelInfo, _ := GetChannelInfo(channel)
 	if channelInfo != nil {
-		channelInfo.StreamStatus = streamStatus
+		channelInfo.StreamStatus = *streamStatus
 	} else {
-		channelInfoRepositoryObject.forceCreateObject(channel, &models.ChannelInfo{Channel: channel, StreamStatus: streamStatus})
+		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{Channel: *channel, StreamStatus: *streamStatus})
 	}
-	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: channel}, bson.M{"$set": bson.M{"streamStatus": streamStatus}})
+	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: *channel}, bson.M{"$set": bson.M{"streamstatus": *streamStatus}})
 }

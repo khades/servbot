@@ -6,7 +6,7 @@ import (
 )
 
 //LogMessage logs the chat message
-func LogMessage(message models.ChatMessage) {
-	Db.C("messageLogs").Insert(message)
+func LogMessage(message *models.ChatMessage) {
+	Db.C("messageLogs").Insert(*message)
 	Db.C("channelUsers").Upsert(models.ChannelSelector{Channel: message.Channel}, bson.M{"$addToSet": bson.M{"users": message.User}})
 }

@@ -7,15 +7,13 @@ import (
 	"github.com/khades/servbot/models"
 )
 
-func auth(next sessionHandler) sessionHandler {
+func auth(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 		_, err := govalidator.ValidateStruct(s)
-
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
+			return
 		}
-
 		next(w, r, s)
 	}
 }

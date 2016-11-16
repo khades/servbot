@@ -6,12 +6,12 @@ import (
 )
 
 // PushBanme sets if banme command enabled
-func PushBanme(channel string, banme models.Banme) {
+func PushBanme(channel *string, banme *models.Banme) {
 	channelInfo, _ := GetChannelInfo(channel)
 	if channelInfo != nil {
-		channelInfo.Banme = banme
+		channelInfo.Banme = *banme
 	} else {
-		channelInfoRepositoryObject.forceCreateObject(channel, &models.ChannelInfo{Channel: channel, Banme: banme})
+		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{Channel: *channel, Banme: *banme})
 	}
-	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: channel}, bson.M{"$set": bson.M{"banme": banme}})
+	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: *channel}, bson.M{"$set": bson.M{"banme": *banme}})
 }

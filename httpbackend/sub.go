@@ -9,7 +9,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func sub(next sessionHandler) sessionHandler {
+func sub(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
 		channel := pat.Param(r, "channel")
 		if channel == "" {

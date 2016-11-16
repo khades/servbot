@@ -22,23 +22,23 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 			commandName = chatCommand.Body
 		}
 		if strings.HasPrefix(template, "!") || strings.HasPrefix(template, ".") || strings.HasPrefix(template, "/") {
-			ircClient.SendPublic(models.OutgoingMessage{
+			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				Body:    "Создание команды: Запрещено зацикливать команды",
 				User:    chatMessage.User})
 		} else {
-			templateError := Template.updateTemplate(chatMessage.Channel, commandName, template)
+
+			templateError := repos.TemplateCache.UpdateTemplate(&chatMessage.Channel, &commandName, &template)
 			if templateError == nil {
-				repos.PutChannelTemplate(chatMessage.User, chatMessage.Channel, commandName, commandName, template)
-				Template.updateAliases(chatMessage.Channel, commandName, template)
-				repos.PushCommandsForChannel(chatMessage.Channel)
-				ircClient.SendPublic(models.OutgoingMessage{
+				repos.PutChannelTemplate(&chatMessage.User, &chatMessage.Channel, &commandName, &commandName, &template)
+				repos.PushCommandsForChannel(&chatMessage.Channel)
+				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
 					Body:    "Создание команды: Ну в принципе готово VoHiYo",
 					User:    chatMessage.User})
 			} else {
 				log.Println(templateError)
-				ircClient.SendPublic(models.OutgoingMessage{
+				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
 					Body:    "Создание команды: Невалидный шаблон для команды etmSad",
 					User:    chatMessage.User})
@@ -46,7 +46,7 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 
 		}
 	} else {
-		ircClient.SendPublic(models.OutgoingMessage{
+		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    "Создание алиaса: Вы не модер SMOrc",
 			User:    chatMessage.User})

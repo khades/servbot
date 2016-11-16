@@ -7,10 +7,10 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-type sessionHandler func(w http.ResponseWriter, r *http.Request, s *models.HTTPSession)
+type sessionHandlerFunc func(w http.ResponseWriter, r *http.Request, s *models.HTTPSession)
 
-func withSession(next sessionHandler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func withSession(next sessionHandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := repos.GetSession(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -22,9 +22,8 @@ func withSession(next sessionHandler) http.Handler {
 		if ok == false {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-			// Handle the case that it's not an expected type
 		}
 
 		next(w, r, sessionObject)
-	})
+	}
 }

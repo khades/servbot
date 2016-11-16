@@ -10,20 +10,15 @@ import (
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
 	Channel      string
-	StreamStatus StreamStatus `bson:"streamStatus"`
-	Banme        Banme        `bson:"banme"`
-	SubAlert     SubAlert     `bson:"subAlert"`
+	StreamStatus StreamStatus
+	Banme        Banme
 	Mods         []string
 	Commands     []string
 }
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {
-	coms := []string{}
-	for _, word := range channelInfo.Commands {
-		coms = append(coms, "!"+word)
-	}
-	return strings.Join(coms, ", ")
+	return "!" + strings.Join(channelInfo.Commands, ", !")
 }
 
 // GetStreamDuration Helper Command for time for mustashe

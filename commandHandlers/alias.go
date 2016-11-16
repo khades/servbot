@@ -18,7 +18,7 @@ func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.Chat
 		if separator != -1 {
 			commandName = chatCommand.Body[:separator]
 			aliasTo = strings.TrimSpace(chatCommand.Body[separator+1:])
-			result, error := repos.GetChannelTemplate(chatMessage.Channel, aliasTo)
+			result, error := repos.GetChannelTemplate(&chatMessage.Channel, &aliasTo)
 			if error == nil {
 				template = result.Template
 			}
@@ -26,22 +26,16 @@ func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.Chat
 			commandName = chatCommand.Body
 			aliasTo = chatCommand.Body
 		}
-		templateError := Template.updateTemplate(chatMessage.Channel, commandName, template)
-		if templateError == nil {
-			repos.PutChannelTemplate(chatMessage.User, chatMessage.Channel, commandName, aliasTo, template)
-			repos.PushCommandsForChannel(chatMessage.Channel)
-			ircClient.SendPublic(models.OutgoingMessage{
-				Channel: chatMessage.Channel,
-				Body:    "Создание алиaса: Ну в принципе готово VoHiYo",
-				User:    chatMessage.User})
-		} else {
-			ircClient.SendPublic(models.OutgoingMessage{
-				Channel: chatMessage.Channel,
-				Body:    "Создание алиaса: Исходная команда имеет невалидный шаблон etmSad",
-				User:    chatMessage.User})
-		}
+		repos.TemplateCache.SetAliasto(&chatMessage.Channel, &commandName, &aliasTo)
+		repos.PutChannelTemplate(&chatMessage.User, &chatMessage.Channel, &commandName, &aliasTo, &template)
+		repos.PushCommandsForChannel(&chatMessage.Channel)
+		ircClient.SendPublic(&models.OutgoingMessage{
+			Channel: chatMessage.Channel,
+			Body:    "Создание алиaса: Ну в принципе готово VoHiYo",
+			User:    chatMessage.User})
+
 	} else {
-		ircClient.SendPublic(models.OutgoingMessage{
+		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    "Создание алиaса: Вы не модер SMOrc",
 			User:    chatMessage.User})

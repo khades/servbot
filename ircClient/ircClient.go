@@ -25,10 +25,10 @@ func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage
 	}
 	bounce, found := ircClient.Bounces[key]
 	if found && int(time.Now().Sub(bounce).Seconds()) < 15 {
-		ircClient.SendPrivate(message.Message)
+		ircClient.SendPrivate(&message.Message)
 	} else {
 		ircClient.Bounces[key] = time.Now()
-		ircClient.SendPublic(models.OutgoingMessage{
+		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: message.Message.Channel,
 			Body:    message.Message.Body,
 			User:    message.RedirectTo})
@@ -43,7 +43,7 @@ func (ircClient IrcClient) SendRaw(message string) {
 }
 
 // SendPublic writes data to a specified chat
-func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
+func (ircClient IrcClient) SendPublic(message *models.OutgoingMessage) {
 	if ircClient.Ready {
 		if message.User != "" {
 			ircClient.Client.Write(fmt.Sprintf("PRIVMSG #%s :@%s %s", message.Channel, message.User, message.Body))
@@ -54,7 +54,7 @@ func (ircClient IrcClient) SendPublic(message models.OutgoingMessage) {
 }
 
 // SendPrivate writes data in private to a user
-func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
+func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
 		log.Println(message.Channel)
 		ircClient.Client.Write(fmt.Sprintf("PRIVMSG #jtv :/w %s Channel %s: %s", message.User, message.Channel, message.Body))
@@ -65,7 +65,7 @@ func (ircClient IrcClient) SendPrivate(message models.OutgoingMessage) {
 func (ircClient IrcClient) SendModsCommand() {
 	if ircClient.Ready {
 		for _, value := range repos.Config.Channels {
-			ircClient.SendPublic(models.OutgoingMessage{Channel: value, Body: ".mods"})
+			ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: ".mods"})
 		}
 	}
 }

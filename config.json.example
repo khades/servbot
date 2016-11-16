@@ -2,9 +2,11 @@
     "botUserName": "botname_changeme", // Username of bot
     "oauthKey": "oauth:changemeeeeee", // Oauth key of chat for the user, can be found here - http://www.twitchapps.com/tmi/
     "channels": [
-        "changeme1",
-        "changeme2"
+        "changeme",
+        "changeme"
     ], // Lists of channel that bot should serve
-    "dbName": "changeme3" // name of mongo database
-    "clientKey": "changeme4" // client key of registered app
+    "dbName": "changeme" // name of mongo database
+    "ClientID": "changeme" // client key of registered app
+    "clientSecret": "changeme" // client secret of registered app
+    "appOauthURL": "chaneme" // oauth redirect path for webapp
 }

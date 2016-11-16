@@ -18,7 +18,8 @@ type ChatMessage struct {
 	BanInfo          *BanInfo          `bson:",omitempty"`
 }
 
-func (chatMessage ChatMessage) IsCommand() (bool, ChatCommand) {
+// GetCommand method checks if message starts from ! and returns body of command if it is command
+func (chatMessage ChatMessage) GetCommand() (ChatCommand, bool) {
 	chatCommand := ChatCommand{}
 	isCommand := strings.HasPrefix(chatMessage.MessageBody, "!")
 	if isCommand {
@@ -32,5 +33,5 @@ func (chatMessage ChatMessage) IsCommand() (bool, ChatCommand) {
 				Command: chatMessage.MessageBody[1:]}
 		}
 	}
-	return isCommand, chatCommand
+	return chatCommand, isCommand
 }
