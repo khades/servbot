@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"html"
 	"log"
 	"net/http"
 
@@ -24,7 +25,7 @@ func CheckTwitchDJTrack() {
 func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	status := models.TwitchDJ{ID: channel.TwitchDJ.ID}
 	defer repos.PushTwitchDJ(&channel.Channel, &status)
-	log.Printf("Checking %s twitchDj track \n", channel.Channel)
+	//log.Printf("Checking %s twitchDj track \n", channel.Channel)
 	resp, error := http.Get("https://twitch-dj.ru/includes/back.php?func=get_track&channel=" + channel.TwitchDJ.ID)
 	defer resp.Body.Close()
 
@@ -40,6 +41,6 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	}
 	if track.Title != "" {
 		status.Playing = true
-		status.Track = track.Title
+		status.Track = html.UnescapeString(track.Title)
 	}
 }
