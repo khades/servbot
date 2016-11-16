@@ -37,18 +37,9 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		"redirect_uri":  {repos.Config.AppOauthURL},
 		"code":          {code}}
 	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
-
-	if resp.StatusCode == 400 {
-		var errorResponse = new(requestError)
-		marshallError := json.NewDecoder(resp.Body).Decode(errorResponse)
-		if marshallError == nil {
-			log.Println(errorResponse)
-			http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
-			return
-		}
-		log.Println("i even didnt demarshaled request")
-		return
-
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(body)
 	}
 	//"state":         {}
 	if err != nil {
@@ -57,10 +48,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var tokenStruct = new(tokenResponse)
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(body)
-	}
+
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
 	if marshallError != nil {
 		log.Println(marshallError)
