@@ -39,7 +39,10 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var tokenStruct = new(tokenResponse)
-
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(body)
+	}
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
 	if marshallError != nil {
 		log.Println(marshallError)
@@ -54,10 +57,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var usernameStruct = new(nameResponse)
-	body, err := ioutil.ReadAll(nameResp.Body)
-	if err != nil {
-		log.Println(body)
-	}
+
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
 	if nameMarshallError != nil {
 		log.Println(marshallError)
