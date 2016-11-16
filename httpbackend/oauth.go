@@ -2,7 +2,6 @@ package httpbackend
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -24,8 +23,6 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Incoming Twitch code is missing", http.StatusUnprocessableEntity)
 		return
 	}
-	fmt.Fprintf(w, "K, we parsed %s", code)
-
 	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token",
 		url.Values{
 			"client_id":     {repos.Config.ClientID},
