@@ -3,6 +3,7 @@ package httpbackend
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -53,6 +54,10 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var usernameStruct = new(nameResponse)
+	body, err := ioutil.ReadAll(nameResp.Body)
+	if err != nil {
+		log.Println(body)
+	}
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
 	if nameMarshallError != nil {
 		log.Println(marshallError)
