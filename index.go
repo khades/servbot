@@ -13,6 +13,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
+	wg.Add(1)
 
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
@@ -46,14 +47,13 @@ func main() {
 
 	// }(&wg)
 
-	// go func(wg *sync.WaitGroup) {
-	// 	wg.Add(1)
-	// 	//bot.Start()
-	// 	wg.Done()
-	// }(&wg)
-	bot.Start()
+	go func(wg *sync.WaitGroup) {
+		bot.Start()
+		wg.Done()
+	}(&wg)
+	//bot.Start()
 
-	log.Println("Quitting...")
 	wg.Wait()
+	log.Println("Quitting...")
 
 }
