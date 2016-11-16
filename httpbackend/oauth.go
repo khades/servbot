@@ -37,15 +37,17 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		"redirect_uri":  {repos.Config.AppOauthURL},
 		"code":          {code}}
 	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(body)
-	}
-	//"state":         {}
+
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Twitch Error", http.StatusUnprocessableEntity)
 		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(body)
+	} else {
+		log.Println("we didnt parsed body")
 	}
 	var tokenStruct = new(tokenResponse)
 
