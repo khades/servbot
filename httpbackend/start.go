@@ -24,7 +24,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 func Start() {
 	mux := goji.NewMux()
 	//	mux.Handle(pat.New("/logs/*"), logs)
-	mux.HandleFunc(pat.Get("/hello/:name"), hello)
+	mux.HandleFunc(pat.Get("/api/username"), hello)
 	mux.HandleFunc(pat.Get("/isMod/:channel"), withSession(mod(func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
 		fmt.Fprintf(w, "Hello, %s, you're moderator of that channel!", session.Username)
 	})))
