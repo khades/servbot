@@ -22,6 +22,18 @@ func (channelInfo ChannelInfo) GetCommands() string {
 	return "!" + strings.Join(channelInfo.Commands, ", !")
 }
 
+// GetIfUserIsMod checks if user exist in internal mod array
+func (channelInfo ChannelInfo) GetIfUserIsMod(user *string) bool {
+	isMod := false
+	for _, value := range channelInfo.Mods {
+		if value == *user {
+			isMod = true
+			break
+		}
+	}
+	return isMod
+}
+
 // GetStreamDuration Helper Command for time for mustashe
 func (channelInfo ChannelInfo) GetStreamDuration() string {
 
@@ -45,7 +57,7 @@ func (channelInfo ChannelInfo) GetStreamDuration() string {
 		}
 	}
 
-	if math.Floor(hours/10) != 1 {
+	if int(math.Floor(hours/10)) != 1 {
 		switch int(hours - math.Floor(hours/10)*10) {
 		case 1:
 			hourPrefix = "час"

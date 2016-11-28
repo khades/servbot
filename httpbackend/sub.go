@@ -35,3 +35,7 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 		}
 	}
 }
+
+func withSub(next sessionHandlerFunc) http.HandlerFunc {
+	return withAuth(sub(next))
+}

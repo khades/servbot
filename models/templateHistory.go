@@ -4,7 +4,8 @@ import "time"
 
 // TemplateHistory describes history of chat command
 type TemplateHistory struct {
-	TemplateInfo `bson:",inline"`
-	User         string
-	Date         time.Time
+	AliasTo  string
+	Template string
+	User     string
+	Date     time.Time
 }

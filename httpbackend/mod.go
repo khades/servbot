@@ -21,18 +21,15 @@ func mod(next sessionHandlerFunc) sessionHandlerFunc {
 			http.Error(w, "That channel is not defined", http.StatusForbidden)
 			return
 		}
-		isMod := false
-		for _, value := range channelInfo.Mods {
-			if value == session.Username {
-				isMod = true
-				break
-			}
-		}
-		if isMod == true {
+		if channelInfo.GetIfUserIsMod(&session.Username) == true {
 			next(w, r, session)
 		} else {
 			http.Error(w, "You're not moderator", http.StatusForbidden)
 			return
 		}
 	}
+}
+
+func withMod(next sessionHandlerFunc) http.HandlerFunc {
+	return withAuth(mod(next))
 }

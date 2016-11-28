@@ -50,24 +50,26 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		user := message.Params[1]
 		channel := message.Params[0]
 		formedMessage := models.ChatMessage{
+			MessageStruct: models.MessageStruct{
+				Date:      time.Now(),
+				BanLength: intBanDuration,
+				BanReason: banReason},
 			Channel: channel,
 			User:    user,
-			IsMod:   false,
-			IsSub:   true,
-			Date:    time.Now(),
-			BanInfo: &models.BanInfo{Duration: intBanDuration, Reason: banReason}}
+		}
 		repos.LogMessage(&formedMessage)
 		//	log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
 	}
 	if message.Command == "PRIVMSG" {
 		formedMessage := models.ChatMessage{
-			Channel:     message.Params[0][1:],
-			User:        message.User,
-			MessageBody: message.Params[1],
-			IsMod:       message.Tags["mod"] == "1" || message.User == "khadesru",
-			IsSub:       message.Tags["subscriber"] == "1",
-			IsPrime:     strings.Contains(message.Tags["badges"].Encode(), "premium/1"),
-			Date:        time.Now()}
+			MessageStruct: models.MessageStruct{
+				MessageBody: message.Params[1],
+				Date:        time.Now()},
+			Channel: message.Params[0][1:],
+			User:    message.User,
+			IsMod:   message.Tags["mod"] == "1" || message.User == "khadesru",
+			IsSub:   message.Tags["subscriber"] == "1",
+			IsPrime: strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		repos.LogMessage(&formedMessage)
 		commandBody, isCommand := formedMessage.GetCommand()
 		if isCommand {

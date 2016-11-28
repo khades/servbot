@@ -17,13 +17,12 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	channel := message.Params[0][1:]
 	if user != "" && channel != "" {
 		formedMessage := models.ChatMessage{
-			Channel:          channel,
-			User:             user,
-			IsMod:            false,
-			IsSub:            true,
-			IsPrime:          strings.Contains(message.String(), "Twitch Prime"),
-			Date:             time.Now(),
-			SubscriptionInfo: &models.SubscriptionInfo{Count: 1}}
+			MessageStruct: models.MessageStruct{
+				Date:     time.Now(),
+				SubCount: 1},
+			Channel: channel,
+			IsPrime: strings.Contains(message.String(), "Twitch Prime"),
+			User:    user}
 		repos.LogMessage(&formedMessage)
 		sendSubMessage(&channel, &user)
 		log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)

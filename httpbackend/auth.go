@@ -17,3 +17,7 @@ func auth(next sessionHandlerFunc) sessionHandlerFunc {
 		next(w, r, s)
 	}
 }
+
+func withAuth(next sessionHandlerFunc) http.HandlerFunc {
+	return withSession(auth(next))
+}

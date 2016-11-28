@@ -1,21 +1,15 @@
 package models
 
-import (
-	"strings"
-	"time"
-)
+import "strings"
 
 // ChatMessage describes processed twitch message with essential information on it
 type ChatMessage struct {
-	Channel          string
-	User             string
-	IsMod            bool
-	IsSub            bool
-	IsPrime          bool
-	Date             time.Time
-	MessageBody      string            `bson:",omitempty"`
-	SubscriptionInfo *SubscriptionInfo `bson:",omitempty"`
-	BanInfo          *BanInfo          `bson:",omitempty"`
+	MessageStruct `bson:",inline"`
+	Channel       string
+	User          string
+	IsMod         bool
+	IsSub         bool
+	IsPrime       bool
 }
 
 // GetCommand method checks if message starts from ! and returns body of command if it is command

@@ -1,13 +1,9 @@
 package repos
 
-import (
-	"github.com/khades/servbot/models"
-	"gopkg.in/mgo.v2/bson"
-)
+import "github.com/khades/servbot/models"
 
-// GetChannelActiveTemplates gets all non-empty templates for channel
-func GetChannelActiveTemplates(channel *string) (*[]models.TemplateInfo, error) {
+func GetChannelTemplates(channel *string) (*[]models.TemplateInfo, error) {
 	var result []models.TemplateInfo
-	error := Db.C("templates").Find(bson.M{"channel": *channel, "template": bson.M{"$ne": ""}}).All(&result)
+	error := Db.C("templates").Find(models.ChannelSelector{Channel: *channel}).All(&result)
 	return &result, error
 }

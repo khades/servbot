@@ -2,26 +2,26 @@ package httpbackend
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/khades/servbot/models"
-
 	"github.com/khades/servbot/repos"
 
 	"goji.io/pat"
 )
 
-func logs(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
+func templates(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 	channel := pat.Param(r, "channel")
-	user := pat.Param(r, "user")
-	if channel == "" || user == "" {
+	if channel == "" {
 		http.Error(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
-	userLogs, error := repos.GetUserMessageHistory(&user, &channel)
+	log.Println(channel)
+	templates, error := repos.GetChannelTemplates(&channel)
 	if error != nil {
 		http.Error(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*userLogs)
+	json.NewEncoder(w).Encode(*templates)
 }
