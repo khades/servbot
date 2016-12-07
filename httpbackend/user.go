@@ -12,6 +12,5 @@ type userResponse struct {
 }
 
 func user(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
-
 	json.NewEncoder(w).Encode(userResponse{s.Username})
 }
