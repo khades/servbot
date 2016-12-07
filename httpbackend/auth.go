@@ -10,8 +10,8 @@ import (
 
 func auth(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
-		_, err := govalidator.ValidateStruct(s)
 		log.Println(s)
+		_, err := govalidator.ValidateStruct(s)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return

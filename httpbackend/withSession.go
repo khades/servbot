@@ -33,6 +33,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 				return
 			}
 		}
+		log.Println(sessionObject)
 		next(w, r, sessionObject)
 	}
 }
