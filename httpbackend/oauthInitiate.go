@@ -1,6 +1,7 @@
 package httpbackend
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
@@ -10,6 +11,8 @@ import (
 
 func oauthInitiate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 	_, err := govalidator.ValidateStruct(s)
+	log.Println(s)
+
 	if err != nil {
 		http.Redirect(w, r, "https://api.twitch.tv/kraken/oauth2/authorize"+
 			"?response_type=code"+
