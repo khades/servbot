@@ -25,7 +25,6 @@ type nameResponse struct {
 
 func oauth(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
-	log.Println("initiating oauth")
 	if code == "" {
 		http.Error(w, "Incoming Twitch code is missing", http.StatusUnprocessableEntity)
 		return
