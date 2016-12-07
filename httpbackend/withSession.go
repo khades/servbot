@@ -1,7 +1,6 @@
 package httpbackend
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/khades/servbot/models"
@@ -21,13 +20,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 		var sessionObject = &models.HTTPSession{}
 
 		if val == nil {
-			log.Println("session is nil")
-			session.Options.Path = "/"
-			session.Values["sessions"] = models.HTTPSession{}
-			session.Save(r, w)
-		} else {
 			var ok = false
-			log.Println(val)
 			sessionObject, ok = val.(*models.HTTPSession)
 			if ok == false {
 				http.Error(w, "what", http.StatusInternalServerError)
