@@ -35,7 +35,6 @@ func CheckStreamStatus() {
 	}
 
 	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(repos.Config.Channels, ",") + "&client_id=" + repos.Config.ClientID
-	log.Println(url)
 	resp, respError := http.Get(url)
 	if respError != nil {
 		return
