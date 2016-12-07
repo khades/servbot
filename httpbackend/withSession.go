@@ -23,6 +23,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 		if val == nil {
 			log.Println("session is nil")
 			session.Values["sessions"] = models.HTTPSession{}
+			session.Save(r, w)
 		} else {
 			var ok = false
 			log.Println(val)
@@ -34,7 +35,6 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 		}
 		log.Println("Returning session")
 		log.Println(sessionObject)
-		session.Save(r, w)
 		next(w, r, sessionObject)
 	}
 }
