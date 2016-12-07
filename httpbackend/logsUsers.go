@@ -14,14 +14,14 @@ import (
 func logsUsers(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 	channel := pat.Param(r, "channel")
 	if channel == "" {
-		http.Error(w, "Сhannel variable is not defined", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Сhannel variable is not defined", http.StatusUnprocessableEntity)
 		return
 	}
 	log.Println(channel)
 	channelUsers, error := repos.GetChannelUsers(&channel)
 	if error != nil {
 		log.Println(error)
-		http.Error(w, error.Error(), http.StatusNotFound)
+		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
 	json.NewEncoder(w).Encode(*channelUsers)

@@ -13,7 +13,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := repos.GetSession(r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			writeJSONError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		val := session.Values["sessions"]
@@ -23,7 +23,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 			var ok = false
 			sessionObject, ok = val.(*models.HTTPSession)
 			if ok == false {
-				http.Error(w, "what", http.StatusInternalServerError)
+				writeJSONError(w, "what", http.StatusInternalServerError)
 				return
 			}
 		}

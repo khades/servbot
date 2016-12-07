@@ -26,7 +26,7 @@ type nameResponse struct {
 func oauth(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		http.Error(w, "Incoming Twitch code is missing", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Incoming Twitch code is missing", http.StatusUnprocessableEntity)
 		return
 	}
 	postValues := url.Values{
@@ -39,7 +39,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Twitch Error, Cant get auth token, Connection problem", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Cant get auth token, Connection problem", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -54,7 +54,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 
 			log.Println(err)
 		}
-		http.Error(w, "Twitch Error, Cant get auth token, Got code 400", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Cant get auth token, Got code 400", http.StatusUnprocessableEntity)
 		return
 	}
 	var tokenStruct = new(tokenResponse)
@@ -62,14 +62,14 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
 	if marshallError != nil {
 		log.Println(marshallError)
-		http.Error(w, "Twitch Error, Can't marshall oauth token", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Can't marshall oauth token", http.StatusUnprocessableEntity)
 		return
 	}
 	url := "https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID + "&oauth_token=" + tokenStruct.Token
 	nameResp, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -82,7 +82,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			log.Println("We didnt parsed body of username request")
 		}
-		http.Error(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
 		return
 	}
 	var usernameStruct = new(nameResponse)
@@ -90,7 +90,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
 	if nameMarshallError != nil {
 		log.Println(marshallError)
-		http.Error(w, "Twitch Error, Cant marshall username", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Cant marshall username", http.StatusUnprocessableEntity)
 		return
 	}
 	session, err := repos.GetSession(r)

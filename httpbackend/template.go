@@ -15,13 +15,13 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 	channel := pat.Param(r, "channel")
 	template := pat.Param(r, "template")
 	if channel == "" || template == "" {
-		http.Error(w, "URL is not valid", http.StatusBadRequest)
+		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
 	log.Println(channel)
 	result, error := repos.GetChannelTemplateWithHistory(&channel, &template)
 	if error != nil {
-		http.Error(w, error.Error(), http.StatusNotFound)
+		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
 	json.NewEncoder(w).Encode(*result)

@@ -14,7 +14,7 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
 		channel := pat.Param(r, "channel")
 		if channel == "" {
-			http.Error(w, "channel is not defined", http.StatusUnprocessableEntity)
+			writeJSONError(w, "channel is not defined", http.StatusUnprocessableEntity)
 			return
 		}
 		isSub, found := repos.GetIfSubToChannel(&session.Username, &channel)
@@ -31,7 +31,7 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 		if isSub == true {
 			next(w, r, session)
 		} else {
-			http.Error(w, "You're not sub", http.StatusForbidden)
+			writeJSONError(w, "You're not sub", http.StatusForbidden)
 		}
 	}
 }
