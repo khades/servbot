@@ -1,6 +1,7 @@
 package httpbackend
 
 import (
+	"log"
 	"net/http"
 
 	"goji.io/pat"
@@ -11,6 +12,7 @@ import (
 
 func mod(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
+		log.Println(session)
 		channel := pat.Param(r, "channel")
 		if channel == "" {
 			http.Error(w, "Сhannel variable is not defined", http.StatusUnprocessableEntity)

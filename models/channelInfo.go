@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"strings"
 	"time"
@@ -24,6 +25,8 @@ func (channelInfo ChannelInfo) GetCommands() string {
 
 // GetIfUserIsMod checks if user exist in internal mod array
 func (channelInfo ChannelInfo) GetIfUserIsMod(user *string) bool {
+	log.Println(channelInfo.Mods)
+	log.Println(*user)
 	isMod := false
 	for _, value := range channelInfo.Mods {
 		if value == *user {
