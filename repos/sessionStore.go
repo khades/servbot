@@ -10,7 +10,7 @@ import (
 
 //var sessionStore = mongostore.New(dbSession, "sessions", &sessions.Options{MaxAge: 3600, Secure: true}, true,
 //[]byte("secret-key"))
-var sessionStore = sessions.NewCookieStore([]byte("ASFasfafasfasfSfAS"))
+var sessionStore = sessions.NewCookieStore([]byte("Hello"))
 
 // GetSession is configured object for reading http sessions
 func GetSession(r *http.Request) (*sessions.Session, error) {
