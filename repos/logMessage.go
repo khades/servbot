@@ -1,15 +1,12 @@
 package repos
 
 import (
-	"log"
-
 	"github.com/khades/servbot/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
 //LogMessage logs the chat message
 func LogMessage(message *models.ChatMessage) {
-	log.Println("Logging message")
 	query := bson.M{
 		"$push": bson.M{"messages": bson.M{
 			"$each":  []models.MessageStruct{message.MessageStruct},
