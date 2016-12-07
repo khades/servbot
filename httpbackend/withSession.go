@@ -27,12 +27,11 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 			var ok = false
 			sessionObject, ok = val.(*models.HTTPSession)
 			if ok == false {
-				log.Println(val)
-				log.Println(ok)
 				http.Error(w, "what", http.StatusInternalServerError)
 				return
 			}
 		}
+		log.Println("Returning session")
 		log.Println(sessionObject)
 		next(w, r, sessionObject)
 	}
