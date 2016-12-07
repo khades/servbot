@@ -96,6 +96,6 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	session, err := repos.GetSession(r)
 	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token}
 	session.Save(r, w)
-	http.Redirect(w, r, repos.Config.AppOauthURL+"/#/afterAuth", http.StatusFound)
+	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()
 }

@@ -9,4 +9,5 @@ type Config struct {
 	ClientID     string `valid:"required"`
 	ClientSecret string `valid:"required"`
 	AppOauthURL  string `valid:"required"`
+	AppURL       string `valid:"required"`
 }
