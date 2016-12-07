@@ -16,11 +16,11 @@ var sessionStore = mongostore.NewMongoStore(repos.Db.C("sessions"), 3600, true, 
 // Start We are starting server here
 func Start() {
 	mux := goji.NewMux()
-	mux.HandleFunc(pat.Get("/api/channel/:channel/logs"), corsEnabled(withMod(logsUsers)))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/:user"), corsEnabled(withMod(logs)))
-	mux.HandleFunc(pat.Get("/api/user"), corsEnabled(withSession(auth(user))))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), corsEnabled(withMod(templates)))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/templates/:template"), corsEnabled(withMod(template)))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/logs"), withMod(logsUsers))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/:user"), withMod(logs))
+	mux.HandleFunc(pat.Get("/api/user"), withAuth(user))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), withMod(templates))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/templates/:template"), withMod(template))
 
 	// mux.HandleFunc(pat.Get("/isMod/:channel"), withSession(mod(func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession) {
 	// 	fmt.Fprintf(w, "Hello, %s, you're moderator of that channel!", session.Username)
