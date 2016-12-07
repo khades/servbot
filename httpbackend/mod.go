@@ -19,6 +19,7 @@ func mod(next sessionHandlerFunc) sessionHandlerFunc {
 			return
 		}
 		channelInfo, error := repos.GetChannelInfo(&channel)
+		log.Println(channelInfo)
 		if error != nil {
 			log.Println(error)
 			http.Error(w, "That channel is not defined", http.StatusForbidden)
