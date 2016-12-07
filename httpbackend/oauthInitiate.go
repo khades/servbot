@@ -1,7 +1,6 @@
 package httpbackend
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
@@ -20,7 +19,8 @@ func oauthInitiate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession
 		return
 	}
 	//http.Redirect(w, r, repos.Config.AppOauthURL+"/#/afterAuth", http.StatusFound)
-	fmt.Fprintf(w, "Hello, %s!", s.Username)
+	http.Redirect(w, r, repos.Config.AppOauthURL+"/#/afterAuth", http.StatusFound)
+	// fmt.Fprintf(w, "Hello, %s!", s.Username)
 
 	return
 

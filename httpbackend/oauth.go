@@ -2,7 +2,6 @@ package httpbackend
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -97,6 +96,6 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	session, err := repos.GetSession(r)
 	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token}
 	session.Save(r, w)
-	fmt.Fprintf(w, "Hello, %s!", usernameStruct.Name)
+	http.Redirect(w, r, repos.Config.AppOauthURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()
 }
