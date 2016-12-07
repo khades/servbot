@@ -21,6 +21,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 		var sessionObject = &models.HTTPSession{}
 
 		if val == nil {
+			log.Println("session is nil")
 			session.Values["sessions"] = models.HTTPSession{}
 			session.Save(r, w)
 		} else {
