@@ -26,6 +26,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 			session.Save(r, w)
 		} else {
 			var ok = false
+			log.Println(val)
 			sessionObject, ok = val.(*models.HTTPSession)
 			if ok == false {
 				http.Error(w, "what", http.StatusInternalServerError)
