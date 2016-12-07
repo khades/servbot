@@ -18,7 +18,7 @@ func Start() {
 	mux := goji.NewMux()
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs"), corsEnabled(withMod(logsUsers)))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/:user"), corsEnabled(withMod(logs)))
-	mux.HandleFunc(pat.Get("/api/user"), corsEnabled(withAuth(user)))
+	mux.HandleFunc(pat.Get("/api/user"), corsEnabled(withSession(auth(user))))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), corsEnabled(withMod(templates)))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates/:template"), corsEnabled(withMod(template)))
 
