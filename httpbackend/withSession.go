@@ -19,7 +19,7 @@ func withSession(next sessionHandlerFunc) http.HandlerFunc {
 		val := session.Values["sessions"]
 		var sessionObject = &models.HTTPSession{}
 
-		if val == nil {
+		if val != nil {
 			var ok = false
 			sessionObject, ok = val.(*models.HTTPSession)
 			if ok == false {
