@@ -17,7 +17,6 @@ func logsUsers(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 		writeJSONError(w, "Сhannel variable is not defined", http.StatusUnprocessableEntity)
 		return
 	}
-	log.Println(channel)
 	channelUsers, error := repos.GetChannelUsers(&channel)
 	if error != nil {
 		log.Println(error)

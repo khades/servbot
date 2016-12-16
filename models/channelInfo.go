@@ -14,6 +14,7 @@ type ChannelInfo struct {
 	StreamStatus StreamStatus
 	Banme        Banme
 	TwitchDJ     TwitchDJ
+	DubTrack     DubTrack
 	Mods         []string
 	Commands     []string
 }

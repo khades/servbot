@@ -40,6 +40,15 @@ func main() {
 			wg.Done()
 		}
 	}(&wg)
+	
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-thirtyTicker.C
+			wg.Add(1)
+			services.CheckDubTrack()
+			wg.Done()
+		}
+	}(&wg)
 
 	minuteTicker := time.NewTicker(time.Minute)
 
