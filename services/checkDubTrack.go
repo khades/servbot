@@ -11,8 +11,8 @@ import (
 )
 
 type dubTrack struct {
-	Status string
-	Data   struct {
+	Message string
+	Data    struct {
 		SongInfo struct {
 			Name string
 		}
@@ -45,7 +45,7 @@ func checkOneDubTrack(channel *models.ChannelInfo) {
 		return
 	}
 	log.Println(track)
-	if track.Status == "200" && track.Data.SongInfo.Name != "" {
+	if track.Message == "OK" && track.Data.SongInfo.Name != "" {
 		status.Playing = true
 		status.Track = html.UnescapeString(track.Data.SongInfo.Name)
 	}
