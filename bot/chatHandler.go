@@ -67,7 +67,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				Date:        time.Now()},
 			Channel: message.Params[0][1:],
 			User:    message.User,
-			IsMod:   message.Tags["mod"] == "1" || message.User == "khadesru",
+			IsMod:   message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
 			IsSub:   message.Tags["subscriber"] == "1",
 			IsPrime: strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		repos.LogMessage(&formedMessage)

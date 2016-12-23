@@ -17,9 +17,8 @@ func main() {
 	wg.Add(2)
 	services.CheckTwitchDJTrack()
 	services.CheckStreamStatus()
-	services.CheckDubTrack(
-		
-	
+	services.CheckDubTrack()
+
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
 	ticker := time.NewTicker(time.Second * 15)
