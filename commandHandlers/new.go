@@ -28,14 +28,14 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				User:    chatMessage.User})
 			return
 		}
-		if template == "" {
+		if commandName == "" {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Запрещено создавать команды",
+				Body:    "Создание команды: Запрещено создавать пустые команды",
 				User:    chatMessage.User})
 			return
 		}
-		if template == "new" {
+		if commandName == "new" {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				Body:    "Создание команды: Запрещено создавать команды для зарезервированных слов",
