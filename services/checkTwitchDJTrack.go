@@ -28,7 +28,6 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	//log.Printf("Checking %s twitchDj track \n", channel.Channel)
 	resp, error := http.Get("https://twitch-dj.ru/includes/back.php?func=get_track&channel=" + channel.TwitchDJ.ID)
 	defer resp.Body.Close()
-
 	if error != nil {
 		log.Println(error)
 		return
@@ -44,5 +43,3 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 		status.Track = html.UnescapeString(track.Title)
 	}
 }
-
-

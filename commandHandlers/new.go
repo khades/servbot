@@ -26,25 +26,38 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				Channel: chatMessage.Channel,
 				Body:    "Создание команды: Запрещено зацикливать команды",
 				User:    chatMessage.User})
-		} else {
-
-			templateError := repos.TemplateCache.UpdateTemplate(&chatMessage.Channel, &commandName, &template)
-			if templateError == nil {
-				repos.PutChannelTemplate(&chatMessage.User, &chatMessage.Channel, &commandName, &commandName, &template)
-				repos.PushCommandsForChannel(&chatMessage.Channel)
-				ircClient.SendPublic(&models.OutgoingMessage{
-					Channel: chatMessage.Channel,
-					Body:    "Создание команды: Ну в принципе готово VoHiYo",
-					User:    chatMessage.User})
-			} else {
-				log.Println(templateError)
-				ircClient.SendPublic(&models.OutgoingMessage{
-					Channel: chatMessage.Channel,
-					Body:    "Создание команды: Невалидный шаблон для команды etmSad",
-					User:    chatMessage.User})
-			}
-
+			return
 		}
+		if template == "" {
+			ircClient.SendPublic(&models.OutgoingMessage{
+				Channel: chatMessage.Channel,
+				Body:    "Создание команды: Запрещено создавать команды",
+				User:    chatMessage.User})
+			return
+		}
+		if template == "new" {
+			ircClient.SendPublic(&models.OutgoingMessage{
+				Channel: chatMessage.Channel,
+				Body:    "Создание команды: Запрещено создавать команды для зарезервированных слов",
+				User:    chatMessage.User})
+			return
+		}
+		templateError := repos.TemplateCache.UpdateTemplate(&chatMessage.Channel, &commandName, &template)
+		if templateError == nil {
+			repos.PutChannelTemplate(&chatMessage.User, &chatMessage.Channel, &commandName, &commandName, &template)
+			repos.PushCommandsForChannel(&chatMessage.Channel)
+			ircClient.SendPublic(&models.OutgoingMessage{
+				Channel: chatMessage.Channel,
+				Body:    "Создание команды: Ну в принципе готово VoHiYo",
+				User:    chatMessage.User})
+		} else {
+			log.Println(templateError)
+			ircClient.SendPublic(&models.OutgoingMessage{
+				Channel: chatMessage.Channel,
+				Body:    "Создание команды: Невалидный шаблон для команды etmSad",
+				User:    chatMessage.User})
+		}
+
 	} else {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
