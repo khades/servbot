@@ -15,7 +15,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	log.Println("Got first sub")
 	user := strings.Split(message.Params[1], " ")[0]
 	channel := message.Params[0][1:]
-	if user != "" && channel != "" {
+	if user != "" && channel != "" && (strings.HasSuffix(message.String(), "subscribed!") || strings.HasSuffix(message.String(), "Twitch Prime!")) {
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
 				Date:     time.Now(),
