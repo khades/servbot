@@ -24,7 +24,7 @@ func PutChannelTemplate(user *string, userID *string, channelID *string, command
 			"history": bson.M{
 				"$each":  []models.TemplateHistory{templateHistory},
 				"$sort":  bson.M{"date": -1},
-				"$slice": 5}}}
+				"$slice": 10}}}
 
 	Db.C(templateCollection).Upsert(
 		models.TemplateSelector{ChannelID: *channelID, CommandName: *commandName},

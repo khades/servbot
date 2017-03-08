@@ -37,7 +37,7 @@ func SetSubAlert(user *string, userID *string, subAlert *models.SubAlert) error 
 					ResubMessage: subAlert.ResubMessage,
 					RepeatBody:   subAlert.RepeatBody}},
 				"$sort":  bson.M{"date": -1},
-				"$slice": 5}}})
+				"$slice": 10}}})
 
 	return nil
 }
