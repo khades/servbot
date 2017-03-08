@@ -25,15 +25,15 @@ func (channelInfo ChannelInfo) GetCommands() string {
 }
 
 // GetIfUserIsMod checks if user exist in internal mod array
-func (channelInfo ChannelInfo) GetIfUserIsMod(user *string) bool {
+func (channelInfo ChannelInfo) GetIfUserIsMod(userID *string) bool {
 	log.Println(channelInfo.Mods)
-	log.Println(*user)
+	log.Println(*userID)
 	isMod := false
-	if *user == "khadesru" {
+	if *userID == "40635840" {
 		return true
 	}
 	for _, value := range channelInfo.Mods {
-		if value == *user {
+		if value == *userID {
 			isMod = true
 			break
 		}
