@@ -78,7 +78,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 
 	if nameResp.StatusCode == 400 {
 		body, err := ioutil.ReadAll(resp.Body)
-
+		log.Println(string(body))
 		if err == nil {
 			log.Println(string(body))
 		} else {
