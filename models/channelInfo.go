@@ -29,7 +29,7 @@ func (channelInfo ChannelInfo) GetIfUserIsMod(userID *string) bool {
 	log.Println(channelInfo.Mods)
 	log.Println(*userID)
 	isMod := false
-	if *userID == "40635840" && channelInfo.ChannelID == *userID {
+	if *userID == "40635840" || channelInfo.ChannelID == *userID {
 		return true
 	}
 	for _, value := range channelInfo.Mods {
