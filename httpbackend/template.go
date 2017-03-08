@@ -30,7 +30,8 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 	}
 	log.Println(channel)
 	result, _ := repos.GetChannelTemplateWithHistory(channelID, &commandName)
-
+	result.ChannelID = *channelID
+	result.CommandName = commandName
 	json.NewEncoder(w).Encode(templateResponse{*result, *channelName})
 }
 
