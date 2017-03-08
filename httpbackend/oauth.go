@@ -68,7 +68,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, "Twitch Error, Can't marshall oauth token", http.StatusUnprocessableEntity)
 		return
 	}
-	url := "https://api.twitch.tv/kraken/users/" + repos.Config.ClientID
+	url := "https://api.twitch.tv/kraken/user?oauth_token=" + tokenStruct.Token
 	nameResp, err := httpclient.TwitchV5(repos.Config.ClientID, "GET", url, nil)
 	if err != nil {
 		log.Println(err)
