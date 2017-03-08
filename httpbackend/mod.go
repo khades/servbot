@@ -17,7 +17,7 @@ func mod(next sessionAndChannelHandlerFunc) sessionAndChannelHandlerFunc {
 			writeJSONError(w, "That channel is not defined", http.StatusForbidden)
 			return
 		}
-		if channelInfo.GetIfUserIsMod(&session.UserID) == true {
+		if *channelID == session.UserID || channelInfo.GetIfUserIsMod(&session.UserID) == true {
 			next(w, r, session, channelID, channelName)
 		} else {
 			writeJSONError(w, "You're not moderator", http.StatusForbidden)
