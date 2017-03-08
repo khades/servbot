@@ -16,7 +16,7 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	repos.GetUsersID(&repos.Config.Channels)
-	//repos.Migrate()
+	repos.CreateChannels()
 	wg.Add(1)
 	go func() {
 		services.CheckTwitchDJTrack()
