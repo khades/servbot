@@ -10,5 +10,5 @@ type Config struct {
 	ClientSecret string `valid:"required"`
 	AppOauthURL  string `valid:"required"`
 	AppURL       string `valid:"required"`
-	Debug        bool   `valid:"required"`
+	Debug        bool
 }
