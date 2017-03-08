@@ -69,7 +69,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	url := "https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID
-	nameResp, err := httpclient.Get(url)
+	nameResp, err := httpclient.TwitchV5(repos.Config.ClientID, "GET", url, nil)
 	if err != nil {
 		log.Println(err)
 		writeJSONError(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
@@ -98,7 +98,9 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := repos.GetSession(r)
 	session.Options.Path = "/"
-	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
+	sessionObject := models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
+	session.Values["sessions"] = sessionObject
+	log.Println(sessionObject)
 	session.Save(r, w)
 	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()
