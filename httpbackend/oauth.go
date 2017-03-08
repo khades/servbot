@@ -93,7 +93,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
 	if nameMarshallError != nil {
 		log.Println(marshallError)
-		writeJSONError(w, "Twitch Error, Cant marshall username", http.StatusUnprocessableEntity)
+		writeJSONError(w, "Twitch Error, Cant marshall username: "+nameMarshallError.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 	session, err := repos.GetSession(r)
