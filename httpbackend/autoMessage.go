@@ -21,6 +21,11 @@ type autoMessageListResponse struct {
 	AutoMessages []models.AutoMessage `json:"autoMessages"`
 }
 
+type autoMessageGetResponse struct {
+	Channel     string                        `json:"channel"`
+	AutoMessage models.AutoMessageWithHistory `json:"autoMessage"`
+}
+
 func autoMessageList(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	result, error := repos.GetAutoMessages(channelID)
 	if error != nil {
@@ -43,7 +48,7 @@ func autoMessageGet(w http.ResponseWriter, r *http.Request, s *models.HTTPSessio
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(autoMessageGetResponse{*channelName, *result})
 }
 
 func autoMessageCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
