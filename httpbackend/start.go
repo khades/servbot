@@ -22,6 +22,7 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/userid/:userID"), withMod(logsByUserID))
 
 	mux.HandleFunc(pat.Get("/api/user"), withAuth(user))
+	mux.HandleFunc(pat.Get("/api/user/index"), withAuth(userIndex))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), withMod(templates))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates/:commandName"), withMod(template))

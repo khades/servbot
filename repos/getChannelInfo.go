@@ -3,6 +3,8 @@ package repos
 import (
 	"log"
 
+	"gopkg.in/mgo.v2/bson"
+
 	"github.com/khades/servbot/models"
 )
 
@@ -21,4 +23,10 @@ func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
 	//log.Println(dbObject)
 	channelInfoRepositoryObject.dataArray[*channelID] = dbObject
 	return dbObject, error
+}
+
+func GetModChannels(userID *string) (*[]models.ChannelWithID, error) {
+	var result []models.ChannelWithID
+	error := Db.C(channelInfoCollection).Find(bson.M{"mods": *userID}).All(&result)
+	return &result, error
 }

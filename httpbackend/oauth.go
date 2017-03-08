@@ -78,7 +78,6 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 
 	if nameResp.StatusCode == 400 {
 		body, err := ioutil.ReadAll(resp.Body)
-		log.Println(string(body))
 		if err == nil {
 			log.Println(string(body))
 		} else {
@@ -100,7 +99,6 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	session.Options.Path = "/"
 	sessionObject := models.HTTPSession{Username: usernameStruct.Name, UserID: usernameStruct.ID, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
 	session.Values["sessions"] = sessionObject
-	log.Println(sessionObject)
 	session.Save(r, w)
 	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()

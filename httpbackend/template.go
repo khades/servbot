@@ -17,6 +17,10 @@ type templatePushRequest struct {
 type aliasToRequest struct {
 	AliasTo string `json:"aliasTo"`
 }
+type templateResponse struct {
+	Template models.TemplateInfoWithHistory `json:"template"`
+	Channel  string                         `json:"channel"`
+}
 
 func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	commandName := pat.Param(r, "commandName")
@@ -30,7 +34,7 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*result)
+	json.NewEncoder(w).Encode(templateResponse{*result, *channelName})
 }
 
 func putTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
