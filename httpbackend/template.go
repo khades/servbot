@@ -29,11 +29,8 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 		return
 	}
 	log.Println(channel)
-	result, error := repos.GetChannelTemplateWithHistory(channelID, &commandName)
-	if error != nil {
-		writeJSONError(w, error.Error(), http.StatusNotFound)
-		return
-	}
+	result, _ := repos.GetChannelTemplateWithHistory(channelID, &commandName)
+
 	json.NewEncoder(w).Encode(templateResponse{*result, *channelName})
 }
 
