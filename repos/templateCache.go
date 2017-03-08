@@ -51,14 +51,16 @@ func (template templateContainer) Get(channelID *string, inputCommandName *strin
 func (template templateContainer) UpdateTemplate(user *string, userID *string, channelID *string, commandName *string, templateBody *string) error {
 	if *templateBody == "" {
 		template.templateMap[*channelID+":"+*commandName] = nil
-		return nil
+
+	} else {
+		compiledTemplate, templateError := mustache.ParseString(*templateBody)
+		if templateError != nil {
+			//	log.Println(templateError)
+			return templateError
+		}
+		template.templateMap[*channelID+":"+*commandName] = compiledTemplate
+
 	}
-	compiledTemplate, templateError := mustache.ParseString(*templateBody)
-	if templateError != nil {
-		//	log.Println(templateError)
-		return templateError
-	}
-	template.templateMap[*channelID+":"+*commandName] = compiledTemplate
 	PutChannelTemplate(user, userID, channelID, commandName, commandName, templateBody)
 	PushCommandsForChannel(channelID)
 	return nil
