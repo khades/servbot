@@ -16,13 +16,13 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	repos.GetUsersID(&repos.Config.Channels)
-	repos.Migrate()
+	//repos.Migrate()
 	wg.Add(1)
-	// go func() {
-	services.CheckTwitchDJTrack()
-	services.CheckStreamStatus()
-	// 	services.CheckDubTrack()
-	// }()
+	go func() {
+		services.CheckTwitchDJTrack()
+		services.CheckStreamStatus()
+		// 	services.CheckDubTrack()
+	}()
 
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
@@ -37,15 +37,15 @@ func main() {
 		}
 	}(&wg)
 
-	// thirtyTicker := time.NewTicker(time.Second * 30)
-	// go func(wg *sync.WaitGroup) {
-	// 	for {
-	// 		<-thirtyTicker.C
-	// 		wg.Add(1)
-	// 		services.CheckTwitchDJTrack()
-	// 		wg.Done()
-	// 	}
-	// }(&wg)
+	thirtyTicker := time.NewTicker(time.Second * 30)
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-thirtyTicker.C
+			wg.Add(1)
+			services.CheckTwitchDJTrack()
+			wg.Done()
+		}
+	}(&wg)
 
 	// go func(wg *sync.WaitGroup) {
 	// 	for {
