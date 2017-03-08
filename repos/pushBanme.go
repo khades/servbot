@@ -1,17 +1,17 @@
 package repos
 
-import (
-	"github.com/khades/servbot/models"
-	"gopkg.in/mgo.v2/bson"
-)
+// import (
+// 	"github.com/khades/servbot/models"
+// 	"gopkg.in/mgo.v2/bson"
+// )
 
-// PushBanme sets if banme command enabled
-func PushBanme(channel *string, banme *models.Banme) {
-	channelInfo, _ := GetChannelInfo(channel)
-	if channelInfo != nil {
-		channelInfo.Banme = *banme
-	} else {
-		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{Channel: *channel, Banme: *banme})
-	}
-	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: *channel}, bson.M{"$set": bson.M{"banme": *banme}})
-}
+// // PushBanme sets if banme command enabled
+// func PushBanme(channelID *string, banme *models.Banme) {
+// 	channelInfo, _ := GetChannelInfo(channelID)
+// 	if channelInfo != nil {
+// 		channelInfo.Banme = *banme
+// 	} else {
+// 		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{ChannelID: *channelID, Banme: *banme})
+// 	}
+// 	Db.C("channelInfo").Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"banme": *banme}})
+// }

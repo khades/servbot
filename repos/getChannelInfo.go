@@ -7,18 +7,18 @@ import (
 )
 
 // GetChannelInfo gets channel info
-func GetChannelInfo(channel *string) (*models.ChannelInfo, error) {
-	item, found := channelInfoRepositoryObject.dataArray[*channel]
+func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
+	item, found := channelInfoRepositoryObject.dataArray[*channelID]
 	if found {
 		return item, nil
 	}
 	var dbObject = &models.ChannelInfo{}
-	error := Db.C("channelInfo").Find(models.ChannelSelector{Channel: *channel}).One(dbObject)
+	error := Db.C(channelInfoCollection).Find(models.ChannelSelector{ChannelID: *channelID}).One(dbObject)
 	if error != nil {
 		log.Println("Error ", error)
 		return nil, error
 	}
-	log.Println(dbObject)
-	channelInfoRepositoryObject.dataArray[*channel] = dbObject
+	//log.Println(dbObject)
+	channelInfoRepositoryObject.dataArray[*channelID] = dbObject
 	return dbObject, error
 }

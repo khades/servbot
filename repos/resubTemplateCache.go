@@ -12,7 +12,11 @@ type resubTemplateContainer map[string]*mustache.Template
 // ResubTemplateCache is needed to cache mustache templates for resub message
 var ResubTemplateCache resubTemplateContainer = make(map[string]*mustache.Template)
 
-func (container resubTemplateContainer) Get(subAlert *models.SubAlertInfo) (*mustache.Template, error) {
+func (container resubTemplateContainer) put(channelID *string, template *mustache.Template) {
+	container[*channelID] = template
+}
+
+func (container resubTemplateContainer) Get(subAlert *models.SubAlert) (*mustache.Template, error) {
 	if subAlert.ResubMessage == "" {
 		return nil, errors.New("empty string")
 	}
@@ -20,10 +24,10 @@ func (container resubTemplateContainer) Get(subAlert *models.SubAlertInfo) (*mus
 	if error != nil {
 		return nil, error
 	}
-	container[subAlert.Channel] = template
+	container[subAlert.ChannelID] = template
 	return template, nil
 }
 
-func (container resubTemplateContainer) Drop(channel *string) {
-	container[*channel] = nil
+func (container resubTemplateContainer) Drop(channelID *string) {
+	container[*channelID] = nil
 }

@@ -2,26 +2,24 @@ package httpbackend
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
-
-	"goji.io/pat"
 )
 
-func templates(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
-	channel := pat.Param(r, "channel")
-	if channel == "" {
-		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
-		return
-	}
-	log.Println(channel)
-	templates, error := repos.GetChannelTemplates(&channel)
+
+type templatesResponse struct {
+	Templates []models.TemplateInfo `json:"templates"`
+	Channel   string                `json:"channel"`
+}
+
+func templates(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+
+	templates, error := repos.GetChannelTemplates(channelID)
 	if error != nil {
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*templates)
+	json.NewEncoder(w).Encode(templatesResponse{*templates, *channelName})
 }

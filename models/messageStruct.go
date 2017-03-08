@@ -3,9 +3,9 @@ package models
 import "time"
 
 type MessageStruct struct {
-	Date        time.Time
-	MessageBody string
-	BanLength   int
-	BanReason   string
-	SubCount    int
+	Date        time.Time `json:"date"`
+	Username    string    `json:"username"`
+	MessageBody string    `json:"messageBody"`
+	BanLength   int       `json:"banLength"`
+	BanReason   string    `json:"banReason"`
 }

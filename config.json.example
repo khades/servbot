@@ -9,4 +9,5 @@
     "ClientID": "changeme" // client key of registered app
     "clientSecret": "changeme" // client secret of registered app
     "appOauthURL": "chaneme" // oauth redirect path for webapp
+    "youtubeAPIKey" : "changeme" // Youtube Api v3 key
 }

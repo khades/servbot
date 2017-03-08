@@ -42,10 +42,8 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				User:    chatMessage.User})
 			return
 		}
-		templateError := repos.TemplateCache.UpdateTemplate(&chatMessage.Channel, &commandName, &template)
+		templateError := repos.TemplateCache.UpdateTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &template)
 		if templateError == nil {
-			repos.PutChannelTemplate(&chatMessage.User, &chatMessage.Channel, &commandName, &commandName, &template)
-			repos.PushCommandsForChannel(&chatMessage.Channel)
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				Body:    "Создание команды: Ну в принципе готово VoHiYo",

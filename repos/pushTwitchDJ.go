@@ -7,12 +7,12 @@ import (
 )
 
 // PushTwitchDJ updates stream twitchDJ status (is it playing or is there any songs)
-func PushTwitchDJ(channel *string, twitchDJ *models.TwitchDJ) {
-	channelInfo, _ := GetChannelInfo(channel)
+func PushTwitchDJ(channelID *string, twitchDJ *models.TwitchDJ) {
+	channelInfo, _ := GetChannelInfo(channelID)
 	if channelInfo != nil {
 		channelInfo.TwitchDJ = *twitchDJ
 	} else {
-		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{Channel: *channel, TwitchDJ: *twitchDJ})
+		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, TwitchDJ: *twitchDJ})
 	}
-	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: *channel}, bson.M{"$set": bson.M{"twitchdj": *twitchDJ}})
+	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"twitchdj": *twitchDJ}})
 }

@@ -13,22 +13,17 @@ func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.Chat
 	if chatMessage.IsMod {
 		commandName := ""
 		aliasTo := ""
-		template := ""
 		separator := strings.Index(chatCommand.Body, "=")
 		if separator != -1 {
 			commandName = chatCommand.Body[:separator]
 			aliasTo = strings.TrimSpace(chatCommand.Body[separator+1:])
-			result, error := repos.GetChannelTemplate(&chatMessage.Channel, &aliasTo)
-			if error == nil {
-				template = result.Template
-			}
+
 		} else {
 			commandName = chatCommand.Body
 			aliasTo = chatCommand.Body
 		}
-		repos.TemplateCache.SetAliasto(&chatMessage.Channel, &commandName, &aliasTo)
-		repos.PutChannelTemplate(&chatMessage.User, &chatMessage.Channel, &commandName, &aliasTo, &template)
-		repos.PushCommandsForChannel(&chatMessage.Channel)
+		repos.TemplateCache.SetAliasto(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &aliasTo)
+
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    "Создание алиaса: Ну в принципе готово VoHiYo",

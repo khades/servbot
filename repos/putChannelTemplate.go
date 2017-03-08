@@ -9,9 +9,10 @@ import (
 )
 
 // PutChannelTemplate puts template into database
-func PutChannelTemplate(user *string, channel *string, commandName *string, aliasTo *string, template *string) {
+func PutChannelTemplate(user *string, userID *string, channelID *string, commandName *string, aliasTo *string, template *string) {
 	var templateHistory = models.TemplateHistory{
 		User:     *user,
+		UserID:   *userID,
 		Date:     time.Now(),
 		AliasTo:  *aliasTo,
 		Template: *template}
@@ -23,14 +24,14 @@ func PutChannelTemplate(user *string, channel *string, commandName *string, alia
 			"history": bson.M{
 				"$each":  []models.TemplateHistory{templateHistory},
 				"$sort":  bson.M{"date": -1},
-				"$slice": 10}}}
+				"$slice": 5}}}
 
-	Db.C("templates").Upsert(
-		models.TemplateSelector{Channel: *channel, CommandName: *commandName},
+	Db.C(templateCollection).Upsert(
+		models.TemplateSelector{ChannelID: *channelID, CommandName: *commandName},
 		arrayUpdateQuery)
 	if *aliasTo == *commandName {
-		Db.C("templates").UpdateAll(
-			models.TemplateAliasSelector{Channel: *channel, AliasTo: *aliasTo},
+		Db.C(templateCollection).UpdateAll(
+			bson.M{"channelid": *channelID, "aliasto": *aliasTo, "commandname": bson.M{"$ne": *commandName}},
 			arrayUpdateQuery)
 	}
 }

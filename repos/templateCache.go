@@ -11,13 +11,13 @@ type templateContainer struct {
 	aliases     map[string]string
 }
 
-func (template templateContainer) Get(channel *string, inputCommandName *string) (*mustache.Template, bool) {
+func (template templateContainer) Get(channelID *string, inputCommandName *string) (*mustache.Template, bool) {
 	commandName := *inputCommandName
 	alias, exists := template.aliases[*inputCommandName]
 	if exists {
 		commandName = alias
 	}
-	key := *channel + ":" + commandName
+	key := *channelID + ":" + commandName
 	cachedCompiledTemplate, exists := template.templateMap[key]
 	if exists {
 		if cachedCompiledTemplate != nil {
@@ -25,7 +25,7 @@ func (template templateContainer) Get(channel *string, inputCommandName *string)
 		}
 		return nil, false
 	}
-	result, error := GetChannelTemplate(channel, &commandName)
+	result, error := GetChannelTemplate(channelID, &commandName)
 	if error != nil {
 		template.templateMap[key] = nil
 		return nil, false
@@ -47,9 +47,10 @@ func (template templateContainer) Get(channel *string, inputCommandName *string)
 	return dbTemplate, true
 }
 
-func (template templateContainer) UpdateTemplate(channel *string, commandName *string, templateBody *string) error {
+//&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &commandName, &template
+func (template templateContainer) UpdateTemplate(user *string, userID *string, channelID *string, commandName *string, templateBody *string) error {
 	if *templateBody == "" {
-		template.templateMap[*channel+":"+*commandName] = nil
+		template.templateMap[*channelID+":"+*commandName] = nil
 		return nil
 	}
 	compiledTemplate, templateError := mustache.ParseString(*templateBody)
@@ -57,12 +58,24 @@ func (template templateContainer) UpdateTemplate(channel *string, commandName *s
 		//	log.Println(templateError)
 		return templateError
 	}
-	template.templateMap[*channel+":"+*commandName] = compiledTemplate
+	template.templateMap[*channelID+":"+*commandName] = compiledTemplate
+	PutChannelTemplate(user, userID, channelID, commandName, commandName, templateBody)
+	PushCommandsForChannel(channelID)
 	return nil
 }
 
-func (template templateContainer) SetAliasto(channel *string, commandName *string, aliasTo *string) {
-	template.aliases[*channel+":"+*commandName] = *aliasTo
+func (template templateContainer) SetAliasto(user *string, userID *string, channelID *string, commandName *string, aliasTo *string) {
+	template.aliases[*channelID+":"+*commandName] = *aliasTo
+	aliasTemplate := ""
+
+	result, error := GetChannelTemplate(channelID, aliasTo)
+	if error == nil {
+		aliasTemplate = result.Template
+	}
+
+	PutChannelTemplate(user, userID, channelID, commandName, aliasTo, &aliasTemplate)
+	PushCommandsForChannel(channelID)
+
 }
 
 // TemplateCache is object, that updates and compiles templates which stored in memory, being backed up with database

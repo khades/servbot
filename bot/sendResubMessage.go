@@ -8,8 +8,8 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func sendResubMessage(channel *string, user *string, resubCount *int) {
-	subAlert, error := repos.GetSubAlert(channel)
+func sendResubMessage(channel *string, channelID *string, user *string, resubCount *int) {
+	subAlert, error := repos.GetSubAlert(channelID)
 	log.Println(*subAlert)
 	if error == nil && subAlert.Enabled == true && subAlert.ResubMessage != "" {
 		template, error := repos.ResubTemplateCache.Get(subAlert)

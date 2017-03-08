@@ -2,8 +2,8 @@ package repos
 
 import "github.com/khades/servbot/models"
 
-func GetChannelUsers(channel *string) (*[]models.ChannelUserSelector, error) {
-	var channelUsers []models.ChannelUserSelector
-	error := Db.C("messageLogs").Find(models.ChannelSelector{Channel: *channel}).All(&channelUsers)
+func GetChannelUsers(channelID *string) (*[]models.ChannelUsers, error) {
+	var channelUsers []models.ChannelUsers
+	error := Db.C("messageLogs").Find(models.ChannelSelector{ChannelID: *channelID}).All(&channelUsers)
 	return &channelUsers, error
 }

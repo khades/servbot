@@ -20,10 +20,11 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		case "room_mods":
 			{
 				commaIndex := strings.Index(message.Params[1], ":")
+				log.Println(message.String())
 				if commaIndex != -1 {
 					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
 					channel := message.Params[0][1:]
-					repos.PushMods(&channel, &mods)
+					modHandler(&channel, &mods)
 				}
 			}
 		case "resub":
@@ -54,41 +55,40 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				Date:      time.Now(),
 				BanLength: intBanDuration,
 				BanReason: banReason},
-			Channel: channel,
-			User:    user,
-		}
+			Channel:   channel,
+			ChannelID: message.Tags["room-id"].Encode(),
+			User:      user,
+			UserID:    message.Tags["user-id"].Encode()}
 		repos.LogMessage(&formedMessage)
 		//	log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
 	}
 	if message.Command == "PRIVMSG" {
+		log.Println(message.String())
+		log.Println(message.Tags["room-id"].Encode())
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
+				Username:    message.User,
 				MessageBody: message.Params[1],
 				Date:        time.Now()},
-			Channel: message.Params[0][1:],
-			User:    message.User,
+			Channel:   message.Params[0][1:],
+			ChannelID: message.Tags["room-id"].Encode(),
+			User:      message.User,
+			UserID:    message.Tags["user-id"].Encode(),
+
 			IsMod:   message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
 			IsSub:   message.Tags["subscriber"] == "1",
 			IsPrime: strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		repos.LogMessage(&formedMessage)
+		repos.DecrementAutoMessages(&formedMessage.ChannelID)
 		commandBody, isCommand := formedMessage.GetCommand()
 		if isCommand {
-			if message.User == "khadesru" && commandBody.Command == "debugSetSub" {
-				repos.SetSubAlert(&message.User, &models.SubAlertInfo{
-					Channel:      "khadesru",
-					Enabled:      true,
-					SubMessage:   "ha",
-					ResubMessage: "hoho {{ ResubCount }}  {{ RepeatedBody }}",
-					RepeatBody:   "etmBeer"})
-				log.Println("debug subalert is set")
-			}
 			if message.User == "khadesru" && commandBody.Command == "debugSub" {
-				sendSubMessage(&formedMessage.Channel, &formedMessage.User)
+				sendSubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User)
 				log.Println("debug subalert is triggered")
 			}
 			if message.User == "khadesru" && commandBody.Command == "debugResub" {
 				resubCount := 3
-				sendResubMessage(&formedMessage.Channel, &formedMessage.User, &resubCount)
+				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount)
 				log.Println("debug resubalert is triggered")
 			}
 			handlerFunction := commandHandlers.Router.Go(commandBody.Command)

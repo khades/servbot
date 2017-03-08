@@ -2,6 +2,7 @@ package commandHandlers
 
 import (
 	"log"
+	"strings"
 
 	"html"
 
@@ -12,9 +13,9 @@ import (
 
 // Custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	template, found := repos.TemplateCache.Get(&chatMessage.Channel, &chatCommand.Command)
+	template, found := repos.TemplateCache.Get(&chatMessage.ChannelID, &chatCommand.Command)
 	if found {
-		values, _ := repos.GetChannelInfo(&chatMessage.Channel)
+		values, _ := repos.GetChannelInfo(&chatMessage.ChannelID)
 		message, templateError := template.Render(values)
 		log.Println(templateError)
 		log.Println(message)
@@ -24,7 +25,12 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 		user := chatMessage.User
 		redirectTo := chatMessage.User
 		if chatCommand.Body != "" {
-			redirectTo = chatCommand.Body
+			if strings.HasPrefix(chatCommand.Body, "@") {
+				redirectTo = chatCommand.Body[1:]
+			} else {
+				redirectTo = chatCommand.Body
+
+			}
 		}
 		ircClient.SendDebounced(models.OutgoingDebouncedMessage{
 			Message: models.OutgoingMessage{

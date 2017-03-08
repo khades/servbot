@@ -63,6 +63,7 @@ func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
 
 // SendModsCommand runs mod command
 func (ircClient IrcClient) SendModsCommand() {
+	log.Println("Sending MODS")
 	if ircClient.Ready {
 		for _, value := range repos.Config.Channels {
 			ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: ".mods"})

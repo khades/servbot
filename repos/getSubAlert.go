@@ -3,8 +3,14 @@ package repos
 import "github.com/khades/servbot/models"
 
 // GetSubAlert ha
-func GetSubAlert(channel *string) (*models.SubAlertInfo, error) {
-	var result models.SubAlertInfo
-	error := Db.C("subAlert").Find(models.ChannelSelector{Channel: *channel}).One(&result)
+func GetSubAlert(channelID *string) (*models.SubAlert, error) {
+	var result models.SubAlert
+	error := Db.C(subAlertCollection).Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
+	return &result, error
+}
+
+func GetSubAlertWithHistory(channelID *string) (*models.SubAlertWithHistory, error) {
+	var result models.SubAlertWithHistory
+	error := Db.C(subAlertCollection).Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
 	return &result, error
 }

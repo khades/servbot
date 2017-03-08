@@ -15,16 +15,19 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	log.Println("Got first sub")
 	user := strings.Split(message.Params[1], " ")[0]
 	channel := message.Params[0][1:]
-	if user != "" && channel != "" && (strings.HasSuffix(message.String(), "subscribed!") || strings.HasSuffix(message.String(), "Twitch Prime!")) {
-		formedMessage := models.ChatMessage{
-			MessageStruct: models.MessageStruct{
-				Date:     time.Now(),
-				SubCount: 1},
-			Channel: channel,
-			IsPrime: strings.Contains(message.String(), "Twitch Prime"),
-			User:    user}
-		repos.LogMessage(&formedMessage)
-		sendSubMessage(&channel, &user)
-		log.Printf("Channel %v: %v subbed\n", formedMessage.Channel, formedMessage.User)
+	values, error := repos.GetUsersID(&[]string{channel, user})
+	channelID := (*values)[channel]
+	userID := (*values)[user]
+	if error == nil && user != "" && userID != "" && channel != "" && channelID != "" && (strings.HasSuffix(message.String(), "subscribed!") || strings.HasSuffix(message.String(), "Twitch Prime!")) {
+		loggedSubscription := models.SubscriptionInfo{
+			User:      user,
+			UserID:    userID,
+			ChannelID: channelID,
+			Count:     1,
+			IsPrime:   strings.Contains(message.String(), "Twitch Prime"),
+			Date:      time.Now()}
+		repos.LogSubscription(&loggedSubscription)
+		sendSubMessage(&channel, &channelID, &user)
+		log.Printf("Channel %v: %v subbed\n", channel, user)
 	}
 }

@@ -6,6 +6,7 @@ import (
 
 	"goji.io/pat"
 
+	"github.com/khades/servbot/httpclient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -21,7 +22,7 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 		if found == false {
 			log.Println("Sub cache is not set for user " + channel + " for channel " + session.Username)
 			url := "https://api.twitch.tv/kraken/users/" + session.Username + "/subscriptions/" + channel + "?oauth_token=" + session.Key
-			resp, respError := http.Get(url)
+			resp, respError := httpclient.Get(url)
 			if respError == nil && (resp.StatusCode == 200 || resp.StatusCode == 204) {
 				isSub = true
 			}

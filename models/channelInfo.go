@@ -10,7 +10,7 @@ import (
 
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
-	Channel      string
+	ChannelID    string
 	StreamStatus StreamStatus
 	Banme        Banme
 	TwitchDJ     TwitchDJ

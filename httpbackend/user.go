@@ -8,9 +8,10 @@ import (
 )
 
 type userResponse struct {
-	Username string
+	Username  string `json:"username"`
+	AvatarURL string `json:"avatarUrl"`
 }
 
 func user(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
-	json.NewEncoder(w).Encode(userResponse{s.Username})
+	json.NewEncoder(w).Encode(userResponse{s.Username, s.AvatarURL})
 }

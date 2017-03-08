@@ -2,5 +2,5 @@ package models
 
 type TemplateInfoWithHistory struct {
 	TemplateInfo `bson:",inline"`
-	History      []TemplateHistory
+	History      []TemplateHistory `json:"history"`
 }

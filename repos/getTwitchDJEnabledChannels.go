@@ -1,14 +1,12 @@
 package repos
 
-import "github.com/khades/servbot/models"
+import (
+	"github.com/khades/servbot/models"
+	"gopkg.in/mgo.v2/bson"
+)
 
-func GetTwitchDJEnabledChannels() []*models.ChannelInfo {
-	result := []*models.ChannelInfo{}
-	for _, value := range Config.Channels {
-		value, error := GetChannelInfo(&value)
-		if error == nil && value.TwitchDJ.ID != "" {
-			result = append(result, value)
-		}
-	}
-	return result
+func GetTwitchDJEnabledChannels() (*[]models.ChannelInfo, error) {
+	result := []models.ChannelInfo{}
+	error := Db.C(channelInfoCollection).Find(bson.M{"twitchdj.id": bson.M{"$exists": true, "$ne": ""}}).All(&result)
+	return &result, error
 }

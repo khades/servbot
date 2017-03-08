@@ -7,12 +7,12 @@ import (
 )
 
 // PushDubTrack updates stream DubTrack status (is it playing or is there any songs)
-func PushDubTrack(channel *string, dubTrack *models.DubTrack) {
-	channelInfo, _ := GetChannelInfo(channel)
+func PushDubTrack(channelID *string, dubTrack *models.DubTrack) {
+	channelInfo, _ := GetChannelInfo(channelID)
 	if channelInfo != nil {
 		channelInfo.DubTrack = *dubTrack
 	} else {
-		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{Channel: *channel, DubTrack: *dubTrack})
+		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, DubTrack: *dubTrack})
 	}
-	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: *channel}, bson.M{"$set": bson.M{"dubtrack": *dubTrack}})
+	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"dubtrack": *dubTrack}})
 }

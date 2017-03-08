@@ -7,13 +7,13 @@ import (
 )
 
 type SongRequest struct {
-	ID               bson.ObjectId `bson:"_id,omitempty"`
-	User             string
-	Channel          string
-	inQueue          bool
-	Paused           bool
-	PlayingNow       bool
-	VideoID          string
-	Length           time.Duration
-	EstimatedEndTime time.Time
+	ID      bson.ObjectId `bson:"_id,omitempty"`
+	User    string
+	Channel string
+	Date    time.Time
+	// inQueue    bool
+	// PlayingNow bool
+	VideoID string
+	// Length           time.Duration
+	// EstimatedEndTime time.Time
 }

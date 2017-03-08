@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/khades/servbot/httpclient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -21,6 +22,8 @@ type tokenResponse struct {
 }
 type nameResponse struct {
 	Name string
+	ID   string `json:"_id"`
+	Logo string `json:"logo"`
 }
 
 func oauth(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +69,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	url := "https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID + "&oauth_token=" + tokenStruct.Token
-	nameResp, err := http.Get(url)
+	nameResp, err := httpclient.Get(url)
 	if err != nil {
 		log.Println(err)
 		writeJSONError(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
@@ -95,7 +98,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := repos.GetSession(r)
 	session.Options.Path = "/"
-	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token}
+	session.Values["sessions"] = models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
 	session.Save(r, w)
 	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()

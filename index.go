@@ -9,15 +9,20 @@ import (
 	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/httpbackend"
 	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/repos"
 	"github.com/khades/servbot/services"
 )
 
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(2)
+	repos.GetUsersID(&repos.Config.Channels)
+	repos.Migrate()
+	wg.Add(1)
+	// go func() {
 	services.CheckTwitchDJTrack()
 	services.CheckStreamStatus()
-	services.CheckDubTrack()
+	// 	services.CheckDubTrack()
+	// }()
 
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
@@ -32,24 +37,24 @@ func main() {
 		}
 	}(&wg)
 
-	thirtyTicker := time.NewTicker(time.Second * 30)
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-thirtyTicker.C
-			wg.Add(1)
-			services.CheckTwitchDJTrack()
-			wg.Done()
-		}
-	}(&wg)
+	// thirtyTicker := time.NewTicker(time.Second * 30)
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-thirtyTicker.C
+	// 		wg.Add(1)
+	// 		services.CheckTwitchDJTrack()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-thirtyTicker.C
-			wg.Add(1)
-			services.CheckDubTrack()
-			wg.Done()
-		}
-	}(&wg)
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-thirtyTicker.C
+	// 		wg.Add(1)
+	// 		services.CheckDubTrack()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
 
 	minuteTicker := time.NewTicker(time.Minute)
 
@@ -58,6 +63,15 @@ func main() {
 			<-minuteTicker.C
 			wg.Add(1)
 			services.CheckStreamStatus()
+			wg.Done()
+		}
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-ticker.C
+			wg.Add(1)
+			services.SendAutoMessages()
 			wg.Done()
 		}
 	}(&wg)

@@ -6,7 +6,9 @@ import "strings"
 type ChatMessage struct {
 	MessageStruct `bson:",inline"`
 	Channel       string
+	ChannelID     string
 	User          string
+	UserID        string
 	IsMod         bool
 	IsSub         bool
 	IsPrime       bool

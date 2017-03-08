@@ -6,10 +6,10 @@ import (
 )
 
 // PushCommandsForChannel updates list of commands based on info from DB
-func PushCommandsForChannel(channel *string) {
+func PushCommandsForChannel(channelID *string) {
 	var commandsList []string
-	channelInfo, channelError := GetChannelInfo(channel)
-	dbCommands, commandsError := GetChannelActiveTemplates(channel)
+	channelInfo, channelError := GetChannelInfo(channelID)
+	dbCommands, commandsError := GetChannelActiveTemplates(channelID)
 	if commandsError == nil {
 		for _, value := range *dbCommands {
 			commandsList = append(commandsList, value.CommandName)
@@ -18,7 +18,7 @@ func PushCommandsForChannel(channel *string) {
 	if channelError == nil {
 		channelInfo.Commands = commandsList
 	} else {
-		channelInfoRepositoryObject.forceCreateObject(*channel, &models.ChannelInfo{Channel: *channel, Commands: commandsList})
+		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, Commands: commandsList})
 	}
-	Db.C("channelInfo").Upsert(models.ChannelSelector{Channel: *channel}, bson.M{"$set": bson.M{"commands": commandsList}})
+	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"commands": commandsList}})
 }
