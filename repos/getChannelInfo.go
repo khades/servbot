@@ -27,6 +27,9 @@ func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
 
 func GetModChannels(userID *string) (*[]models.ChannelWithID, error) {
 	var result []models.ChannelWithID
-	error := Db.C(channelInfoCollection).Find(bson.M{"mods": *userID}).All(&result)
+	error := Db.C(channelInfoCollection).Find(
+		bson.M{"$or": []bson.M{
+			bson.M{"mods": *userID},
+			bson.M{"channelid": *userID}}}).All(&result)
 	return &result, error
 }
