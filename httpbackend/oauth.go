@@ -21,7 +21,7 @@ type tokenResponse struct {
 	Token string `json:"access_token"`
 }
 type nameResponse struct {
-	Name string
+	Name string `json:"name"`
 	ID   string `json:"_id"`
 	Logo string `json:"logo"`
 }
@@ -68,7 +68,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, "Twitch Error, Can't marshall oauth token", http.StatusUnprocessableEntity)
 		return
 	}
-	url := "https://api.twitch.tv/kraken/user?client_id=" + repos.Config.ClientID
+	url := "https://api.twitch.tv/kraken/users/" + repos.Config.ClientID
 	nameResp, err := httpclient.TwitchV5(repos.Config.ClientID, "GET", url, nil)
 	if err != nil {
 		log.Println(err)
@@ -98,7 +98,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := repos.GetSession(r)
 	session.Options.Path = "/"
-	sessionObject := models.HTTPSession{Username: usernameStruct.Name, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
+	sessionObject := models.HTTPSession{Username: usernameStruct.Name, UserID: usernameStruct.ID, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
 	session.Values["sessions"] = sessionObject
 	log.Println(sessionObject)
 	session.Save(r, w)
