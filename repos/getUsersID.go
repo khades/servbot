@@ -91,7 +91,7 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 			for _, user := range usersWithID.Users {
 				result[user.DisplayName] = user.ID
 				userIDCacheObject.Set("username-"+strings.ToLower(user.Name), user.ID, 0)
-				userIDCacheObject.Set("id-"+user.ID, strings.ToLower(user.Name), 0)
+				userIDCacheObject.Set("id-"+user.ID, strings.ToLower(user.Name), 600*time.Minute)
 			}
 			if len(usersWithID.Users) == 0 {
 				log.Println(len(notFoundUsers[sliceStart : index+1]))

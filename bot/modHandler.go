@@ -9,7 +9,7 @@ func modHandler(channel *string, mods *[]string) {
 	}
 	values, error := repos.GetUsersID(&[]string{*channel})
 	channelID := (*values)[*channel]
-	if error != nil {
+	if error != nil || channelID == "" {
 		return
 	}
 	userIDs := []string{}
