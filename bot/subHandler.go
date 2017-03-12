@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/belak/irc"
+	"github.com/khades/servbot/channels"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -26,6 +27,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 			Count:     1,
 			IsPrime:   strings.Contains(message.String(), "Twitch Prime"),
 			Date:      time.Now()}
+		channels.SubscriptionChannel <- loggedSubscription
 		repos.LogSubscription(&loggedSubscription)
 		sendSubMessage(&channel, &channelID, &user)
 		log.Printf("Channel %v: %v subbed\n", channel, user)

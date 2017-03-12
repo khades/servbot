@@ -6,10 +6,10 @@ import (
 
 // SubscriptionInfo shows how many times user is subscribed to a channel
 type SubscriptionInfo struct {
-	Count     int
-	IsPrime   bool
-	User      string
-	UserID    string
-	ChannelID string
-	Date      time.Time
+	Count     int       `json:"count"`
+	IsPrime   bool      `json:"isPrime"`
+	User      string    `json:"user"`
+	UserID    string    `json:"userID"`
+	ChannelID string    `json:"channelID"`
+	Date      time.Time `json:"date"`
 }

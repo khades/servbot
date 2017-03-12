@@ -20,7 +20,8 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs"), withMod(logsUsers))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/username/:user"), withMod(logsByUsername))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/userid/:userID"), withMod(logsByUserID))
-
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subs"), withMod(subscriptions))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subs/events"), withMod(subscriptionEvents))
 	mux.HandleFunc(pat.Get("/api/user"), withAuth(user))
 	mux.HandleFunc(pat.Get("/api/user/index"), withAuth(userIndex))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), withMod(templates))
@@ -54,5 +55,7 @@ func Start() {
 	// })))
 	mux.HandleFunc(pat.Get("/oauth"), oauth)
 	mux.HandleFunc(pat.Get("/oauth/initiate"), withSession(oauthInitiate))
+
+	mux.HandleFunc(pat.Get("/api/time"), corsEnabled(getTime))
 	http.ListenAndServe("localhost:8000", mux)
 }

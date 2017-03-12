@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/belak/irc"
+	"github.com/khades/servbot/channels"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -31,6 +32,7 @@ func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 				Date:      time.Now()}
 
 			repos.LogSubscription(&loggedSubscription)
+			channels.SubscriptionChannel <- loggedSubscription
 			sendResubMessage(&channel, &channelID, &user, &resubCount)
 			log.Printf("Channel %v: %v resubbed for %v months\n", channel, user, resubCount)
 		}
