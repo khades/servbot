@@ -23,7 +23,7 @@ func GetSubsForChannelWithLimit(channelID *string, limit time.Time) (*[]models.S
 
 func GetSubsForChannel(channelID *string) (*[]models.SubscriptionInfo, error) {
 	var result []models.SubscriptionInfo
-	day := -24 * time.Hour
+	day := -24 * 3 * time.Hour
 	localLimit := time.Now().Add(day)
 	error := Db.C(subscriptionInfoCollection).Find(bson.M{
 		"channelid": *channelID,
