@@ -23,6 +23,6 @@ func GetSubsForChannel(channelID *string, limit time.Time) (*[]models.Subscripti
 	// } else {
 	// 	localLimit = limit
 	// }
-	error := Db.C(subscriptionInfoCollection).Find(bson.M{"channelid": *channelID}).All(&result)
+	error := Db.C(subscriptionInfoCollection).Find(bson.M{"channelid": *channelID}).Sort("-date").All(&result)
 	return &result, error
 }
