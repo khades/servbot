@@ -15,4 +15,6 @@ func (router RouterStruct) Go(command string) CommandHandler {
 }
 
 // Router explicitly maps input chat command to a handler
-var Router = RouterStruct{routes: map[string]CommandHandler{}}
+var Router = RouterStruct{routes: map[string]CommandHandler{
+	"new":   New,
+	"alias": Alias}}
