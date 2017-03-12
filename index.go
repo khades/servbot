@@ -33,6 +33,7 @@ func main() {
 			<-ticker.C
 			wg.Add(1)
 			bot.IrcClientInstance.SendModsCommand()
+			services.SendAutoMessages()
 			wg.Done()
 		}
 	}(&wg)
@@ -55,7 +56,15 @@ func main() {
 	// 		wg.Done()
 	// 	}
 	// }(&wg)
+	// tenticker := time.NewTicker(time.Second * 3)
 
+	// go func() {
+	// 	for {
+	// 		<-tenticker.C
+	// 		channelID := "40635840"
+	// 		eventbus.EventBus.Trigger(eventbus.EventSub(&channelID))
+	// 	}
+	// }()
 	minuteTicker := time.NewTicker(time.Minute)
 
 	go func(wg *sync.WaitGroup) {
@@ -63,15 +72,6 @@ func main() {
 			<-minuteTicker.C
 			wg.Add(1)
 			services.CheckStreamStatus()
-			wg.Done()
-		}
-	}(&wg)
-
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-ticker.C
-			wg.Add(1)
-			services.SendAutoMessages()
 			wg.Done()
 		}
 	}(&wg)

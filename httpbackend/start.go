@@ -57,5 +57,6 @@ func Start() {
 	mux.HandleFunc(pat.Get("/oauth/initiate"), withSession(oauthInitiate))
 
 	mux.HandleFunc(pat.Get("/api/time"), corsEnabled(getTime))
+	mux.HandleFunc(pat.Get("/api/timeticker"), corsEnabled(timeTicker))
 	http.ListenAndServe("localhost:8000", mux)
 }
