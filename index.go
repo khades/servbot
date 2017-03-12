@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/khades/servbot/bot"
+	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/httpbackend"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -56,15 +57,14 @@ func main() {
 	// 		wg.Done()
 	// 	}
 	// }(&wg)
-	// tenticker := time.NewTicker(time.Second * 3)
+	twentyticker := time.NewTicker(time.Second * 20)
 
-	// go func() {
-	// 	for {
-	// 		<-tenticker.C
-	// 		channelID := "40635840"
-	// 		eventbus.EventBus.Trigger(eventbus.EventSub(&channelID))
-	// 	}
-	// }()
+	go func() {
+		for {
+			<-twentyticker.C
+			eventbus.EventBus.Trigger("ping")
+		}
+	}()
 	minuteTicker := time.NewTicker(time.Minute)
 
 	go func(wg *sync.WaitGroup) {

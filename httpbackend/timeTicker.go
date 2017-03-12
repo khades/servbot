@@ -1,7 +1,6 @@
 package httpbackend
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -13,7 +12,6 @@ func timeTicker(w http.ResponseWriter, r *http.Request) {
 	conn, _ := sse.Upgrade(w, r)
 	for {
 		tick := <-ticker.C
-		log.Println("sendingTime")
 		conn.WriteJson(tick)
 	}
 

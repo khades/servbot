@@ -56,7 +56,6 @@ func (ircClient IrcClient) SendPublic(message *models.OutgoingMessage) {
 // SendPrivate writes data in private to a user
 func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
-		log.Println(message.Channel)
 		ircClient.Client.Write(fmt.Sprintf("PRIVMSG #jtv :/w %s Channel %s: %s", message.User, message.Channel, message.Body))
 	}
 }

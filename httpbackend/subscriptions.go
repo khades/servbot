@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
+
+	"goji.io/pat"
 
 	"github.com/JanBerktold/sse"
 	"github.com/khades/servbot/eventbus"
@@ -24,28 +27,47 @@ type subscriptionEvent struct {
 
 func subscriptions(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	var response = subscriptionsResponse{Channel: *channelName}
-	result, error := repos.GetSubsForChannel(channelID, time.Now())
+	result, error := repos.GetSubsForChannel(channelID)
 	if error == nil {
 		response.Subscriptions = *result
 	}
-	log.Println(error)
 	json.NewEncoder(w).Encode(response)
 }
 
+func subscriptionsWithLimit(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	dateLimit := pat.Param(r, "limit")
+	if dateLimit == "" {
+		writeJSONError(w, "limit is not defined", http.StatusUnprocessableEntity)
+		return
+	}
+	unixTime, error := strconv.ParseInt(dateLimit, 10, 64)
+	if error != nil {
+		writeJSONError(w, error.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+	log.Println(unixTime)
+	date := time.Unix(0, unixTime*int64(time.Millisecond))
+	log.Println(date)
+	var response = subscriptionsResponse{Channel: *channelName}
+	result, error := repos.GetSubsForChannelWithLimit(channelID, date)
+	if error == nil {
+		response.Subscriptions = *result
+	}
+	json.NewEncoder(w).Encode(response)
+}
 func subscriptionEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
 	conn, _ := sse.Upgrade(w, r)
-	log.Println(eventbus.EventSub(channelID))
 	channel := make(chan string)
-	write := func() {
-		channel <- "hey"
+	write := func(value string) {
+		channel <- value
 	}
-	eventbus.EventBus.On(eventbus.EventSub(channelID), write)
+	eventbus.EventBus.On("ping "+eventbus.EventSub(channelID), write)
 	for conn.IsOpen() {
 		msg := <-channel
 		conn.WriteString(msg)
 	}
-	defer eventbus.EventBus.Off(eventbus.EventSub(channelID), write)
+	defer eventbus.EventBus.Off("ping "+eventbus.EventSub(channelID), write)
 	defer log.Println("Disconnecting Subscription SSE")
 
 }

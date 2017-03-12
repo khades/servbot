@@ -13,16 +13,20 @@ var subscriptionInfoCollection string = "subsciptionInfo"
 func LogSubscription(info *models.SubscriptionInfo) {
 	Db.C(subscriptionInfoCollection).Insert(*info)
 }
-
-func GetSubsForChannel(channelID *string, limit time.Time) (*[]models.SubscriptionInfo, error) {
+func GetSubsForChannelWithLimit(channelID *string, limit time.Time) (*[]models.SubscriptionInfo, error) {
 	var result []models.SubscriptionInfo
-	// var localLimit time.Time
-	// if limit.IsZero() {
-	// 	day := -24 * time.Hour
-	// 	localLimit = time.Now().Add(day)
-	// } else {
-	// 	localLimit = limit
-	// }
-	error := Db.C(subscriptionInfoCollection).Find(bson.M{"channelid": *channelID}).Sort("-date").All(&result)
+	error := Db.C(subscriptionInfoCollection).Find(bson.M{
+		"channelid": *channelID,
+		"date":      bson.M{"$gte": limit}}).Sort("-date").All(&result)
+	return &result, error
+}
+
+func GetSubsForChannel(channelID *string) (*[]models.SubscriptionInfo, error) {
+	var result []models.SubscriptionInfo
+	day := -24 * time.Hour
+	localLimit := time.Now().Add(day)
+	error := Db.C(subscriptionInfoCollection).Find(bson.M{
+		"channelid": *channelID,
+		"date":      bson.M{"$gte": localLimit}}).Sort("-date").All(&result)
 	return &result, error
 }

@@ -1,7 +1,6 @@
 package httpbackend
 
 import (
-	"log"
 	"net/http"
 
 	"goji.io/pat"
@@ -20,7 +19,6 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 		}
 		isSub, found := repos.GetIfSubToChannel(&session.Username, &channel)
 		if found == false {
-			log.Println("Sub cache is not set for user " + channel + " for channel " + session.Username)
 			url := "https://api.twitch.tv/kraken/users/" + session.Username + "/subscriptions/" + channel + "?oauth_token=" + session.Key
 			resp, respError := httpclient.Get(url)
 			if respError == nil && (resp.StatusCode == 200 || resp.StatusCode == 204) {

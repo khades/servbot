@@ -54,8 +54,7 @@ func GetUsernameByID(userID *string) (*string, error) {
 func GetUsersID(users *[]string) (*map[string]string, error) {
 	notFoundUsers := []string{}
 	result := make(map[string]string)
-	log.Println(*users)
-	log.Printf("Users: %d", len(*users))
+	//log.Printf("Users: %d", len(*users))
 	for _, user := range *users {
 		value, found := userIDCacheObject.Get("username-" + user)
 		if found {
@@ -68,14 +67,14 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 		}
 	}
 	if len(notFoundUsers) == 0 {
-		log.Printf("Found users: %d", len(result))
+		//log.Printf("Found users: %d", len(result))
 		return &result, nil
 	}
 	sliceStart := 0
 	log.Println(notFoundUsers)
 	for index, _ := range notFoundUsers {
 		if index == len(notFoundUsers)-1 || index-sliceStart > 48 {
-			log.Printf("%d - %d", sliceStart, index)
+			//log.Printf("%d - %d", sliceStart, index)
 			usersString := "https://api.twitch.tv/kraken/users?login=" + strings.Join(notFoundUsers[sliceStart:index+1], ",")
 			resp, error := httpclient.TwitchV5(Config.ClientID, "GET", usersString, nil)
 			if error != nil {
@@ -87,7 +86,7 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 			if marshallError != nil {
 				return nil, marshallError
 			}
-			log.Printf("That request returned %d users", len(usersWithID.Users))
+			//log.Printf("That request returned %d users", len(usersWithID.Users))
 			for _, user := range usersWithID.Users {
 				result[user.DisplayName] = user.ID
 				userIDCacheObject.Set("username-"+strings.ToLower(user.Name), user.ID, 0)
@@ -111,6 +110,6 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 	// 		}
 	// 	}
 	// }
-	log.Printf("Found users: %d", len(result))
+	//log.Printf("Found users: %d", len(result))
 	return &result, nil
 }

@@ -20,7 +20,6 @@ func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
 		log.Println("Error ", error)
 		return nil, error
 	}
-	//log.Println(dbObject)
 	channelInfoRepositoryObject.dataArray[*channelID] = dbObject
 	return dbObject, error
 }

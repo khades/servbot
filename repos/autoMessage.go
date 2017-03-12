@@ -15,14 +15,14 @@ func DecrementAutoMessages(channelID *string) {
 }
 
 func GetCurrentAutoMessages() (*[]models.AutoMessage, error) {
-	log.Println("AutoMessage: Getting Current AutoMessages")
+	//log.Println("AutoMessage: Getting Current AutoMessages")
 	var result []models.AutoMessage
 	error := Db.C(autoMessageCollectionName).Find(bson.M{
 		"message":           bson.M{"$ne": ""},
 		"messagethreshold":  bson.M{"$lte": 0},
 		"durationthreshold": bson.M{"$lte": time.Now()}}).All(&result)
 	log.Printf("AutoMessage: Got %d AutoMessages", len(result))
-	log.Println(error)
+	//log.Println(error)
 	return &result, error
 }
 

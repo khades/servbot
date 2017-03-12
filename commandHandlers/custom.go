@@ -1,7 +1,6 @@
 package commandHandlers
 
 import (
-	"log"
 	"strings"
 
 	"html"
@@ -17,8 +16,6 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	if found {
 		values, _ := repos.GetChannelInfo(&chatMessage.ChannelID)
 		message, templateError := template.Render(values)
-		log.Println(templateError)
-		log.Println(message)
 		if templateError != nil {
 			message = "Ошибка в шаблоне команды, обратитесь к модератору etmSad"
 		}

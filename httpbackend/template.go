@@ -2,7 +2,6 @@ package httpbackend
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/khades/servbot/models"
@@ -28,7 +27,7 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
-	log.Println(channel)
+
 	result, _ := repos.GetChannelTemplateWithHistory(channelID, &commandName)
 	result.ChannelID = *channelID
 	result.CommandName = commandName

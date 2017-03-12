@@ -13,7 +13,6 @@ import (
 )
 
 func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
-	log.Println("Got first sub")
 	user := strings.Split(message.Params[1], " ")[0]
 	channel := message.Params[0][1:]
 	values, error := repos.GetUsersID(&[]string{channel, user})
