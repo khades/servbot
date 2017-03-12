@@ -14,6 +14,7 @@ import (
 )
 
 func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
+	log.Println(message.String())
 	msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
 	user, userFound := message.Tags.GetTag("display-name")
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
