@@ -15,6 +15,9 @@ import (
 
 func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	log.Println(message.String())
+
+	systemMsg, systemMsgFound := message.Tags.GetTag("system-msg")
+	prime := systemMsgFound && strings.Contains(systemMsg, `just\ssubscribed\swith\sTwitch\sPrime`)
 	msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
 	user, userFound := message.Tags.GetTag("display-name")
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
@@ -29,7 +32,7 @@ func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 				UserID:    userID,
 				ChannelID: channelID,
 				Count:     resubCount,
-				IsPrime:   strings.Contains(message.String(), "Twitch Prime"),
+				IsPrime:   prime,
 				Date:      time.Now()}
 
 			repos.LogSubscription(&loggedSubscription)
