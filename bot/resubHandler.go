@@ -17,7 +17,7 @@ func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	log.Println(message.String())
 
 	systemMsg, systemMsgFound := message.Tags.GetTag("system-msg")
-	prime := systemMsgFound && strings.Contains(systemMsg, `just\ssubscribed\swith\sTwitch\sPrime`)
+	prime := systemMsgFound && strings.Contains(systemMsg, `Prime`) && strings.Contains(systemMsg, `Twitch`)
 	msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
 	user, userFound := message.Tags.GetTag("display-name")
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
