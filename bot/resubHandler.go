@@ -20,6 +20,9 @@ func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	prime := systemMsgFound && strings.Contains(systemMsg, `Prime`) && strings.Contains(systemMsg, `Twitch`)
 	msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
 	user, userFound := message.Tags.GetTag("display-name")
+	if userFound == false || user == "" {
+		user, userFound = message.Tags.GetTag("login")
+	}
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
 	userID, userIDFound := message.Tags.GetTag("user-id")
 
