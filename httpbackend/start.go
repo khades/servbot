@@ -11,7 +11,7 @@ import (
 	"goji.io/pat"
 )
 
-var sessionStore = mongostore.NewMongoStore(repos.Db.C("sessions"), 86400*7, true, []byte("something-very-secret"))
+var sessionStore = mongostore.NewMongoStore(repos.Db.C("sessions"), 3600*24, true, []byte("something-very-secret"))
 
 // Start We are starting server here
 func Start() {
