@@ -17,7 +17,8 @@ func mod(next sessionAndChannelHandlerFunc) sessionAndChannelHandlerFunc {
 			writeJSONError(w, "That channel is not defined", http.StatusForbidden)
 			return
 		}
-
+		log.Println("FIXING GETTING SESSION")
+		log.Println(*session)
 		if channelInfo.GetIfUserIsMod(&session.UserID) == true {
 			next(w, r, session, channelID, channelName)
 		} else {
