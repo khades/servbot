@@ -29,5 +29,5 @@ func mod(next sessionAndChannelHandlerFunc) sessionAndChannelHandlerFunc {
 }
 
 func withMod(next sessionAndChannelHandlerFunc) http.HandlerFunc {
-	return withSessionAndChannel(auth(mod(next)))
+	return withSessionAndChannel(mod(next))
 }

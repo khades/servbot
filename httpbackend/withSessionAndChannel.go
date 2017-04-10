@@ -31,5 +31,5 @@ func sessionAndChannel(next sessionAndChannelHandlerFunc) sessionHandlerFunc {
 }
 
 func withSessionAndChannel(next sessionAndChannelHandlerFunc) http.HandlerFunc {
-	return corsEnabled(session(sessionAndChannel(next)))
+	return corsEnabled(session(auth(sessionAndChannel(next))))
 }
