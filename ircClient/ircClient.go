@@ -65,7 +65,7 @@ func (ircClient IrcClient) SendModsCommand() {
 	log.Println("Sending MODS")
 	if ircClient.Ready {
 		for _, value := range repos.Config.Channels {
-			ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: ".mods"})
+			ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: "/mods"})
 		}
 	}
 }
