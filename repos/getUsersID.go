@@ -54,7 +54,8 @@ func GetUsernameByID(userID *string) (*string, error) {
 func GetUsersID(users *[]string) (*map[string]string, error) {
 	notFoundUsers := []string{}
 	result := make(map[string]string)
-	//log.Printf("Users: %d", len(*users))
+	log.Printf("Users: %d", len(*users))
+	log.Println(*users)
 	for _, user := range *users {
 		value, found := userIDCacheObject.Get("username-" + user)
 		if found {
