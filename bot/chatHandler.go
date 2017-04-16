@@ -62,7 +62,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		//	log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
 	}
 	if message.Command == "PRIVMSG" {
-		log.Println(message.String())
+		//log.Println(message.String())
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
 				Username:    message.User,
