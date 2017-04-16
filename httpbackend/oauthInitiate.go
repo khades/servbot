@@ -20,7 +20,7 @@ func oauthInitiate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession
 			"&scope=user_subscriptions+user_read", http.StatusFound)
 		return
 	}
-	log.Println("Session is fine")
+	//log.Println("Session is fine")
 	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	return
 

@@ -1,15 +1,16 @@
 package bot
 
-import (
-	"log"
-
-	"github.com/khades/servbot/repos"
-)
+import "github.com/khades/servbot/repos"
 
 func modHandler(channel *string, mods *[]string) {
-	log.Println("We got mods")
-	log.Println(*mods)
-	users, error := repos.GetUsersID(mods)
+	filteredMods := []string{}
+	for _, mod := range *mods {
+		if mod != "" {
+			filteredMods = append(filteredMods, mod)
+		}
+
+	}
+	users, error := repos.GetUsersID(&filteredMods)
 	if error != nil {
 		return
 	}
@@ -18,6 +19,7 @@ func modHandler(channel *string, mods *[]string) {
 	if error != nil || channelID == "" {
 		return
 	}
+
 	userIDs := []string{}
 	for _, id := range *users {
 		userIDs = append(userIDs, id)

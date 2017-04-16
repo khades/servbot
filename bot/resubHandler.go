@@ -14,7 +14,7 @@ import (
 )
 
 func resubHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
-	log.Println(message.String())
+	//log.Println(message.String())
 
 	systemMsg, systemMsgFound := message.Tags.GetTag("system-msg")
 	prime := systemMsgFound && strings.Contains(systemMsg, `Prime`) && strings.Contains(systemMsg, `Twitch`)

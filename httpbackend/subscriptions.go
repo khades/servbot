@@ -45,9 +45,9 @@ func subscriptionsWithLimit(w http.ResponseWriter, r *http.Request, s *models.HT
 		writeJSONError(w, error.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	log.Println(unixTime)
+	//log.Println(unixTime)
 	date := time.Unix(0, unixTime*int64(time.Millisecond))
-	log.Println(date)
+	//log.Println(date)
 	var response = subscriptionsResponse{Channel: *channelName}
 	result, error := repos.GetSubsForChannelWithLimit(channelID, date)
 	if error == nil {

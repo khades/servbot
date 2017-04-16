@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"log"
 	"strings"
 
 	"github.com/khades/servbot/models"
@@ -10,7 +9,7 @@ import (
 
 func sendResubMessage(channel *string, channelID *string, user *string, resubCount *int) {
 	subAlert, error := repos.GetSubAlert(channelID)
-	log.Println(*subAlert)
+	//log.Println(*subAlert)
 	if error == nil && subAlert.Enabled == true && subAlert.ResubMessage != "" {
 		template, error := repos.ResubTemplateCache.Get(subAlert)
 		if error == nil {

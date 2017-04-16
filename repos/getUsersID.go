@@ -54,8 +54,8 @@ func GetUsernameByID(userID *string) (*string, error) {
 func GetUsersID(users *[]string) (*map[string]string, error) {
 	notFoundUsers := []string{}
 	result := make(map[string]string)
-	log.Printf("Users: %d", len(*users))
-	log.Println(*users)
+	//log.Printf("Input users: %d", len(*users))
+	////log.Println(*users)
 	for _, user := range *users {
 		value, found := userIDCacheObject.Get("username-" + user)
 		if found {
@@ -72,11 +72,15 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 		return &result, nil
 	}
 	sliceStart := 0
+	//log.Printf("Found users: %d", len(result))
+	//log.Printf("Unfound users: %d", len(notFoundUsers))
+
 	log.Println(notFoundUsers)
 	for index, _ := range notFoundUsers {
 		if index == len(notFoundUsers)-1 || index-sliceStart > 48 {
-			//log.Printf("%d - %d", sliceStart, index)
+			////log.Printf("%d - %d", sliceStart, index)
 			usersString := "https://api.twitch.tv/kraken/users?login=" + strings.Join(notFoundUsers[sliceStart:index+1], ",")
+			//log.Printf(usersString)
 			resp, error := httpclient.TwitchV5(Config.ClientID, "GET", usersString, nil)
 			if error != nil {
 				return nil, error
@@ -87,8 +91,8 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 			if marshallError != nil {
 				return nil, marshallError
 			}
-			log.Printf("That request returned %d users", len(usersWithID.Users))
-			log.Println(usersWithID)
+			//log.Printf("That request returned %d users", len(usersWithID.Users))
+			//log.Println(usersWithID)
 
 			for _, user := range usersWithID.Users {
 				result[user.DisplayName] = user.ID
@@ -96,9 +100,9 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 				userIDCacheObject.Set("id-"+user.ID, strings.ToLower(user.Name), 600*time.Minute)
 			}
 			if len(usersWithID.Users) == 0 {
-				log.Println(len(notFoundUsers[sliceStart : index+1]))
-				log.Println(sliceStart)
-				log.Println(index + 1)
+				//log.Println(len(notFoundUsers[sliceStart : index+1]))
+				//log.Println(sliceStart)
+				//log.Println(index + 1)
 				for _, user := range notFoundUsers[sliceStart : index+1] {
 					userIDCacheObject.Set("username-"+user, "rejected", 600*time.Minute)
 				}
@@ -113,6 +117,7 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 	// 		}
 	// 	}
 	// }
-	//log.Printf("Found users: %d", len(result))
+	//log.Printf("Returning %d users", len(result))
+
 	return &result, nil
 }
