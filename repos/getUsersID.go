@@ -86,7 +86,9 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 			if marshallError != nil {
 				return nil, marshallError
 			}
-			//log.Printf("That request returned %d users", len(usersWithID.Users))
+			log.Printf("That request returned %d users", len(usersWithID.Users))
+			log.Println(usersWithID)
+
 			for _, user := range usersWithID.Users {
 				result[user.DisplayName] = user.ID
 				userIDCacheObject.Set("username-"+strings.ToLower(user.Name), user.ID, 0)
