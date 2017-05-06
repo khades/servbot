@@ -41,7 +41,7 @@ func sendResubMessage(channel *string, channelID *string, user *string, resubCou
 	}
 	compiledTemplate, error := mustache.ParseString(template)
 	if error == nil {
-		resubInfo := models.ResubInfo{RepeatedBody: strings.Repeat(smile+" ", *resubCount), ResubCount: *resubCount}
+		resubInfo := models.ResubInfo{Smiles: strings.Repeat(smile+" ", *resubCount), ResubCount: *resubCount}
 		compiledMessage := compiledTemplate.Render(resubInfo)
 		if compiledMessage != "" {
 			IrcClientInstance.SendPublic(&models.OutgoingMessage{
