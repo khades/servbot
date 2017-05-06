@@ -1,7 +1,6 @@
 package commandHandlers
 
 import (
-	"log"
 	"strings"
 
 	"github.com/khades/servbot/ircClient"
@@ -42,14 +41,13 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				User:    chatMessage.User})
 			return
 		}
-		templateError := repos.TemplateCache.UpdateTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &template)
+		templateError := repos.SetChannelTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &template)
 		if templateError == nil {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				Body:    "Создание команды: Ну в принципе готово VoHiYo",
 				User:    chatMessage.User})
 		} else {
-			log.Println(templateError)
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				Body:    "Создание команды: Невалидный шаблон для команды etmSad",

@@ -18,7 +18,7 @@ func logsByUsername(w http.ResponseWriter, r *http.Request, s *models.HTTPSessio
 		return
 	}
 	userLogs, error := repos.GetUserMessageHistoryByUsername(&user, channelID)
-	if error != nil {
+	if error != nil && error.Error() != "not found" {
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
@@ -32,7 +32,7 @@ func logsByUserID(w http.ResponseWriter, r *http.Request, s *models.HTTPSession,
 		return
 	}
 	userLogs, error := repos.GetUserMessageHistoryByUserID(&user, channelID)
-	if error != nil {
+	if error != nil && error.Error() != "not found" {
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}

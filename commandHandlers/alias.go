@@ -22,7 +22,7 @@ func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.Chat
 			commandName = chatCommand.Body
 			aliasTo = chatCommand.Body
 		}
-		repos.TemplateCache.SetAliasto(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &aliasTo)
+		repos.SetChannelTemplateAlias(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &aliasTo)
 
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,

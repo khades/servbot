@@ -9,7 +9,7 @@ import (
 )
 
 // PutChannelTemplate puts template into database
-func PutChannelTemplate(user *string, userID *string, channelID *string, commandName *string, aliasTo *string, template *string) {
+func putChannelTemplate(user *string, userID *string, channelID *string, commandName *string, aliasTo *string, template *string) {
 	var templateHistory = models.TemplateHistory{
 		User:     *user,
 		UserID:   *userID,

@@ -15,4 +15,5 @@ type SubscriptionInfo struct {
 	UserID    string        `json:"userID"`
 	ChannelID string        `json:"channelID"`
 	Date      time.Time     `json:"date"`
+	SubPlan   string        `json:"subPlan"`
 }

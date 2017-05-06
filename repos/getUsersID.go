@@ -31,7 +31,9 @@ func GetUsernameByID(userID *string) (*string, error) {
 		if error != nil {
 			return nil, error
 		}
-		defer resp.Body.Close()
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		var twitchUser twitchUserInfo
 		marshallError := json.NewDecoder(resp.Body).Decode(&twitchUser)
 		if marshallError != nil {
@@ -85,7 +87,9 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 			if error != nil {
 				return nil, error
 			}
-			defer resp.Body.Close()
+			if resp != nil {
+				defer resp.Body.Close()
+			}
 			var usersWithID usersLoginStruct
 			marshallError := json.NewDecoder(resp.Body).Decode(&usersWithID)
 			if marshallError != nil {

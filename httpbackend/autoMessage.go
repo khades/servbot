@@ -28,7 +28,7 @@ type autoMessageGetResponse struct {
 
 func autoMessageList(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	result, error := repos.GetAutoMessages(channelID)
-	if error != nil {
+	if error != nil && error.Error() != "not found" {
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 		return
 	}

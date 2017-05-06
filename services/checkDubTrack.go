@@ -35,11 +35,13 @@ func checkOneDubTrack(channel *models.ChannelInfo) {
 	defer repos.PushDubTrack(&channel.ChannelID, &status)
 	//log.Printf("Checking %s twitchDj track \n", channel.Channel)
 	resp, error := httpclient.Get("https://api.dubtrack.fm/room/" + channel.DubTrack.ID + "/playlist/active")
-	defer resp.Body.Close()
 
 	if error != nil {
 		log.Println(error)
 		return
+	}
+	if resp != nil {
+		defer resp.Body.Close()
 	}
 	track := dubTrack{}
 	marshallError := json.NewDecoder(resp.Body).Decode(&track)

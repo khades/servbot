@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 type stream struct {
 	CreatedAt time.Time `json:"created_at"`
 	Channel   channelInfo
+	Viewers   int
 }
 
 type channelInfo struct {
@@ -34,6 +36,7 @@ func CheckStreamStatus() {
 	if error != nil {
 		return
 	}
+
 	userIDs := []string{}
 	for _, id := range *users {
 		userIDs = append(userIDs, id)
@@ -49,22 +52,27 @@ func CheckStreamStatus() {
 	if respError != nil {
 		return
 	}
-	defer resp.Body.Close()
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	var responseBody = new(responseBodyStruct)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
 
 	if marshallError != nil {
+		log.Println("Unmarshalling error")
+		log.Println(marshallError.Error())
 		return
 	}
 
 	for _, status := range responseBody.Streams {
 
 		streams[strconv.Itoa(status.Channel.ID)] = models.StreamStatus{
-			Online: true,
-			Game:   status.Channel.Game,
-			Title:  status.Channel.Status,
-			Start:  status.CreatedAt}
+			Online:  true,
+			Game:    status.Channel.Game,
+			Title:   status.Channel.Status,
+			Start:   status.CreatedAt,
+			Viewers: status.Viewers}
 
 	}
 	for channel, status := range streams {

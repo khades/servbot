@@ -12,6 +12,8 @@ var subscriptionInfoCollection string = "subsciptionInfo"
 
 func LogSubscription(info *models.SubscriptionInfo) {
 	Db.C(subscriptionInfoCollection).Insert(*info)
+	PutSubscriptionBits(&info.ChannelID, &info.UserID, &info.User, &info.SubPlan)
+
 }
 func GetSubsForChannelWithLimit(channelID *string, limit time.Time) (*[]models.SubscriptionInfo, error) {
 	var result []models.SubscriptionInfo

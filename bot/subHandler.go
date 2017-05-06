@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,24 +14,45 @@ import (
 )
 
 func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
-	user := strings.Split(message.Params[1], " ")[0]
-	channel := message.Params[0][1:]
-	values, error := repos.GetUsersID(&[]string{channel, user})
-	channelID := (*values)[channel]
-	userID := (*values)[user]
-	if error == nil && user != "" && userID != "" && channel != "" && channelID != "" && (strings.HasSuffix(message.String(), "subscribed!") || strings.HasSuffix(message.String(), "Twitch Prime!")) {
-		loggedSubscription := models.SubscriptionInfo{
-			User:      user,
-			UserID:    userID,
-			ChannelID: channelID,
-			Count:     1,
-			IsPrime:   strings.Contains(message.String(), "Twitch Prime"),
-			Date:      time.Now()}
-		//channels.SubscriptionChannel <- loggedSubscription
+	//log.Println(message.String())
 
-		repos.LogSubscription(&loggedSubscription)
-		sendSubMessage(&channel, &channelID, &user)
-		log.Printf("Channel %v: %v subbed\n", channel, user)
-		eventbus.EventBus.Trigger(eventbus.EventSub(&channelID))
+	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
+	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
+	msgID, _ := message.Tags.GetTag("msg-id")
+	msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
+	if msgID == "sub" {
+		msgParamMonths = "1"
+		msgParamMonthsFound = true
+	}
+	user, userFound := message.Tags.GetTag("display-name")
+	if userFound == false || user == "" {
+		user, userFound = message.Tags.GetTag("login")
+	}
+	channelID, channelIDFound := message.Tags.GetTag("room-id")
+	userID, userIDFound := message.Tags.GetTag("user-id")
+
+	channel := message.Params[0][1:]
+	if msgParamMonthsFound && userFound && channel != "" && channelIDFound && userIDFound {
+		subCount, subCountError := strconv.Atoi(msgParamMonths)
+		if subCountError == nil {
+			loggedSubscription := models.SubscriptionInfo{
+				User:      user,
+				UserID:    userID,
+				ChannelID: channelID,
+				Count:     subCount,
+				IsPrime:   prime,
+				SubPlan:   subplanMsg,
+				Date:      time.Now()}
+			if subCount == 1 {
+				sendSubMessage(&channel, &channelID, &user, &subplanMsg)
+			} else {
+				sendResubMessage(&channel, &channelID, &user, &subCount, &subplanMsg)
+			}
+			repos.LogSubscription(&loggedSubscription)
+
+			log.Printf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
+
+			eventbus.EventBus.Trigger(eventbus.EventSub(&channelID))
+		}
 	}
 }

@@ -32,9 +32,11 @@ func setSubAlert(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 		return
 	}
 	request.ChannelID = *channelID
-	err = repos.SetSubAlert(&s.Username, &s.UserID, &request)
-	if err != nil {
-		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
+	validator := repos.SetSubAlert(&s.Username, &s.UserID, &request)
+	if validator.Error == true {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(&models.HttpError{Code: http.StatusUnprocessableEntity, Message: *validator})
 		return
 	}
 	json.NewEncoder(w).Encode(optionResponse{"OK"})

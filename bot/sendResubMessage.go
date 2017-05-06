@@ -3,25 +3,52 @@ package bot
 import (
 	"strings"
 
+	"github.com/hoisie/mustache"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
 
-func sendResubMessage(channel *string, channelID *string, user *string, resubCount *int) {
+func sendResubMessage(channel *string, channelID *string, user *string, resubCount *int, subPlan *string) {
 	subAlert, error := repos.GetSubAlert(channelID)
-	//log.Println(*subAlert)
-	if error == nil && subAlert.Enabled == true && subAlert.ResubMessage != "" {
-		template, error := repos.ResubTemplateCache.Get(subAlert)
-		if error == nil {
-			resubInfo := models.ResubInfo{RepeatedBody: strings.Repeat(subAlert.RepeatBody+" ", *resubCount), ResubCount: *resubCount}
-			compiledMessage := template.Render(resubInfo)
-			if compiledMessage != "" {
-				IrcClientInstance.SendPublic(&models.OutgoingMessage{
-					Body:    compiledMessage,
-					Channel: *channel,
-					User:    *user})
+
+	if error != nil || subAlert.Enabled == false {
+		return
+	}
+	template := subAlert.ResubFiveMessage
+	smile := subAlert.ResubFiveSmile
+	switch *subPlan {
+	case "Prime":
+		{
+			if subAlert.ResubPrimeMessage != "" {
+				template = subAlert.ResubPrimeMessage
+				smile = subAlert.ResubPrimeSmile
 			}
 		}
-
+	case "2000":
+		{
+			if subAlert.ResubTenMessage != "" {
+				template = subAlert.ResubTenMessage
+				smile = subAlert.ResubTenSmile
+			}
+		}
+	case "3000":
+		{
+			if subAlert.ResubTwentyFiveMessage != "" {
+				template = subAlert.ResubTwentyFiveMessage
+				smile = subAlert.ResubTwentyFiveSmile
+			}
+		}
 	}
+	compiledTemplate, error := mustache.ParseString(template)
+	if error == nil {
+		resubInfo := models.ResubInfo{RepeatedBody: strings.Repeat(smile+" ", *resubCount), ResubCount: *resubCount}
+		compiledMessage := compiledTemplate.Render(resubInfo)
+		if compiledMessage != "" {
+			IrcClientInstance.SendPublic(&models.OutgoingMessage{
+				Body:    compiledMessage,
+				Channel: *channel,
+				User:    *user})
+		}
+	}
+
 }

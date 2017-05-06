@@ -47,7 +47,7 @@ func putTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
-	templateError := repos.TemplateCache.UpdateTemplate(&s.Username, &s.UserID, channelID, &commandName, &request.Template)
+	templateError := repos.SetChannelTemplate(&s.Username, &s.UserID, channelID, &commandName, &request.Template)
 
 	if templateError != nil {
 		writeJSONError(w, templateError.Error(), http.StatusUnprocessableEntity)
@@ -75,7 +75,7 @@ func aliasTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession
 		return
 	}
 
-	repos.TemplateCache.SetAliasto(&s.Username, &s.UserID, channelID, &commandName, &request.AliasTo)
+	repos.SetChannelTemplateAlias(&s.Username, &s.UserID, channelID, &commandName, &request.AliasTo)
 
 	json.NewEncoder(w).Encode(optionResponse{"OK"})
 

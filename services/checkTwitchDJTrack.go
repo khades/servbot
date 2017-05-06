@@ -30,11 +30,15 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	defer repos.PushTwitchDJ(&channel.ChannelID, &status)
 	//log.Printf("Checking %s twitchDj track \n", channel.Channel)
 	resp, error := httpclient.Get("https://twitch-dj.ru/includes/back.php?func=get_track&channel=" + channel.TwitchDJ.ID)
-	defer resp.Body.Close()
+
 	if error != nil {
 		//log.Println(error)
 		return
 	}
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
 	track := tdjTrack{}
 	marshallError := json.NewDecoder(resp.Body).Decode(&track)
 	if marshallError != nil {

@@ -28,13 +28,14 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			}
 		case "resub":
 			{
-				resubHandler(message, &IrcClientInstance)
+				subHandler(message, &IrcClientInstance)
+			}
+
+		case "sub":
+			{
+				subHandler(message, &IrcClientInstance)
 			}
 		}
-	}
-
-	if message.User == "twitchnotify" {
-		subHandler(message, &IrcClientInstance)
 	}
 
 	if message.Command == "CLEARCHAT" {
@@ -59,10 +60,8 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			User:      user,
 			UserID:    message.Tags["user-id"].Encode()}
 		repos.LogMessage(&formedMessage)
-		//	log.Printf("Channel %v: %v is banned for %v \n", channel, user, intBanDuration)
 	}
 	if message.Command == "PRIVMSG" {
-		//log.Println(message.String())
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
 				Username:    message.User,
@@ -72,20 +71,28 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			ChannelID: message.Tags["room-id"].Encode(),
 			User:      message.User,
 			UserID:    message.Tags["user-id"].Encode(),
-
-			IsMod:   message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
-			IsSub:   message.Tags["subscriber"] == "1",
-			IsPrime: strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
+			IsMod:     message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
+			IsSub:     message.Tags["subscriber"] == "1",
+			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		repos.LogMessage(&formedMessage)
 		repos.DecrementAutoMessages(&formedMessage.ChannelID)
 		commandBody, isCommand := formedMessage.GetCommand()
+		bits, bitsFound := message.Tags.GetTag("bits")
+		if bitsFound {
+			parsedBits, parsedBitsError := strconv.Atoi(bits)
+			if parsedBitsError == nil {
+				repos.AddBitsToUser(&formedMessage.ChannelID, &formedMessage.UserID, &formedMessage.User, parsedBits)
+			}
+		}
 		if isCommand {
 			if message.User == "khadesru" && commandBody.Command == "debugSub" {
-				sendSubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User)
+				subPlan := "2000"
+				sendSubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &subPlan)
 			}
 			if message.User == "khadesru" && commandBody.Command == "debugResub" {
 				resubCount := 3
-				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount)
+				subPlan := "2000"
+				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount, &subPlan)
 			}
 			handlerFunction := commandHandlers.Router.Go(commandBody.Command)
 			handlerFunction(true, &formedMessage, commandBody, &IrcClientInstance)

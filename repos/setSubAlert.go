@@ -11,33 +11,53 @@ import (
 
 var subAlertCollection = "subAlert"
 
+type SubAlertValidation struct {
+	Error           bool `json:"error"`
+	PrimeError      bool `json:"primeError"`
+	FiveError       bool `json:"fiveError"`
+	TenError        bool `json:"tenError"`
+	TwentyFiveError bool `json:"twentyFiveError"`
+}
+
 // SetSubAlert updates stream status (start of stream, topic of stream)
-func SetSubAlert(user *string, userID *string, subAlert *models.SubAlert) error {
-	ResubTemplateCache.Drop(&subAlert.ChannelID)
-	template, error := mustache.ParseString(subAlert.ResubMessage)
-	if error != nil {
-		return error
+func SetSubAlert(user *string, userID *string, subAlert *models.SubAlert) *SubAlertValidation {
+	templateValidation := SubAlertValidation{false, false, false, false, false}
+
+	_, primeError := mustache.ParseString(subAlert.ResubPrimeMessage)
+	if primeError != nil {
+		templateValidation.PrimeError = true
+		templateValidation.Error = true
 	}
 
-	ResubTemplateCache.put(&subAlert.ChannelID, template)
-	Db.C(subAlertCollection).Upsert(models.ChannelSelector{ChannelID: subAlert.ChannelID}, bson.M{
-		"$set": bson.M{
-			"enabled":      subAlert.Enabled,
-			"submessage":   subAlert.SubMessage,
-			"resubmessage": subAlert.ResubMessage,
-			"repeatbody":   subAlert.RepeatBody},
-		"$push": bson.M{
-			"history": bson.M{
-				"$each": []models.SubAlertHistory{models.SubAlertHistory{
-					User:         *user,
-					UserID:       *userID,
-					Date:         time.Now(),
-					Enabled:      subAlert.Enabled,
-					SubMessage:   subAlert.SubMessage,
-					ResubMessage: subAlert.ResubMessage,
-					RepeatBody:   subAlert.RepeatBody}},
-				"$sort":  bson.M{"date": -1},
-				"$slice": 10}}})
+	_, fiveError := mustache.ParseString(subAlert.ResubFiveMessage)
+	if fiveError != nil {
+		templateValidation.FiveError = true
+		templateValidation.Error = true
+	}
 
-	return nil
+	_, tenError := mustache.ParseString(subAlert.ResubTenMessage)
+	if tenError != nil {
+		templateValidation.TenError = true
+		templateValidation.Error = true
+	}
+
+	_, twentyFiveError := mustache.ParseString(subAlert.ResubTwentyFiveMessage)
+	if twentyFiveError != nil {
+		templateValidation.TwentyFiveError = true
+		templateValidation.Error = true
+	}
+	if templateValidation.Error == false {
+		Db.C(subAlertCollection).Upsert(models.ChannelSelector{ChannelID: subAlert.ChannelID}, bson.M{
+			"$set": &subAlert,
+			"$push": bson.M{
+				"history": bson.M{
+					"$each": []models.SubAlertHistory{models.SubAlertHistory{
+						*user,
+						*userID,
+						time.Now(),
+						*subAlert}},
+					"$sort":  bson.M{"date": -1},
+					"$slice": 10}}})
+	}
+	return &templateValidation
 }

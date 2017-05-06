@@ -5,8 +5,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// PushCommandsForChannel updates list of commands based on info from DB
-func PushCommandsForChannel(channelID *string) {
+func pushCommandsForChannel(channelID *string) {
 	var commandsList []string
 	channelInfo, channelError := GetChannelInfo(channelID)
 	dbCommands, commandsError := GetChannelActiveTemplates(channelID)
