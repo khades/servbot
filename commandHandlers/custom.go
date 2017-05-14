@@ -14,7 +14,7 @@ import (
 // Custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
-	if err == nil {
+	if err == nil && template.Template != "" {
 		values, _ := repos.GetChannelInfo(&chatMessage.ChannelID)
 		message := mustache.Render(template.Template, values)
 		user := chatMessage.User

@@ -41,6 +41,9 @@ func (channelInfo ChannelInfo) GetIfUserIsMod(userID *string) bool {
 	}
 	return isMod
 }
+func (chnanelInfo ChannelInfo) GetGamesHistory() string {
+
+}
 
 // GetStreamDuration Helper Command for time for mustashe
 func (channelInfo ChannelInfo) GetStreamDuration() string {
