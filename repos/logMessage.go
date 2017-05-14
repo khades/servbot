@@ -13,7 +13,7 @@ func LogMessage(message *models.ChatMessage) {
 		"$push": bson.M{"messages": bson.M{
 			"$each":  []models.MessageStruct{message.MessageStruct},
 			"$sort":  bson.M{"date": -1},
-			"$slice": 20}}}
+			"$slice": 50}}}
 	Db.C("messageLogs").Upsert(
 		bson.M{"channelid": message.ChannelID, "userid": message.UserID},
 		query)
