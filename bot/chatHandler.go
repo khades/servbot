@@ -50,21 +50,27 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		banReason, _ := message.Tags.GetTag("ban-reason")
 		user := message.Params[1]
 		channel := message.Params[0]
+		messageType := "timeout"
+		if intBanDuration == 0 {
+			messageType = "ban"
+		}
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
-				Date:      time.Now(),
-				BanLength: intBanDuration,
-				BanReason: banReason},
+				Date:        time.Now(),
+				MessageType: messageType,
+				BanLength:   intBanDuration,
+				BanReason:   banReason},
 			Channel:   channel,
 			ChannelID: message.Tags["room-id"].Encode(),
 			User:      user,
-			UserID:    message.Tags["user-id"].Encode()}
+			UserID:    message.Tags["target-user-id"].Encode()}
 		repos.LogMessage(&formedMessage)
 	}
 	if message.Command == "PRIVMSG" {
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
 				Username:    message.User,
+				MessageType: "message",
 				MessageBody: message.Params[1],
 				Date:        time.Now()},
 			Channel:   message.Params[0][1:],
