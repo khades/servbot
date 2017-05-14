@@ -33,7 +33,7 @@ func PushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 					Start: time.Now()}}}
 	}
 	if prevStatus.Online == true && streamStatus.Online == true {
-		if prevStatus.Game != streamStatus.Game {
+		if prevStatus.Game == streamStatus.Game {
 			currentStatus = models.StreamStatus{Online: true,
 				Game:           streamStatus.Game,
 				Title:          streamStatus.Title,
