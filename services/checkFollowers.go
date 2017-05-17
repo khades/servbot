@@ -32,7 +32,7 @@ func CheckChannelsFollowers() {
 		return
 	}
 	for key, value := range *userIDs {
-		go checkOneChannelFollowers(&key, &value)
+		checkOneChannelFollowers(&key, &value)
 	}
 
 }
