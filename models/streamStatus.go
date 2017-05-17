@@ -42,14 +42,14 @@ func (history GamesHistory) ReturnHistory() string {
 		}
 		minutes := float64(int(duration.Minutes() - math.Floor(duration.Minutes()/60)*60))
 		hours := float64(int(duration.Hours()))
-		stringDuration := fmt.Sprintf("[%dh%dm]", int(hours), int(minutes))
+		stringDuration := fmt.Sprintf("%dh%dm]", int(hours), int(minutes))
 		if minutes < 10 {
-			stringDuration = fmt.Sprintf("[%dh0%dm]", int(hours), int(minutes))
+			stringDuration = fmt.Sprintf("%dh0%dm]", int(hours), int(minutes))
 		}
 		if stringHistory == "" {
-			newStringHistory = history[index].Game + " " + stringDuration
+			newStringHistory = history[index].Game + " [!NOW!" + stringDuration
 		} else {
-			newStringHistory = stringHistory + " -> " + history[index].Game + " " + stringDuration
+			newStringHistory = history[index].Game + " [" + stringDuration + " -> " + stringHistory
 		}
 
 		if utf8.RuneCountInString(newStringHistory) > 400 {
