@@ -80,8 +80,8 @@ func main() {
 		httpbackend.Start()
 		wg.Done()
 	}(&wg)
-	followerTicker := time.NewTicker(time.Second * 15)
-	services.CheckChannelsFollowers()
+	followerTicker := time.NewTicker(time.Second * 30)
+
 	go func(wg *sync.WaitGroup) {
 		for {
 			<-followerTicker.C
