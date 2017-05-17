@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -32,36 +31,32 @@ type responseBodyStruct struct {
 // CheckStreamStatus runs gettting all data from all channels bot applied to
 func CheckStreamStatus() {
 	streams := make(map[string]models.StreamStatus)
-	users, error := repos.GetUsersID(&repos.Config.Channels)
+	userIDs, error := repos.GetStreamersID()
+
 	if error != nil {
 		return
 	}
 
-	userIDs := []string{}
-	for _, id := range *users {
-		userIDs = append(userIDs, id)
-	}
-	for _, channel := range userIDs {
+	for _, channel := range *userIDs {
 		streams[channel] = models.StreamStatus{
 			Online: false}
-
 	}
 
-	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(userIDs, ",")
+	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(*userIDs, ",")
 	resp, respError := httpclient.TwitchV5(repos.Config.ClientID, "GET", url, nil)
 	if respError != nil {
 		return
 	}
+
 	if resp != nil {
 		defer resp.Body.Close()
 	}
+
 	var responseBody = new(responseBodyStruct)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(responseBody)
 
 	if marshallError != nil {
-		log.Println("Unmarshalling error")
-		log.Println(marshallError.Error())
 		return
 	}
 

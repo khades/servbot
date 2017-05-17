@@ -8,6 +8,7 @@ type SubAlert struct {
 }
 
 type SubAlertBody struct {
+	FollowerMessage        string `json:"followerMessage"`
 	SubPrimeMessage        string `json:"subPrimeMessage"`
 	SubFiveMessage         string `json:"subFiveMessage"`
 	SubTenMessage          string `json:"subTenMessage"`
