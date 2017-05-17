@@ -47,7 +47,7 @@ func (history GamesHistory) ReturnHistory() string {
 			stringDuration = fmt.Sprintf("%dh0%dm]", int(hours), int(minutes))
 		}
 		if stringHistory == "" {
-			newStringHistory = history[index].Game + " [!NOW!" + stringDuration
+			newStringHistory = "NOW" history[index].Game + " [" + stringDuration
 		} else {
 			newStringHistory = history[index].Game + " [" + stringDuration + " -> " + stringHistory
 		}
