@@ -7,4 +7,5 @@ type ChatMessageLog struct {
 	UserID         string          `json:"userID"`
 	ChannelID      string          `json:"channelID"`
 	Messages       []MessageStruct `json:"messages"`
+	Bans           []BanInfo       `json:"bans"`
 }
