@@ -36,6 +36,10 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				subHandler(message, &IrcClientInstance)
 			}
 		}
+
+		if message.User == "twitchnotify" {
+			oldSubHandler(message, &IrcClientInstance)
+		}
 	}
 
 	if message.Command == "CLEARCHAT" {
