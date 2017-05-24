@@ -43,7 +43,7 @@ func CheckVK() {
 		return
 	}
 	for _, channel := range *channels {
-		go checkOne(&channel)
+		checkOne(&channel)
 	}
 }
 func checkOne(channel *models.ChannelInfo) {
