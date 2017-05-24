@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/khades/servbot/bot"
@@ -19,6 +20,7 @@ type responseItem struct {
 	Owner    int    `json:"owner_id"`
 	Text     string `json:"text"`
 	IsPinned int    `json:"is_pinned"`
+	Date     int    `json:"date"`
 }
 
 type vkResponse struct {
@@ -108,6 +110,9 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 	vkGroupInfo.LastMessageID = vkPost.ID
 	vkGroupInfo.LastMessageBody = vkPost.Text
 	vkGroupInfo.LastMessageURL = fmt.Sprintf("https://vk.com/%s?w=wall%d_%d", vkInputGroupInfo.GroupName, vkPost.Owner, vkPost.ID)
+	loc, _ := time.LoadLocation("Europe/Moscow")
+	nowTime := time.Unix(0, int64(vkPost.Date)*1000000000).In(loc)
+	vkGroupInfo.LastMessageDate = nowTime.Format("Jan _2 15:04 MSK")
 	log.Println(vkGroupInfo)
 	return &vkGroupInfo, nil
 }

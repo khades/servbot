@@ -6,4 +6,5 @@ type VkGroupInfo struct {
 	LastMessageID   int    `json:"lastMessageID"`
 	LastMessageURL  string `json:"lastMessageURL"`
 	LastMessageBody string `json:"lastMessageBody"`
+	LastMessageDate string `json:"lastMessageDate"`
 }
