@@ -81,12 +81,13 @@ func checkOneChannelFollowers(channel *string, channelID *string) {
 		}
 
 	}
-
-	alertInfo, alertError := repos.GetSubAlert(channelID)
-	if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
-		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-			Channel: *channel,
-			Body:    "@" + strings.Join(followersToGreet, " @") + " " + alertInfo.FollowerMessage})
+	if len(followersToGreet) > 0 {
+		alertInfo, alertError := repos.GetSubAlert(channelID)
+		if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
+				Channel: *channel,
+				Body:    "@" + strings.Join(followersToGreet, " @") + " " + alertInfo.FollowerMessage})
+		}
 	}
 
 }
