@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/httpclient"
@@ -62,21 +63,32 @@ func checkOneChannelFollowers(channel *string, channelID *string) {
 	}
 
 	repos.SetFollowerCursor(channelID, &followers.Cursor)
+	followersToGreet := []string{}
 	for _, follow := range followers.Follows {
 		alreadyGreeted, _ := repos.CheckIfFollowerGreeted(channelID, &follow.User.Name)
 		if alreadyGreeted == false {
+			followersToGreet = append(followersToGreet, follow.User.Name)
+
 			repos.AddFollowerToList(channelID, &follow.User.Name)
-			alertInfo, alertError := repos.GetSubAlert(channelID)
-			if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
-				bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-					Channel: *channel,
-					Body:    alertInfo.FollowerMessage,
-					User:    follow.User.Name})
-			}
+			// alertInfo, alertError := repos.GetSubAlert(channelID)
+			// if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+			// 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
+			// 		Channel: *channel,
+			// 		Body:    alertInfo.FollowerMessage,
+			// 		User:    follow.User.Name})
+			// }
 
 		}
 
 	}
+
+	alertInfo, alertError := repos.GetSubAlert(channelID)
+	if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
+			Channel: *channel,
+			Body:    "@" + strings.Join(followersToGreet, " @") + alertInfo.FollowerMessage})
+	}
+
 }
 func getFollowers(channelID *string, cursor *string) (*followerResponse, error) {
 	url := "https://api.twitch.tv/kraken/channels/" + *channelID + "/follows?direction=ASC&cursor=" + *cursor
