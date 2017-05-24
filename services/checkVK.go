@@ -43,18 +43,25 @@ func CheckVK() {
 		return
 	}
 	for _, channel := range *channels {
-		result, parseError := ParseVK(&channel.VkGroupInfo)
-		if parseError == nil && result.LastMessageID != channel.VkGroupInfo.LastMessageID {
-			repos.PushVkGroupInfo(&channel.ChannelID, result)
-			if result.NotifyOnChange == true {
-				channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
-				if channelNameError == nil && *channelName != "" {
-					bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-						Channel: *channelName,
-						Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
-				}
-			}
-		}
+		go checkOne(&channel)
+	}
+}
+func checkOne(channel *models.ChannelInfo) {
+	result, parseError := ParseVK(&channel.VkGroupInfo)
+	if parseError != nil || result.LastMessageID == channel.VkGroupInfo.LastMessageID {
+		return
+	}
+	repos.PushVkGroupInfo(&channel.ChannelID, result)
+	if result.NotifyOnChange == false {
+		return
+	}
+	channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
+
+	if channelNameError == nil && *channelName != "" {
+		log.Println("SENDING MESSAGE")
+		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
+			Channel: *channelName,
+			Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
 	}
 }
 
