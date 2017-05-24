@@ -10,14 +10,15 @@ import (
 
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
-	ChannelID    string
-	StreamStatus StreamStatus
+	ChannelID    string       `json:"channelId"`
+	Channel      string       `json:"channel"`
+	StreamStatus StreamStatus `json:"streamStatus"`
 	Banme        Banme
-	TwitchDJ     TwitchDJ
-	DubTrack     DubTrack
-	VkGroupInfo  VkGroupInfo
-	Mods         []string
-	Commands     []string
+	TwitchDJ     TwitchDJ    `json:"twitchDJ"`
+	DubTrack     DubTrack    `json:"dubTrack"`
+	VkGroupInfo  VkGroupInfo `json:"vkGroupInfo"`
+	Mods         []string    `json:"mods"`
+	Commands     []string    `json:"commands"`
 }
 
 // GetCommands Helper Command for mustashe

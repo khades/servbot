@@ -65,7 +65,7 @@ func main() {
 			eventbus.EventBus.Trigger("ping")
 		}
 	}()
-	vkTimer := time.NewTicker(time.Second * 60)
+	vkTimer := time.NewTicker(time.Second * 20)
 
 	go func() {
 		for {

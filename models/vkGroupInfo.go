@@ -1,9 +1,9 @@
 package models
 
 type VkGroupInfo struct {
-	GroupName       string
-	NotifyOnChange  bool
-	LastMessageID   int
-	LastMessageURL  string
-	LastMessageBody string
+	GroupName       string `json:"groupName"`
+	NotifyOnChange  bool   `json:"notifyOnChange"`
+	LastMessageID   int    `json:"lastMessageID"`
+	LastMessageURL  string `json:"lastMessageURL"`
+	LastMessageBody string `json:"lastMessageBody"`
 }

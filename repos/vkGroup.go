@@ -1,12 +1,17 @@
 package repos
 
 import (
+	"log"
+
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/khades/servbot/models"
 )
 
 func PushVkGroupInfo(channelID *string, vkGroupInfo *models.VkGroupInfo) {
+	log.Println("pushing info")
+	log.Println(*channelID)
+	log.Println(*vkGroupInfo)
 	channelInfo, _ := GetChannelInfo(channelID)
 	if channelInfo != nil {
 		channelInfo.VkGroupInfo = *vkGroupInfo
