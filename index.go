@@ -65,6 +65,14 @@ func main() {
 			eventbus.EventBus.Trigger("ping")
 		}
 	}()
+	vkTimer := time.NewTicker(time.Second * 60)
+
+	go func() {
+		for {
+			<-vkTimer.C
+			services.CheckVK()
+		}
+	}()
 	minuteTicker := time.NewTicker(time.Minute)
 
 	go func(wg *sync.WaitGroup) {

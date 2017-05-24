@@ -15,6 +15,7 @@ type ChannelInfo struct {
 	Banme        Banme
 	TwitchDJ     TwitchDJ
 	DubTrack     DubTrack
+	VkGroupInfo  VkGroupInfo
 	Mods         []string
 	Commands     []string
 }
