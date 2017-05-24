@@ -51,7 +51,7 @@ func CheckVK() {
 				if channelNameError == nil && *channelName != "" {
 					bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
 						Channel: *channelName,
-						Body:    "[VK] " + result.LastMessageBody + " " + result.LastMessageURL})
+						Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
 				}
 			}
 		}
