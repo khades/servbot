@@ -15,9 +15,10 @@ import (
 )
 
 type responseItem struct {
-	ID    int    `json:"id"`
-	Owner int    `json:"owner_id"`
-	Text  string `json:"text"`
+	ID       int    `json:"id"`
+	Owner    int    `json:"owner_id"`
+	Text     string `json:"text"`
+	IsPinned int    `json:"is_pinned"`
 }
 
 type vkResponse struct {
@@ -69,7 +70,12 @@ func checkOne(channel *models.ChannelInfo) {
 func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) {
 	vkGroupInfo := models.VkGroupInfo{GroupName: vkInputGroupInfo.GroupName,
 		NotifyOnChange: vkInputGroupInfo.NotifyOnChange}
-	resp, error := httpclient.Get("https://api.vk.com/method/wall.get?domain=" + vkInputGroupInfo.GroupName + "&filter=owner&count=1&v=5.60")
+	url := "https://api.vk.com/method/wall.get?domain=" + vkInputGroupInfo.GroupName + "&filter=owner&count=2&v=5.60"
+	if strings.HasPrefix(vkInputGroupInfo.GroupName, "club") {
+		url = "https://api.vk.com/method/wall.get?owner_id=-" + strings.Replace(vkInputGroupInfo.GroupName, "club", "", -1) + "&filter=owner&count=2&v=5.60"
+
+	}
+	resp, error := httpclient.Get(url)
 	if error != nil {
 		log.Println(error)
 		return &vkGroupInfo, error
@@ -87,13 +93,21 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 		return &vkGroupInfo, errors.New("not found")
 	}
 	vkPost := vkResp.Response.Items[0]
+	if vkPost.IsPinned == 1 {
+		if len(vkResp.Response.Items) == 1 {
+			return &vkGroupInfo, errors.New("not found")
+		}
+		vkPost = vkResp.Response.Items[1]
+
+	}
+
 	vkPost.Text = strings.Replace(vkPost.Text, "\n", " ", -1)
 	if utf8.RuneCountInString(vkPost.Text) > 300 {
 		vkPost.Text = Short(vkPost.Text, 297) + "..."
 	}
 	vkGroupInfo.LastMessageID = vkPost.ID
 	vkGroupInfo.LastMessageBody = vkPost.Text
-	vkGroupInfo.LastMessageURL = fmt.Sprintf("https://vk.com/mob5tervk?w=wall%d_%d", vkPost.Owner, vkPost.ID)
+	vkGroupInfo.LastMessageURL = fmt.Sprintf("https://vk.com/%s?w=wall%d_%d", vkInputGroupInfo.GroupName, vkPost.Owner, vkPost.ID)
 	log.Println(vkGroupInfo)
 	return &vkGroupInfo, nil
 }
