@@ -20,6 +20,13 @@ type ChannelInfo struct {
 	Mods         []string    `json:"mods"`
 	Commands     []string    `json:"commands"`
 }
+type ChannelInfoForTemplate struct {
+	ChannelInfo
+	RandomInteger          int
+	RandomIntegerIsMinimal bool
+	RandomString           string
+	IsMod                  bool
+}
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {

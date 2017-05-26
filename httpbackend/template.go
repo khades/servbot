@@ -31,12 +31,13 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 	result, _ := repos.GetChannelTemplateWithHistory(channelID, &commandName)
 	result.ChannelID = *channelID
 	result.CommandName = commandName
+
 	json.NewEncoder(w).Encode(templateResponse{*result, *channelName})
 }
 
 func putTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	decoder := json.NewDecoder(r.Body)
-	var request templatePushRequest
+	var request models.TemplateInfoBody
 	err := decoder.Decode(&request)
 	if err != nil {
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
@@ -47,7 +48,9 @@ func putTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
-	templateError := repos.SetChannelTemplate(&s.Username, &s.UserID, channelID, &commandName, &request.Template)
+	request.AliasTo = commandName
+
+	templateError := repos.SetChannelTemplate(&s.Username, &s.UserID, channelID, &commandName, &request)
 
 	if templateError != nil {
 		writeJSONError(w, templateError.Error(), http.StatusUnprocessableEntity)

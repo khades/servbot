@@ -41,7 +41,11 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				User:    chatMessage.User})
 			return
 		}
-		templateError := repos.SetChannelTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &template)
+		templateBody := models.TemplateInfoBody{
+			ShowOffline: true,
+			ShowOnline:  true,
+			Template:    template}
+		templateError := repos.SetChannelTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &templateBody)
 		if templateError == nil {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
@@ -54,10 +58,11 @@ func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCo
 				User:    chatMessage.User})
 		}
 
-	} else {
-		ircClient.SendPublic(&models.OutgoingMessage{
-			Channel: chatMessage.Channel,
-			Body:    "Создание алиaса: Вы не модер SMOrc",
-			User:    chatMessage.User})
 	}
+	//  else {
+	// 	ircClient.SendPublic(&models.OutgoingMessage{
+	// 		Channel: chatMessage.Channel,
+	// 		Body:    "Создание алиaса: Вы не модер SMOrc",
+	// 		User:    chatMessage.User})
+	// }
 }

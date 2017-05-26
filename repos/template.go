@@ -10,24 +10,24 @@ var templateCollection = "templates"
 
 func SetChannelTemplateAlias(user *string, userID *string, channelID *string, commandName *string, aliasTo *string) {
 	result, error := GetChannelTemplate(channelID, aliasTo)
-	aliasTemplate := ""
+	aliasTemplate := models.TemplateInfoBody{}
 	if error == nil {
-		aliasTemplate = result.Template
+		aliasTemplate = result.TemplateInfoBody
 	}
 
-	putChannelTemplate(user, userID, channelID, commandName, aliasTo, &aliasTemplate)
+	putChannelTemplate(user, userID, channelID, commandName, &aliasTemplate)
 	pushCommandsForChannel(channelID)
 
 }
-func SetChannelTemplate(user *string, userID *string, channelID *string, commandName *string, templateBody *string) error {
-	if *templateBody == "" {
-		_, templateError := mustache.ParseString(*templateBody)
+func SetChannelTemplate(user *string, userID *string, channelID *string, commandName *string, template *models.TemplateInfoBody) error {
+	if template.Template == "" {
+		_, templateError := mustache.ParseString(template.Template)
 		if templateError != nil {
 			//	log.Println(templateError)
 			return templateError
 		}
 	}
-	putChannelTemplate(user, userID, channelID, commandName, commandName, templateBody)
+	putChannelTemplate(user, userID, channelID, commandName, template)
 	pushCommandsForChannel(channelID)
 	return nil
 }

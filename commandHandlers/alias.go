@@ -29,10 +29,11 @@ func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.Chat
 			Body:    "Создание алиaса: Ну в принципе готово VoHiYo",
 			User:    chatMessage.User})
 
-	} else {
-		ircClient.SendPublic(&models.OutgoingMessage{
-			Channel: chatMessage.Channel,
-			Body:    "Создание алиaса: Вы не модер SMOrc",
-			User:    chatMessage.User})
-	}
+	} 
+	// else {
+	// 	ircClient.SendPublic(&models.OutgoingMessage{
+	// 		Channel: chatMessage.Channel,
+	// 		Body:    "Создание алиaса: Вы не модер SMOrc",
+	// 		User:    chatMessage.User})
+	// }
 }

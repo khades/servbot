@@ -1,6 +1,7 @@
 package commandHandlers
 
 import (
+	"math/rand"
 	"strings"
 
 	"html"
@@ -13,26 +14,68 @@ import (
 
 // Custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+	channelInfo, error := repos.GetChannelInfo(&chatMessage.ChannelID)
+	if error != nil {
+		return
+	}
+	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod}
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
-	if err == nil && template.Template != "" {
-		values, _ := repos.GetChannelInfo(&chatMessage.ChannelID)
-		message := mustache.Render(template.Template, values)
-		user := chatMessage.User
-		redirectTo := chatMessage.User
-		if chatCommand.Body != "" {
-			if strings.HasPrefix(chatCommand.Body, "@") {
-				redirectTo = chatCommand.Body[1:]
-			} else {
-				redirectTo = chatCommand.Body
+
+	if err != nil || template.Template == "" {
+		return
+	}
+
+	if chatMessage.IsMod == false {
+		if channelStatus.StreamStatus.Online == true && template.ShowOnline == false {
+			return
+		}
+		if channelStatus.StreamStatus.Online == false && template.ShowOffline == false {
+			return
+		}
+	}
+	if template.IntegerRandomizer.Enabled == true && template.IntegerRandomizer.UpperLimit > template.IntegerRandomizer.LowerLimit {
+		channelStatus.RandomInteger = template.IntegerRandomizer.LowerLimit + rand.Intn(template.IntegerRandomizer.UpperLimit-template.IntegerRandomizer.LowerLimit)
+		if channelStatus.RandomInteger == template.IntegerRandomizer.LowerLimit {
+			channelStatus.RandomIntegerIsMinimal = true
+		}
+	}
+
+	if template.StringRandomizer.Enabled == true {
+		if len(template.StringRandomizer.Strings) == 0 {
+			commandValues := strings.Split(chatCommand.Body, ",")
+			if len(commandValues) != 0 {
+				channelStatus.RandomString = strings.TrimSpace(commandValues[rand.Intn(len(commandValues)-1)])
 
 			}
+		} else {
+			channelStatus.RandomString = strings.TrimSpace(template.StringRandomizer.Strings[rand.Intn(len(template.StringRandomizer.Strings)-1)])
 		}
+	}
+
+	message := mustache.Render(template.Template, channelStatus)
+	user := chatMessage.User
+	redirectTo := chatMessage.User
+	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) {
+		if strings.HasPrefix(chatCommand.Body, "@") {
+			redirectTo = chatCommand.Body[1:]
+		} else {
+			redirectTo = chatCommand.Body
+
+		}
+	}
+	if template.PreventDebounce == true {
+		ircClient.SendPublic(&models.OutgoingMessage{
+			Channel: chatMessage.Channel,
+			User:    user,
+			Body:    html.UnescapeString(message)})
+	} else {
 		ircClient.SendDebounced(models.OutgoingDebouncedMessage{
 			Message: models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				User:    user,
 				Body:    html.UnescapeString(message)},
-			Command:    chatCommand.Command,
+			Command:    template.AliasTo,
 			RedirectTo: redirectTo})
 	}
+
 }
