@@ -43,9 +43,18 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 			channelStatus.RandomIntegerIsMaximal = true
 		}
 		if template.IntegerRandomizer.TimeoutAfter == true && channelStatus.RandomInteger > 0 {
-			ircClient.SendPublic(&models.OutgoingMessage{
-				Channel: chatMessage.Channel,
-				Body:    fmt.Sprintf("/timeout %s %d ", user, channelStatus.RandomInteger)})
+			if chatMessage.IsMod == false {
+				ircClient.SendPublic(&models.OutgoingMessage{
+					Channel: chatMessage.Channel,
+					Body:    fmt.Sprintf("/timeout %s %d ", user, channelStatus.RandomInteger)})
+			} else {
+				ircClient.SendPublic(&models.OutgoingMessage{
+					Channel: chatMessage.Channel,
+					User:    user,
+					Body:    "Модератора нельзя затаймаутить SMOrc"})
+				return
+			}
+
 		}
 	}
 
