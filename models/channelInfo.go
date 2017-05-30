@@ -24,6 +24,7 @@ type ChannelInfoForTemplate struct {
 	ChannelInfo
 	RandomInteger          int
 	RandomIntegerIsMinimal bool
+	RandomIntegerIsMaximal bool
 	RandomString           string
 	IsMod                  bool
 }

@@ -1,6 +1,7 @@
 package commandHandlers
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 
@@ -20,7 +21,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod}
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
-
+	user := chatMessage.User
 	if err != nil || template.Template == "" {
 		return
 	}
@@ -38,6 +39,14 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 		if channelStatus.RandomInteger == template.IntegerRandomizer.LowerLimit {
 			channelStatus.RandomIntegerIsMinimal = true
 		}
+		if channelStatus.RandomInteger == template.IntegerRandomizer.UpperLimit {
+			channelStatus.RandomIntegerIsMaximal = true
+		}
+		if template.IntegerRandomizer.TimeoutAfter == true && channelStatus.RandomInteger > 0 {
+			ircClient.SendPublic(&models.OutgoingMessage{
+				Channel: chatMessage.Channel,
+				Body:    fmt.Sprintf("/timeout %s %d ", user, channelStatus.RandomInteger)})
+		}
 	}
 
 	if template.StringRandomizer.Enabled == true {
@@ -53,7 +62,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 
 	message := mustache.Render(template.Template, channelStatus)
-	user := chatMessage.User
+
 	redirectTo := chatMessage.User
 	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true || template.IntegerRandomizer.Enabled == true) {
 		if strings.HasPrefix(chatCommand.Body, "@") {

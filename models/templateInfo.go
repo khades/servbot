@@ -17,9 +17,10 @@ type TemplateInfoBody struct {
 	StringRandomizer  TemplateStringRandomizer  `json:"stringRandomizer"`
 }
 type TemplateIntegerRandomizer struct {
-	Enabled    bool `json:"enabled"`
-	LowerLimit int  `json:"lowerLimit"`
-	UpperLimit int  `json:"upperLimit"`
+	Enabled      bool `json:"enabled"`
+	TimeoutAfter bool `json:"timeoutAfter"`
+	LowerLimit   int  `json:"lowerLimit"`
+	UpperLimit   int  `json:"upperLimit"`
 }
 
 type TemplateStringRandomizer struct {
