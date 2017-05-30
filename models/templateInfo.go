@@ -11,6 +11,7 @@ type TemplateInfoBody struct {
 	ShowOnline        bool                      `json:"showOnline"`
 	ShowOffline       bool                      `json:"showOffline"`
 	PreventDebounce   bool                      `json:"preventDebounce"`
+	PreventRedirect   bool                      `json:"preventRedirect"`
 	AliasTo           string                    `json:"aliasTo"`
 	Template          string                    `json:"template"`
 	IntegerRandomizer TemplateIntegerRandomizer `json:"integerRandomizer"`

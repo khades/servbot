@@ -78,7 +78,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	message := mustache.Render(template.Template, channelStatus)
 
 	redirectTo := chatMessage.User
-	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true || template.IntegerRandomizer.Enabled == true) {
+	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false {
 		if strings.HasPrefix(chatCommand.Body, "@") {
 			redirectTo = chatCommand.Body[1:]
 		} else {
