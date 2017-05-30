@@ -25,8 +25,10 @@ type ChannelInfoForTemplate struct {
 	RandomInteger          int
 	RandomIntegerIsMinimal bool
 	RandomIntegerIsMaximal bool
+	RandomIngegerIsZero    bool
 	RandomString           string
 	IsMod                  bool
+	CommandBody            string
 }
 
 // GetCommands Helper Command for mustashe

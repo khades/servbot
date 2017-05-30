@@ -20,6 +20,8 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 		return
 	}
 	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod}
+	channelStatus.IsMod = chatMessage.IsMod
+	channelStatus.RandomIntegerIsMinimal = true
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
 	user := chatMessage.User
 	if err != nil || template.Template == "" {
@@ -41,6 +43,9 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 		}
 		if channelStatus.RandomInteger == template.IntegerRandomizer.UpperLimit {
 			channelStatus.RandomIntegerIsMaximal = true
+		}
+		if channelStatus.RandomInteger == 0 {
+			channelStatus.RandomIntegerIsMinimal = true
 		}
 		if template.IntegerRandomizer.TimeoutAfter == true && channelStatus.RandomInteger > 0 {
 			if chatMessage.IsMod == false {
