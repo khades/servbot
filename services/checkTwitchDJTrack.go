@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html"
 
+	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/httpclient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -48,5 +49,16 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	if track.Title != "" {
 		status.Playing = true
 		status.Track = html.UnescapeString(track.Title)
+	}
+	if status.Playing == false {
+		return
+	}
+	if channel.TwitchDJ.NotifyOnUpdate == true {
+		channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
+		if channelNameError == nil && *channelName != "" && status.Playing == true && channel.TwitchDJ.Track != status.Track {
+			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
+				Channel: *channelName,
+				Body:    "[TwitchDJ] Now Playing: " + status.Track})
+		}
 	}
 }
