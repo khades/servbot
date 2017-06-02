@@ -26,7 +26,8 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/info"), withMod(channelInfo))
 	mux.HandleFunc(pat.Post("/api/channel/:channel/externalservices/vk"), withMod(putVK))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/externalservices/vk"), corsEnabled(options))
-
+	mux.HandleFunc(pat.Post("/api/channel/:channel/externalservices/twitchdj"), withMod(putTwitchDJ))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/externalservices/twitchdj"), corsEnabled(options))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subs/events"), withMod(subscriptionEvents))
 	mux.HandleFunc(pat.Get("/api/user"), withAuth(user))
 	mux.HandleFunc(pat.Get("/api/user/index"), withAuth(userIndex))

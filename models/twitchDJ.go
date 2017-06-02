@@ -5,5 +5,5 @@ type TwitchDJ struct {
 	ID             string `json:"id"`
 	Playing        bool   `json:"Playing"`
 	Track          string `json:"track"`
-	NotifyOnUpdate bool   `json:"notifyOnUpdate"`
+	NotifyOnChange bool   `json:"notifyOnChange"`
 }

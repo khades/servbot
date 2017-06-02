@@ -53,7 +53,7 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	if status.Playing == false {
 		return
 	}
-	if channel.TwitchDJ.NotifyOnUpdate == true {
+	if channel.TwitchDJ.NotifyOnChange == true {
 		channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
 		if channelNameError == nil && *channelName != "" && status.Playing == true && channel.TwitchDJ.Track != status.Track {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
