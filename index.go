@@ -16,7 +16,11 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-	repos.GetUsersID(&repos.Config.Channels)
+	result, _ := repos.GetUsersID(&repos.Config.Channels)
+	for _, value := range *result {
+		repos.PushCommandsForChannel(&value)
+	}
+
 	repos.CreateChannels()
 	wg.Add(1)
 	go func() {

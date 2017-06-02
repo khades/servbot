@@ -10,15 +10,16 @@ import (
 
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
-	ChannelID    string       `json:"channelId"`
-	Channel      string       `json:"channel"`
-	StreamStatus StreamStatus `json:"streamStatus"`
-	Banme        Banme
-	TwitchDJ     TwitchDJ    `json:"twitchDJ"`
-	DubTrack     DubTrack    `json:"dubTrack"`
-	VkGroupInfo  VkGroupInfo `json:"vkGroupInfo"`
-	Mods         []string    `json:"mods"`
-	Commands     []string    `json:"commands"`
+	ChannelID       string       `json:"channelId"`
+	Channel         string       `json:"channel"`
+	StreamStatus    StreamStatus `json:"streamStatus"`
+	Banme           Banme
+	TwitchDJ        TwitchDJ    `json:"twitchDJ"`
+	DubTrack        DubTrack    `json:"dubTrack"`
+	VkGroupInfo     VkGroupInfo `json:"vkGroupInfo"`
+	Mods            []string    `json:"mods"`
+	OfflineCommands []string    `json:"offlinecommands"`
+	OnlineCommands  []string    `json:"onlinecommands"`
 }
 type ChannelInfoForTemplate struct {
 	ChannelInfo
@@ -33,7 +34,11 @@ type ChannelInfoForTemplate struct {
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {
-	return "!" + strings.Join(channelInfo.Commands, ", !")
+	if channelInfo.StreamStatus.Online == true {
+		return "!" + strings.Join(channelInfo.OnlineCommands, ", !")
+
+	}
+	return "!" + strings.Join(channelInfo.OfflineCommands, ", !")
 }
 
 // GetIfUserIsMod checks if user exist in internal mod array

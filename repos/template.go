@@ -16,7 +16,7 @@ func SetChannelTemplateAlias(user *string, userID *string, channelID *string, co
 	}
 
 	putChannelTemplate(user, userID, channelID, commandName, &aliasTemplate)
-	pushCommandsForChannel(channelID)
+	PushCommandsForChannel(channelID)
 
 }
 func SetChannelTemplate(user *string, userID *string, channelID *string, commandName *string, template *models.TemplateInfoBody) error {
@@ -28,7 +28,7 @@ func SetChannelTemplate(user *string, userID *string, channelID *string, command
 		}
 	}
 	putChannelTemplate(user, userID, channelID, commandName, template)
-	pushCommandsForChannel(channelID)
+	PushCommandsForChannel(channelID)
 	return nil
 }
 
