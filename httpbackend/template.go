@@ -22,13 +22,19 @@ type templateResponse struct {
 }
 
 func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+
 	commandName := pat.Param(r, "commandName")
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
 
-	result, _ := repos.GetChannelTemplateWithHistory(channelID, &commandName)
+	result, error := repos.GetChannelTemplateWithHistory(channelID, &commandName)
+	if error.Error() == "not found" {
+		result.ShowOffline = true
+		result.ShowOnline = true
+	}
+
 	result.ChannelID = *channelID
 	result.CommandName = commandName
 

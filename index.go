@@ -28,7 +28,7 @@ func main() {
 		services.CheckStreamStatus()
 		// 	services.CheckDubTrack()
 	}()
-
+	services.CheckVK()
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
 	ticker := time.NewTicker(time.Second * 15)

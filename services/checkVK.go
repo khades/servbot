@@ -40,7 +40,7 @@ func Short(s string, i int) string {
 }
 
 func CheckVK() {
-	log.Println("Checking")
+	log.Println("Checking VK")
 	channels, error := repos.GetVKEnabledChannels()
 	if error != nil {
 		return
