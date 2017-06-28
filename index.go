@@ -4,11 +4,7 @@ import (
 	"encoding/gob"
 	"log"
 	"sync"
-	"time"
 
-	"github.com/khades/servbot/bot"
-	"github.com/khades/servbot/eventbus"
-	"github.com/khades/servbot/httpbackend"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 	"github.com/khades/servbot/services"
@@ -28,87 +24,88 @@ func main() {
 		services.CheckStreamStatus()
 		// 	services.CheckDubTrack()
 	}()
-	services.CheckVK()
+
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
-	ticker := time.NewTicker(time.Second * 15)
+	services.CheckVK()
+	// ticker := time.NewTicker(time.Second * 15)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-ticker.C
-			wg.Add(1)
-			bot.IrcClientInstance.SendModsCommand()
-			services.SendAutoMessages()
-			wg.Done()
-		}
-	}(&wg)
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-ticker.C
+	// 		wg.Add(1)
+	// 		bot.IrcClientInstance.SendModsCommand()
+	// 		services.SendAutoMessages()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
 
-	thirtyTicker := time.NewTicker(time.Second * 30)
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-thirtyTicker.C
-			wg.Add(1)
-			services.CheckTwitchDJTrack()
-			wg.Done()
-		}
-	}(&wg)
-
+	// thirtyTicker := time.NewTicker(time.Second * 30)
 	// go func(wg *sync.WaitGroup) {
 	// 	for {
 	// 		<-thirtyTicker.C
 	// 		wg.Add(1)
-	// 		services.CheckDubTrack()
+	// 		services.CheckTwitchDJTrack()
 	// 		wg.Done()
 	// 	}
 	// }(&wg)
-	twentyticker := time.NewTicker(time.Second * 20)
 
-	go func() {
-		for {
-			<-twentyticker.C
-			eventbus.EventBus.Trigger("ping")
-		}
-	}()
+	// // go func(wg *sync.WaitGroup) {
+	// // 	for {
+	// // 		<-thirtyTicker.C
+	// // 		wg.Add(1)
+	// // 		services.CheckDubTrack()
+	// // 		wg.Done()
+	// // 	}
+	// // }(&wg)
+	// twentyticker := time.NewTicker(time.Second * 20)
 
-	vkTimer := time.NewTicker(time.Second * 60)
+	// go func() {
+	// 	for {
+	// 		<-twentyticker.C
+	// 		eventbus.EventBus.Trigger("ping")
+	// 	}
+	// }()
 
-	go func() {
-		for {
-			<-vkTimer.C
-			services.CheckVK()
-		}
-	}()
-	minuteTicker := time.NewTicker(time.Minute)
+	// vkTimer := time.NewTicker(time.Second * 60)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-minuteTicker.C
-			wg.Add(1)
-			services.CheckStreamStatus()
-			wg.Done()
-		}
-	}(&wg)
+	// go func() {
+	// 	for {
+	// 		<-vkTimer.C
+	// 		services.CheckVK()
+	// 	}
+	// }()
+	// minuteTicker := time.NewTicker(time.Minute)
 
-	go func(wg *sync.WaitGroup) {
-		httpbackend.Start()
-		wg.Done()
-	}(&wg)
-	followerTicker := time.NewTicker(time.Second * 30)
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-minuteTicker.C
+	// 		wg.Add(1)
+	// 		services.CheckStreamStatus()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-followerTicker.C
-			wg.Add(1)
-			services.CheckChannelsFollowers()
-			wg.Done()
-		}
-	}(&wg)
-	go func(wg *sync.WaitGroup) {
-		bot.Start()
-		wg.Done()
-	}(&wg)
+	// go func(wg *sync.WaitGroup) {
+	// 	httpbackend.Start()
+	// 	wg.Done()
+	// }(&wg)
+	// followerTicker := time.NewTicker(time.Second * 30)
 
-	wg.Wait()
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-followerTicker.C
+	// 		wg.Add(1)
+	// 		services.CheckChannelsFollowers()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
+	// go func(wg *sync.WaitGroup) {
+	// 	bot.Start()
+	// 	wg.Done()
+	// }(&wg)
+
+	// wg.Wait()
 	log.Println("Quitting...")
 
 }

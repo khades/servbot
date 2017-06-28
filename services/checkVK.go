@@ -41,6 +41,10 @@ func Short(s string, i int) string {
 
 func CheckVK() {
 	log.Println("Checking VK")
+	if repos.Config.VkClientKey == "" {
+		log.Println("VK key is not set")
+		return
+	}
 	channels, error := repos.GetVKEnabledChannels()
 	if error != nil {
 		return
@@ -50,8 +54,10 @@ func CheckVK() {
 	}
 }
 func checkOne(channel *models.ChannelInfo) {
+	log.Println("Checking group " + channel.VkGroupInfo.GroupName)
 	result, parseError := ParseVK(&channel.VkGroupInfo)
 	if parseError != nil || result.LastMessageID == channel.VkGroupInfo.LastMessageID {
+		log.Println("ParseError " + parseError.Error())
 		return
 	}
 	repos.PushVkGroupInfo(&channel.ChannelID, result)
@@ -77,7 +83,8 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 		url = "https://api.vk.com/method/wall.get?owner_id=-" + strings.Replace(vkInputGroupInfo.GroupName, "club", "", -1) + "&filter=owner&count=2&v=5.60"
 
 	}
-	resp, error := httpclient.Get(url)
+	log.Println("URL: " + url)
+	resp, error := httpclient.Get(url + "&access_token=" + repos.Config.VkClientKey)
 	if error != nil {
 		log.Println(error)
 		return &vkGroupInfo, error

@@ -11,4 +11,5 @@ type Config struct {
 	AppOauthURL  string `valid:"required"`
 	AppURL       string `valid:"required"`
 	Debug        bool
+	VkClientKey  string
 }
