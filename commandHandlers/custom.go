@@ -21,7 +21,6 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod}
 	channelStatus.IsMod = chatMessage.IsMod
-	channelStatus.RandomIntegerIsMinimal = true
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
 	user := chatMessage.User
 	if err != nil || template.Template == "" {
