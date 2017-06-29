@@ -30,7 +30,7 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 	}
 
 	result, error := repos.GetChannelTemplateWithHistory(channelID, &commandName)
-	if error.Error() == "not found" {
+	if error != nil && error.Error() == "not found" {
 		result.ShowOffline = true
 		result.ShowOnline = true
 	}
