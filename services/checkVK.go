@@ -56,8 +56,11 @@ func CheckVK() {
 func checkOne(channel *models.ChannelInfo) {
 	log.Println("Checking group " + channel.VkGroupInfo.GroupName)
 	result, parseError := ParseVK(&channel.VkGroupInfo)
-	if parseError != nil || result.LastMessageID == channel.VkGroupInfo.LastMessageID {
+	if parseError != nil {
 		log.Println("ParseError " + parseError.Error())
+		return
+	}
+	if result.LastMessageID == channel.VkGroupInfo.LastMessageID {
 		return
 	}
 	repos.PushVkGroupInfo(&channel.ChannelID, result)
