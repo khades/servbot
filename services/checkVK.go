@@ -117,8 +117,12 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 	if utf8.RuneCountInString(vkPost.Text) > 300 {
 		vkPost.Text = Short(vkPost.Text, 297) + "..."
 	}
+	if vkPost.ID == 0 || vkPost.Owner == 0 {
+		return nil, errors.New("VK Error")
+	}
 	vkGroupInfo.LastMessageID = vkPost.ID
 	vkGroupInfo.LastMessageBody = vkPost.Text
+
 	vkGroupInfo.LastMessageURL = fmt.Sprintf("https://vk.com/%s?w=wall%d_%d", vkInputGroupInfo.GroupName, vkPost.Owner, vkPost.ID)
 	loc, _ := time.LoadLocation("Europe/Moscow")
 	nowTime := time.Unix(0, int64(vkPost.Date)*1000000000).In(loc)
