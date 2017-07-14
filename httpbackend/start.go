@@ -17,6 +17,7 @@ var sessionStore = mongostore.NewMongoStore(repos.Db.C("sessions"), 3600*24, tru
 func Start() {
 	mux := goji.NewMux()
 	mux.HandleFunc(pat.Get("/api/channel/:channel"), withSessionAndChannel(channel))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/channelname"), withSessionAndChannel(channelName))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs"), withMod(logsUsers))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/username/:user"), withMod(logsByUsername))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/userid/:userID"), withMod(logsByUserID))
