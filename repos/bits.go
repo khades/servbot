@@ -45,7 +45,7 @@ func PutSubscriptionBits(channelID *string, userID *string, user *string, subPla
 	switch *subPlan {
 	case "Prime":
 		{
-
+			AddBitsToUser(channelID, userID, user, 499, "subprime")
 		}
 	case "1000":
 		{

@@ -37,5 +37,17 @@ func userbits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
+	if error != nil && error.Error() == "not found" {
+		userName, _ := repos.GetUsernameByID(&userID)
+
+		bitsEmptyResult := models.UserBitsWithHistory{
+			UserBits: models.UserBits{
+				ChannelID: *channelID,
+				UserID:    userID,
+				User:      *userName}}
+		json.NewEncoder(w).Encode(bitsEmptyResult)
+		return
+	}
+
 	json.NewEncoder(w).Encode(*bits)
 }

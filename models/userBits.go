@@ -3,10 +3,10 @@ package models
 import "time"
 
 type UserBits struct {
-	User     string `json:"user"`
-	UserID   string `json:"userID"`
-	ChanneID string `json:"channelID"`
-	Amount   int    `json:"amount"`
+	User      string `json:"user"`
+	UserID    string `json:"userID"`
+	ChannelID string `json:"channelID"`
+	Amount    int    `json:"amount"`
 }
 
 type UserBitsHistory struct {
