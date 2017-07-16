@@ -87,7 +87,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		if bitsFound {
 			parsedBits, parsedBitsError := strconv.Atoi(bits)
 			if parsedBitsError == nil {
-				repos.AddBitsToUser(&formedMessage.ChannelID, &formedMessage.UserID, &formedMessage.User, parsedBits)
+				repos.AddBitsToUser(&formedMessage.ChannelID, &formedMessage.UserID, &formedMessage.User, parsedBits, "bits")
 			}
 		}
 		if isCommand {

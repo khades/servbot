@@ -9,8 +9,7 @@ import (
 
 var bitsCollection = "bits"
 
-func AddBitsToUser(channelID *string, userID *string, user *string, amount int) {
-	log.Println("Adding Bits")
+func AddBitsToUser(channelID *string, userID *string, user *string, amount int, reason string) {
 	log.Println(*channelID)
 	log.Println(*userID)
 	log.Println(amount)
@@ -18,7 +17,14 @@ func AddBitsToUser(channelID *string, userID *string, user *string, amount int) 
 	Db.C(bitsCollection).Upsert(bson.M{
 		"channelid": *channelID,
 		"userid":    *userID},
-		bson.M{"$inc": bson.M{"amount": amount}, "$set": bson.M{"user": *user}})
+		bson.M{
+			"$inc": bson.M{"amount": amount},
+			"$set": bson.M{"user": *user},
+			"$push": bson.M{
+				"history": bson.M{
+					"$each":  []models.UserBitsHistory{models.UserBitsHistory{Reason: reason, Change: amount}},
+					"$sort":  bson.M{"date": -1},
+					"$slice": 100}}})
 }
 
 func GetBitsForChannel(channelID *string) (*[]models.UserBits, error) {
@@ -27,8 +33,8 @@ func GetBitsForChannel(channelID *string) (*[]models.UserBits, error) {
 	return &result, error
 }
 
-func GetBitsForChannelUser(channelID *string, userID *string) (*models.UserBits, error) {
-	var result models.UserBits
+func GetBitsForChannelUser(channelID *string, userID *string) (*models.UserBitsWithHistory, error) {
+	var result models.UserBitsWithHistory
 	error := Db.C(bitsCollection).Find(bson.M{
 		"channelid": *channelID,
 		"userid":    *userID}).One(&result)
@@ -43,15 +49,15 @@ func PutSubscriptionBits(channelID *string, userID *string, user *string, subPla
 		}
 	case "1000":
 		{
-			AddBitsToUser(channelID, userID, user, 499)
+			AddBitsToUser(channelID, userID, user, 499, "sub")
 		}
 	case "2000":
 		{
-			AddBitsToUser(channelID, userID, user, 999)
+			AddBitsToUser(channelID, userID, user, 999, "sub")
 		}
 	case "3000":
 		{
-			AddBitsToUser(channelID, userID, user, 2499)
+			AddBitsToUser(channelID, userID, user, 2499, "sub")
 		}
 	}
 }
