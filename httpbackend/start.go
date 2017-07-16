@@ -33,6 +33,7 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/user"), withAuth(user))
 	mux.HandleFunc(pat.Get("/api/user/index"), withAuth(userIndex))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/bits"), withMod(bits))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/bits/:userID"), withMod(userbits))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), withMod(templates))
 
