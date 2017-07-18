@@ -14,6 +14,12 @@ import (
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
+	if strings.Contains(message.String(), ":jtv") {
+		log.Println("JTV: " + message.String())
+	}
+	if strings.Contains(message.String(), ":tmi.twitch.tv") {
+		log.Println("TMI.TWITCH.TV: " + message.String())
+	}
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
