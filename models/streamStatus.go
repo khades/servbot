@@ -17,6 +17,7 @@ type GamesHistory []StreamStatusGameHistory
 func (history GamesHistory) Len() int {
 	return len(history)
 }
+
 func (history GamesHistory) Less(i, j int) bool {
 	return history[i].Start.Before(history[j].Start)
 }

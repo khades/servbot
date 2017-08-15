@@ -32,17 +32,17 @@ func main() {
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
 
-	ticker := time.NewTicker(time.Second * 15)
+	// ticker := time.NewTicker(time.Second * 15)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-ticker.C
-			wg.Add(1)
-			bot.IrcClientInstance.SendModsCommand()
-			services.SendAutoMessages()
-			wg.Done()
-		}
-	}(&wg)
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-ticker.C
+	// 		wg.Add(1)
+	// 		bot.IrcClientInstance.SendModsCommand()
+	// 		services.SendAutoMessages()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
 
 	thirtyTicker := time.NewTicker(time.Second * 30)
 	go func(wg *sync.WaitGroup) {

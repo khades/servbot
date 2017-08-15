@@ -119,7 +119,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			client.Write("JOIN #" + value)
 		}
 		IrcClientInstance = ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true}
-		IrcClientInstance.SendModsCommand()
+		//IrcClientInstance.SendModsCommand()
 		log.Println("Bot is started")
 	}
 }
