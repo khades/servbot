@@ -69,10 +69,11 @@ func (ircClient IrcClient) SendModsCommand() {
 		ircClient.SendPublic(&models.OutgoingMessage{Channel: channelName, Body: "/mods"})
 
 	}
-	ircClient.ModChannelIndex = ircClient.ModChannelIndex + 1
-	if ircClient.ModChannelIndex == len(repos.Config.Channels) {
+	ircClient.ModChannelIndex++
+	if ircClient.ModChannelIndex == len(repos.Config.Channels) || ircClient.ModChannelIndex > len(repos.Config.Channels) {
 		ircClient.ModChannelIndex = 0
 	}
+	log.Printf("Next Mods index: %d", ircClient.ModChannelIndex)
 	// if ircClient.Ready {
 	// 	for _, value := range repos.Config.Channels {
 	// 		ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: "/mods"})
