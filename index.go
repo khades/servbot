@@ -32,7 +32,7 @@ func main() {
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
 
-	modTicker := time.NewTicker(time.Second * 300)
+	modTicker := time.NewTicker(time.Second * 30)
 
 	go func(wg *sync.WaitGroup) {
 		for {

@@ -118,7 +118,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		for _, value := range repos.Config.Channels {
 			client.Write("JOIN #" + value)
 		}
-		IrcClientInstance = ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true}
+		IrcClientInstance = ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true, ModChannelIndex: 0}
 		IrcClientInstance.SendModsCommand()
 		log.Println("Bot is started")
 	}

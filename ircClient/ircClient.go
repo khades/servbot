@@ -7,13 +7,15 @@ import (
 
 	"github.com/belak/irc"
 	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/repos"
 )
 
 // IrcClient struct defines object that will send messages to a twitch server
 type IrcClient struct {
-	Client  *irc.Client
-	Bounces map[string]time.Time
-	Ready   bool
+	Client          *irc.Client
+	Bounces         map[string]time.Time
+	Ready           bool
+	ModChannelIndex int
 }
 
 // SendDebounced prevents from sending data too frequent in public chat sending it to a PM
@@ -62,6 +64,15 @@ func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
 // SendModsCommand runs mod command
 func (ircClient IrcClient) SendModsCommand() {
 	log.Println("Sending MODS")
+	channelName := repos.Config.Channels[ircClient.ModChannelIndex]
+	if channelName != "" {
+		ircClient.SendPublic(&models.OutgoingMessage{Channel: channelName, Body: "/mods"})
+
+	}
+	ircClient.ModChannelIndex = ircClient.ModChannelIndex + 1
+	if ircClient.ModChannelIndex == len(repos.Config.Channels) {
+		ircClient.ModChannelIndex = 0
+	}
 	// if ircClient.Ready {
 	// 	for _, value := range repos.Config.Channels {
 	// 		ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: "/mods"})
