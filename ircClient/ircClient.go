@@ -7,7 +7,6 @@ import (
 
 	"github.com/belak/irc"
 	"github.com/khades/servbot/models"
-	"github.com/khades/servbot/repos"
 )
 
 // IrcClient struct defines object that will send messages to a twitch server
@@ -63,9 +62,9 @@ func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
 // SendModsCommand runs mod command
 func (ircClient IrcClient) SendModsCommand() {
 	log.Println("Sending MODS")
-	if ircClient.Ready {
-		for _, value := range repos.Config.Channels {
-			ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: "/mods"})
-		}
-	}
+	// if ircClient.Ready {
+	// 	for _, value := range repos.Config.Channels {
+	// 		ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: "/mods"})
+	// 	}
+	// }
 }
