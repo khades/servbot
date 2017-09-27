@@ -2,9 +2,9 @@ package commandHandlers
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
+	"unicode/utf8"
 
 	"html"
 
@@ -13,6 +13,14 @@ import (
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
+
+func Short(s string, i int) string {
+	runes := []rune(s)
+	if len(runes) > i {
+		return string(runes[:i])
+	}
+	return s
+}
 
 // Custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
@@ -76,8 +84,9 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 
 	message := mustache.Render(template.Template, channelStatus)
-	log.Println(template.CommandName)
-	log.Println(message)
+	if utf8.RuneCountInString(message) > 400 {
+		message = Short(message, 397) + "..."
+	}
 	redirectTo := chatMessage.User
 	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false {
 		if strings.HasPrefix(chatCommand.Body, "@") {
