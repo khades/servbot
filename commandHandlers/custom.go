@@ -2,6 +2,7 @@ package commandHandlers
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strings"
 
@@ -75,7 +76,8 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 
 	message := mustache.Render(template.Template, channelStatus)
-
+	log.Println(template.CommandName)
+	log.Println(message)
 	redirectTo := chatMessage.User
 	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false {
 		if strings.HasPrefix(chatCommand.Body, "@") {
