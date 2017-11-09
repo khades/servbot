@@ -1,6 +1,8 @@
 package services
 
 import (
+	"strings"
+
 	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -14,7 +16,7 @@ func SendAutoMessages() {
 	for _, message := range *messages {
 		repos.ResetAutoMessageThreshold(&message)
 		channel, error := repos.GetUsernameByID(&message.ChannelID)
-		if error == nil {
+		if error == nil && strings.TrimSpace(message.Message) != "" {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{Channel: *channel, Body: message.Message})
 		}
 	}
