@@ -87,6 +87,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 
 	message := mustache.Render(template.Template, channelStatus)
 	log.Println("Debug template output")
+	log.Println("User: ", chatMessage.User)
 	log.Println(template.Template)
 	log.Println(channelStatus)
 	log.Println(message)
