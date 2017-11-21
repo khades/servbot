@@ -29,6 +29,7 @@ type ChannelInfoForTemplate struct {
 	RandomIngegerIsZero    bool
 	RandomString           string
 	IsMod                  bool
+	IsSub                  bool
 	CommandBody            string
 }
 

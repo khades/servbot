@@ -30,6 +30,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod}
 	channelStatus.IsMod = chatMessage.IsMod
+	channelStatus.IsSub = chatMessage.IsSub
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
 	user := chatMessage.User
 	if err != nil || template.Template == "" {
@@ -87,8 +88,11 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	if utf8.RuneCountInString(message) > 400 {
 		message = Short(message, 397) + "..."
 	}
+	if message == "" {
+		return
+	}
 	redirectTo := chatMessage.User
-	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false {
+	if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false && template.OnlyPrivate == false {
 		if strings.HasPrefix(chatCommand.Body, "@") {
 			redirectTo = chatCommand.Body[1:]
 		} else {
@@ -96,19 +100,28 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 
 		}
 	}
+	if template.OnlyPrivate == true {
+		ircClient.SendPrivate(&models.OutgoingMessage{
+			Channel: chatMessage.Channel,
+			User:    user,
+			Body:    html.UnescapeString(message)})
+		return
+	}
+
 	if template.PreventDebounce == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			User:    user,
 			Body:    html.UnescapeString(message)})
-	} else {
-		ircClient.SendDebounced(models.OutgoingDebouncedMessage{
-			Message: models.OutgoingMessage{
-				Channel: chatMessage.Channel,
-				User:    user,
-				Body:    html.UnescapeString(message)},
-			Command:    template.AliasTo,
-			RedirectTo: redirectTo})
+		return
 	}
+
+	ircClient.SendDebounced(models.OutgoingDebouncedMessage{
+		Message: models.OutgoingMessage{
+			Channel: chatMessage.Channel,
+			User:    user,
+			Body:    html.UnescapeString(message)},
+		Command:    template.AliasTo,
+		RedirectTo: redirectTo})
 
 }
