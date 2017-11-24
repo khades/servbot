@@ -15,7 +15,6 @@ import (
 
 func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	//log.Println(message.String())
-
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
 	msgID, _ := message.Tags.GetTag("msg-id")
@@ -27,6 +26,9 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	user, userFound := message.Tags.GetTag("display-name")
 	if userFound == false || user == "" {
 		user, userFound = message.Tags.GetTag("login")
+	}
+	if msgID == "subgift" {
+		user, userFound := message.Tags.GetTag("msg-param-recipient-display-name")
 	}
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
 	userID, userIDFound := message.Tags.GetTag("user-id")

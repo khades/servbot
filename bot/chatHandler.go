@@ -23,6 +23,10 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
+		case "subgift":
+			{
+				subHandler(message, &IrcClientInstance)
+			}
 		case "room_mods":
 			{
 				commaIndex := strings.Index(message.Params[1], ":")
