@@ -85,7 +85,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 
 	message := mustache.Render(template.Template, channelStatus)
-
+	message = strings.TrimSpace(message)
 	if utf8.RuneCountInString(message) > 400 {
 		message = Short(message, 397) + "..."
 	}
