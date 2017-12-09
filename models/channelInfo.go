@@ -31,6 +31,7 @@ type ChannelInfoForTemplate struct {
 	IsMod                  bool
 	IsSub                  bool
 	CommandBody            string
+	CommandBodyIsEmpty     bool
 }
 
 // GetCommands Helper Command for mustashe

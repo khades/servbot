@@ -28,7 +28,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	if error != nil {
 		return
 	}
-	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body}
+	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
 	channelStatus.IsMod = chatMessage.IsMod
 	channelStatus.IsSub = chatMessage.IsSub
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
