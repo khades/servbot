@@ -14,5 +14,5 @@ type AutoMessage struct {
 	DurationLimit     time.Duration `json:"durationLimit"`
 	MessageThreshold  int           `json:"messageThreshold"`
 	DurationThreshold time.Time     `json:"durationThreshold"`
-	Game              string        `valid:"required" json:"game"`
+	Game              string        `json:"game"`
 }
