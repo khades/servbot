@@ -19,9 +19,9 @@ func DecrementAutoMessages(channelID *string) {
 	Db.C(autoMessageCollectionName).UpdateAll(bson.M{
 		"channelid": *channelID,
 		"message":   bson.M{"$ne": ""},
-		"$or": bson.D{
-			{"game", bson.M{"$in": games}},
-			{"game", bson.M{"$exists": false}}}},
+		"$or": []bson.M{
+			bson.M{"game": bson.M{"$in": games}},
+			bson.M{"game": bson.M{"$exists": false}}}},
 		bson.M{"$inc": bson.M{"messagethreshold": -1}})
 }
 
@@ -92,9 +92,9 @@ func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) {
 			"$push": bson.M{
 				"history": bson.M{
 					"$each": []models.AutoMessageHistory{models.AutoMessageHistory{
-						User:   autoMessageUpdate.User,
-						UserID: autoMessageUpdate.UserID,
-						Game:   autoMessageUpdate.Game,
+						User:          autoMessageUpdate.User,
+						UserID:        autoMessageUpdate.UserID,
+						Game:          autoMessageUpdate.Game,
 						Date:          now,
 						Message:       autoMessageUpdate.Message,
 						MessageLimit:  autoMessageUpdate.MessageLimit,
