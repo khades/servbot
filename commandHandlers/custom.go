@@ -2,7 +2,6 @@ package commandHandlers
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
 	"unicode/utf8"
@@ -29,7 +28,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	if error != nil {
 		return
 	}
-	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod}
+	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body}
 	channelStatus.IsMod = chatMessage.IsMod
 	channelStatus.IsSub = chatMessage.IsSub
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
@@ -86,11 +85,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 
 	message := mustache.Render(template.Template, channelStatus)
-	log.Println("Debug template output")
-	log.Println("User: ", chatMessage.User)
-	log.Println(template.Template)
-	log.Println(channelStatus)
-	log.Println(message)
+
 	if utf8.RuneCountInString(message) > 400 {
 		message = Short(message, 397) + "..."
 	}
