@@ -11,7 +11,18 @@ import (
 var autoMessageCollectionName = "autoMessages"
 
 func DecrementAutoMessages(channelID *string) {
-	Db.C(autoMessageCollectionName).UpdateAll(bson.M{"channelid": *channelID, "message": bson.M{"$ne": ""}}, bson.M{"$inc": bson.M{"messagethreshold": -1}})
+	channelInfo, error := GetChannelInfo(channelID)
+	games := []string{""}
+	if error == nil && channelInfo.StreamStatus.Online == true {
+		games = append(games, channelInfo.StreamStatus.Game)
+	}
+	Db.C(autoMessageCollectionName).UpdateAll(bson.M{
+		"channelid": *channelID,
+		"message":   bson.M{"$ne": ""},
+		"$or": bson.D{
+			{"game", bson.M{"$in": games}},
+			{"game", bson.M{"$exists": false}}}},
+		bson.M{"$inc": bson.M{"messagethreshold": -1}})
 }
 
 func GetCurrentAutoMessages() (*[]models.AutoMessage, error) {

@@ -23,5 +23,6 @@ func channel(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, chan
 	channelInfoResponse := channelInfoResponseStruct{
 		Channel: *channelName,
 		IsMod:   channelInfo.GetIfUserIsMod(&s.UserID)}
+
 	json.NewEncoder(w).Encode(&channelInfoResponse)
 }

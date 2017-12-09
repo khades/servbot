@@ -7,6 +7,7 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/hoisie/mustache"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 
@@ -64,7 +65,13 @@ func autoMessageCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 	request.UserID = s.UserID
 
 	request.ChannelID = *channelID
+	_, mustasheError := mustache.ParseString(request.Message)
+	if mustasheError != nil {
 
+		writeJSONError(w, mustasheError.Error(), http.StatusUnprocessableEntity)
+		return
+
+	}
 	id := repos.CreateAutoMessage(&request)
 
 	json.NewEncoder(w).Encode(autoMessageCreationResponse{*id})
@@ -85,6 +92,13 @@ func autoMessageUpdate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 		log.Println(err)
 		writeJSONError(w, "Invalid entry", http.StatusUnprocessableEntity)
 		return
+	}
+	_, mustasheError := mustache.ParseString(request.Message)
+	if mustasheError != nil {
+
+		writeJSONError(w, mustasheError.Error(), http.StatusUnprocessableEntity)
+		return
+
 	}
 	request.User = s.Username
 	request.UserID = s.UserID
