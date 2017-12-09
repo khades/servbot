@@ -69,13 +69,14 @@ func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) *bson.Object
 				Message:           autoMessageUpdate.Message,
 				MessageThreshold:  autoMessageUpdate.MessageLimit,
 				MessageLimit:      autoMessageUpdate.MessageLimit,
+				Game:              autoMessageUpdate.Game,
 				DurationLimit:     durationLimit,
 				DurationThreshold: now.Add(durationLimit)},
 			History: []models.AutoMessageHistory{
 				models.AutoMessageHistory{
-					User:   autoMessageUpdate.User,
-					UserID: autoMessageUpdate.UserID,
-
+					User:          autoMessageUpdate.User,
+					UserID:        autoMessageUpdate.UserID,
+					Game:          autoMessageUpdate.Game,
 					Date:          now,
 					Message:       autoMessageUpdate.Message,
 					MessageLimit:  autoMessageUpdate.MessageLimit,
