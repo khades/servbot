@@ -28,7 +28,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 		user, userFound = message.Tags.GetTag("login")
 	}
 	if msgID == "subgift" {
-		user, userFound := message.Tags.GetTag("msg-param-recipient-display-name")
+		user, userFound = message.Tags.GetTag("msg-param-recipient-display-name")
 	}
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
 	userID, userIDFound := message.Tags.GetTag("user-id")
