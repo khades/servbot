@@ -94,7 +94,7 @@ func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) {
 					"$each": []models.AutoMessageHistory{models.AutoMessageHistory{
 						User:   autoMessageUpdate.User,
 						UserID: autoMessageUpdate.UserID,
-
+						Game:   autoMessageUpdate.Game,
 						Date:          now,
 						Message:       autoMessageUpdate.Message,
 						MessageLimit:  autoMessageUpdate.MessageLimit,
@@ -107,6 +107,7 @@ func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) {
 				Message:           autoMessageUpdate.Message,
 				MessageThreshold:  autoMessageUpdate.MessageLimit,
 				MessageLimit:      autoMessageUpdate.MessageLimit,
+				Game:              autoMessageUpdate.Game,
 				DurationLimit:     durationLimit,
 				DurationThreshold: now.Add(durationLimit)}})
 
