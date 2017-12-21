@@ -7,3 +7,5 @@ var EventBus = observable.New()
 func EventSub(channelID *string) string {
 	return "sub:" + *channelID
 }
+
+var SubtrainBus = observable.New()

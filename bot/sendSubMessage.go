@@ -3,6 +3,8 @@ package bot
 import (
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	
+	"github.com/hoisie/mustache"
 )
 
 func sendSubMessage(channel *string, channelID *string, user *string, subPlan *string) {
@@ -32,6 +34,13 @@ func sendSubMessage(channel *string, channelID *string, user *string, subPlan *s
 			}
 		}
 	}
+	channelInfo, channelInfoError := repos.GetChannelInfo(channelID)
+	if channelInfoError == nil && channelInfo.SubTrain.Enabled {
+		localSubtrain := channelInfo.SubTrain
+		localSubtrain.CurrentStreak = localSubtrain.CurrentStreak + 1
+		template = template + mustache.Render(channelInfo.SubTrain.AppendTemplate, localSubtrain)
+	}
+	
 	if template != "" {
 		IrcClientInstance.SendPublic(&models.OutgoingMessage{
 			Body:    template,

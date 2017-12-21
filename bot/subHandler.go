@@ -45,13 +45,14 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 				IsPrime:   prime,
 				SubPlan:   subplanMsg,
 				Date:      time.Now()}
+			repos.IncrementSubtrainCounterByChannelID(&channelID)
+
 			if subCount == 1 {
 				sendSubMessage(&channel, &channelID, &user, &subplanMsg)
 			} else {
 				sendResubMessage(&channel, &channelID, &user, &subCount, &subplanMsg)
 			}
 			repos.LogSubscription(&loggedSubscription)
-
 			log.Printf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
 
 			eventbus.EventBus.Trigger(eventbus.EventSub(&channelID))

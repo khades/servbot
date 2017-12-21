@@ -16,7 +16,11 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-	result, _ := repos.GetUsersID(&repos.Config.Channels)
+	result, resultError := repos.GetUsersID(&repos.Config.Channels)
+	if resultError != nil {
+		log.Printf("INITIALISATION ERROR: ", resultError)
+		return
+	}
 	for _, value := range *result {
 		repos.PushCommandsForChannel(&value)
 	}
@@ -53,7 +57,24 @@ func main() {
 			wg.Done()
 		}
 	}(&wg)
-
+	subTrainNotificationTicker := time.NewTicker(time.Second * 5)
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-subTrainNotificationTicker.C
+			wg.Add(1)
+			services.SendSubTrainNotification()
+			wg.Done()
+		}
+	}(&wg)
+	subTrainTimeoutTicker := time.NewTicker(time.Second * 5)
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-subTrainTimeoutTicker.C
+			wg.Add(1)
+			services.SendSubTrainTimeoutMessage()
+			wg.Done()
+		}
+	}(&wg)
 	// go func(wg *sync.WaitGroup) {
 	// 	for {
 	// 		<-thirtyTicker.C

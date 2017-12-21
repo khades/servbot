@@ -62,5 +62,11 @@ func Start() {
 
 	mux.HandleFunc(pat.Get("/api/time"), corsEnabled(getTime))
 	mux.HandleFunc(pat.Get("/api/timeticker"), corsEnabled(timeTicker))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subtrain"),  withSessionAndChannel(subtrain))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subtrain"), corsEnabled(options))
+	
+	mux.HandleFunc(pat.Post("/api/channel/:channel/subtrain"), withMod(putSubtrain))
+
 	http.ListenAndServe("localhost:8000", mux)
 }

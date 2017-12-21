@@ -32,3 +32,9 @@ func GetModChannels(userID *string) (*[]models.ChannelWithID, error) {
 			bson.M{"channelid": *userID}}}).All(&result)
 	return &result, error
 }
+
+func GetDubTrackEnabledChannels() (*[]models.ChannelInfo, error) {
+	result := []models.ChannelInfo{}
+	error := Db.C(channelInfoCollection).Find(bson.M{"dubtrack.id": bson.M{"$exists": true, "$ne": ""}}).All(&result)
+	return &result, error
+}

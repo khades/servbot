@@ -21,8 +21,14 @@ func processMessage(message *models.AutoMessage) {
 	}
 	repos.ResetAutoMessageThreshold(message)
 
-	compiledMessage := mustache.Render(message.Message, channelInfo)
-
+	compiledTemplate, templateError := mustache.ParseString(message.Message)
+	if templateError != nil {
+		return
+	}
+	compiledMessage := compiledTemplate.Render(channelInfo)
+	if  strings.TrimSpace(compiledMessage) == "" {
+		return
+	}
 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
 		Channel: *channel,
 		Body:    html.UnescapeString(compiledMessage)})
@@ -35,10 +41,11 @@ func SendAutoMessages() {
 		return
 	}
 	for _, message := range *messages {
-		repos.ResetAutoMessageThreshold(&message)
-		channel, error := repos.GetUsernameByID(&message.ChannelID)
-		if error == nil && strings.TrimSpace(message.Message) != "" {
-			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{Channel: *channel, Body: message.Message})
-		}
+		//repos.ResetAutoMessageThreshold(&message)
+		processMessage(&message)
+		// channel, error := repos.GetUsernameByID(&message.ChannelID)
+		// if error == nil && strings.TrimSpace(message.Message) != "" {
+		// 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{Channel: *channel, Body: message.Message})
+		// }
 	}
 }

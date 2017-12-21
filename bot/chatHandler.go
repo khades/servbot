@@ -104,11 +104,19 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			if message.User == "khadesru" && commandBody.Command == "debugSub" {
 				subPlan := "2000"
 				sendSubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &subPlan)
+				channelID, channelIDFound := message.Tags.GetTag("room-id") 
+				if channelIDFound {
+					repos.IncrementSubtrainCounterByChannelID(&channelID)
+				}				
 			}
 			if message.User == "khadesru" && commandBody.Command == "debugResub" {
 				resubCount := 3
 				subPlan := "2000"
 				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount, &subPlan)
+				channelID, channelIDFound := message.Tags.GetTag("room-id") 
+				if channelIDFound {
+					repos.IncrementSubtrainCounterByChannelID(&channelID)
+				}		
 			}
 			handlerFunction := commandHandlers.Router.Go(commandBody.Command)
 			handlerFunction(true, &formedMessage, commandBody, &IrcClientInstance)

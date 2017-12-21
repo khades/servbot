@@ -1,7 +1,7 @@
 package repos
 
 import (
-	"log"
+
 	"time"
 
 	"gopkg.in/mgo.v2/bson"
@@ -17,8 +17,6 @@ func PushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 	if channelInfo != nil {
 		prevStatus = channelInfo.StreamStatus
 	}
-	log.Println("Outputting prev status")
-	log.Println(prevStatus)
 	if prevStatus.Online == false && streamStatus.Online == true {
 
 		currentStatus = models.StreamStatus{Online: true,

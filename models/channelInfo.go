@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strings"
 	"time"
@@ -20,6 +19,7 @@ type ChannelInfo struct {
 	Mods            []string    `json:"mods"`
 	OfflineCommands []string    `json:"offlinecommands"`
 	OnlineCommands  []string    `json:"onlinecommands"`
+	SubTrain        SubTrain    `json:"subTrain"`
 }
 type ChannelInfoForTemplate struct {
 	ChannelInfo
@@ -45,8 +45,6 @@ func (channelInfo ChannelInfo) GetCommands() string {
 
 // GetIfUserIsMod checks if user exist in internal mod array
 func (channelInfo ChannelInfo) GetIfUserIsMod(userID *string) bool {
-	log.Println(channelInfo.Mods)
-	log.Println(*userID)
 	isMod := false
 	if *userID == "40635840" || channelInfo.ChannelID == *userID {
 		return true
