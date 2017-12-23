@@ -33,6 +33,7 @@ func LogMessage(message *models.ChatMessage) {
 					"$each":  []models.BanInfo{banInfo},
 					"$sort":  bson.M{"date": -1},
 					"$slice": 10}}}
+		LogChannelBan(&message.UserID, &message.User, &message.ChannelID, &message.BanLength)
 	}
 	Db.C("messageLogs").Upsert(
 		bson.M{"channelid": message.ChannelID, "userid": message.UserID},

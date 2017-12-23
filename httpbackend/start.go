@@ -65,7 +65,10 @@ func Start() {
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subtrain"),  withSessionAndChannel(subtrain))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subtrain"), corsEnabled(options))
-	
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/bans"),  withSessionAndChannel(channelBans))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/bans"), corsEnabled(options))
+
 	mux.HandleFunc(pat.Post("/api/channel/:channel/subtrain"), withMod(putSubtrain))
 
 	http.ListenAndServe("localhost:8000", mux)

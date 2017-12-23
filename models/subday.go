@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 type SubdayRecord struct {
@@ -14,6 +16,7 @@ type SubdayWinnersHistory struct {
 	Winners []SubdayRecord `json:"winners"`
 }
 type Subday struct {
+	ID             bson.ObjectId
 	ChannelID      string                 `json:"channelID"`
 	IsActive       bool                   `json:"isActive"`
 	SubsOnly       bool                   `json:"subsOnly"`

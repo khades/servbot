@@ -29,6 +29,7 @@ func putSubtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 	}
 	request.CurrentStreak = 0
 	request.NotificationShown = false
-	repos.PutChannelSubtrain(channelID, &request)
+	request.Users = []string{}
+	repos.PutChannelSubtrainWeb(channelID, &request)
 	json.NewEncoder(w).Encode(optionResponse{"OK"})
 }

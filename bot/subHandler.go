@@ -52,7 +52,6 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 				sendResubMessage(&channel, &channelID, &user, &subCount, &subplanMsg)
 			}
 			repos.LogSubscription(&loggedSubscription)
-			repos.IncrementSubtrainCounterByChannelID(&channelID)
 
 			log.Printf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
 

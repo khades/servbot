@@ -6,6 +6,7 @@ import (
 
 type SubTrain struct {
 	Enabled              bool      `json:"enabled"`
+	OnlyNewSubs          bool      `json:"onlyNewSubs"`
 	ExpirationLimit      int       `json:"expirationLimit"`
 	NotificationLimit    int       `json:"notificationLimit"`
 	NotificationShown    bool      `json:"notificationShown"`
@@ -15,4 +16,5 @@ type SubTrain struct {
 	TimeoutTemplate      string    `json:"timeoutTemplate"`
 	NotificationTemplate string    `json:"notificationTemplate"`
 	CurrentStreak        int       `json:"сurrentStreak"`
+	Users                []string  `json:"users"`
 }
