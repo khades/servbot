@@ -2,12 +2,13 @@ package repos
 
 import (
 	"time"
+	"log"
 	"gopkg.in/mgo.v2/bson"
 	"math/rand"
 	"github.com/khades/servbot/models"
 )
 
-var subdayCollection string = "subdays"
+var subdayCollection  = "subdays"
 
 func GetLastActiveSubday(channelID *string) (*models.Subday, error) {
 	var result models.Subday
@@ -17,7 +18,15 @@ func GetLastActiveSubday(channelID *string) (*models.Subday, error) {
 	return &result, error
 }
 
-func GetLastSubday(channelID *string) (*models.Subday, error) {
+func GetLastSubday(channelID *string) (*models.SubdayNoWinners, error) {
+	var result models.SubdayNoWinners
+	error := Db.C(subdayCollection).Find(bson.M{
+		"channelid": *channelID,
+		}).Sort("-date").One(&result)
+	return &result, error
+}
+
+func GetLastSubdayMod(channelID *string) (*models.Subday, error) {
 	var result models.Subday
 	error := Db.C(subdayCollection).Find(bson.M{
 		"channelid": *channelID,
@@ -25,22 +34,58 @@ func GetLastSubday(channelID *string) (*models.Subday, error) {
 	return &result, error
 }
 
+func GetSubdayById(id *string) (*models.SubdayNoWinners, error) {
+	var result models.SubdayNoWinners
+	error := Db.C(subdayCollection).Find(bson.M{
+		"_id": bson.ObjectIdHex(*id)}).One(&result)
+	return &result, error
+}
+
+func GetSubdayByIdMod(id *string) (*models.Subday, error) {
+	var result models.Subday
+	error := Db.C(subdayCollection).Find(bson.M{
+		"_id": bson.ObjectIdHex(*id)}).One(&result)
+	return &result, error
+}
+
+func GetSubdays(channelID *string)(*[]models.SubdayList, error) {
+	var result []models.SubdayList
+	error := Db.C(subdayCollection).Find(bson.M{
+		"channelid": *channelID,
+		}).Sort("-date").All(&result)
+	return &result, error
+}
+
 func CloseActiveSubday(channelID *string) {
 	Db.C(subdayCollection).UpdateAll(bson.M{
 		"channelid": *channelID,
 		"isactive": true},
-		 bson.M{"isactive":false})
+		 bson.M{"$set":bson.M{"isactive":false}})
+	SetSubdayIsActive(channelID, false)
+
 }
 
-func PullWinner(id *bson.ObjectId, user *string) {
+func CloseSubday(channelID *string, id *string) {
 	Db.C(subdayCollection).UpdateAll(bson.M{
-		"_id": *id},
+		"channelid": *channelID,
+		"_id": bson.ObjectIdHex(*id)},
+		 bson.M{"$set":bson.M{"isactive":false}})
+	SetSubdayIsActive(channelID, false)
+
+}
+func SubdayPullWinner(id *string, user *string) {
+	Db.C(subdayCollection).UpdateAll(bson.M{
+		"_id": bson.ObjectIdHex(*id),
+		"isactive": true},
 		 bson.M{
 			 "$pull": bson.M{
 				 "winners": bson.M{"user":*user}}})
 }
-func PushWinners(id *bson.ObjectId, winners *[]models.SubdayRecord) {
-	Db.C(subdayCollection).UpdateAll(bson.M{"_id": *id}, bson.M{
+
+func PushWinners(id bson.ObjectId, winners *[]models.SubdayRecord) {
+	Db.C(subdayCollection).UpdateAll(bson.M{
+		"_id":  id,
+		"isactive": true}, bson.M{
 		"$set": bson.M{"winners": *winners},
 		"$push": bson.M{"winnershistory":
 			bson.M{
@@ -50,15 +95,23 @@ func PushWinners(id *bson.ObjectId, winners *[]models.SubdayRecord) {
 				"$sort":  bson.M{"date": -1},
 				"$slice": 5}}})
 }
-func PickRandomWinnerForSubday(id *bson.ObjectId, channelID *string) bool {
+func PickRandomWinnerForSubday( channelID *string,id *string) *models.SubdayRecord {
 	var result models.Subday
-	error := Db.C(subdayCollection).Find(bson.M{"_id": *id, "channelid": *channelID, "isactive":true}).One(&result)
+	error := Db.C(subdayCollection).Find(bson.M{"_id": bson.ObjectIdHex(*id), "channelid": *channelID, "isactive":true}).One(&result)
 	if error !=nil {
-		return false
+		log.Println("some error with collection")
+		return nil
 	}
 	votes := []models.SubdayRecord{}
-	if (len(votes) == 0) {
-		return false
+	if (len(result.Votes) == 0) {
+		log.Println("No Votes")
+
+		return nil
+	}
+	if (len(result.Votes) == len(result.Winners)) {
+		log.Println("Nobody To Pick")
+
+		return nil
 	}
 	winners := result.Winners
 	for _, vote := range result.Votes {
@@ -73,17 +126,22 @@ func PickRandomWinnerForSubday(id *bson.ObjectId, channelID *string) bool {
 			votes = append(votes, vote)
 		}
 	}
-	winners = append(winners, votes[rand.Intn(len(votes) -1)])
-	return true
+	var winner models.SubdayRecord
+	random := rand.Intn(len(votes))
+	winner = votes[random]
+	winners = append(winners,winner)
+	PushWinners(bson.ObjectIdHex(*id), &winners)
+	return &winner
 }
+
 func VoteForSubday(user *string, userID *string, id *bson.ObjectId, game *string) {
-	
+
 	Db.C(subdayCollection).UpdateAll(bson.M{
 		"_id" : *id,
 		"votes.userid": userID},
-		bson.M{"$set":bson.M{"votes": bson.M{
-			"votes.*.game": *game,
-			"votes.*.user": *user}}})
+		bson.M{"$set":bson.M{
+			"votes.$.game": *game,
+			"votes.$.user": *user}})
 			
 	Db.C(subdayCollection).UpdateAll(bson.M{
 		"_id": *id,
@@ -94,12 +152,33 @@ func VoteForSubday(user *string, userID *string, id *bson.ObjectId, game *string
 			 Game: *game}}})
 
 }
+func SetSubdayEnabled(channelID *string, enabled bool) {
+	channelInfo, _ := GetChannelInfo(channelID)
+	if channelInfo != nil {
+		channelInfo.SubdayEnabled = enabled
+	} else {
+		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, SubdayEnabled: enabled})
+	}
+	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subdayenabled": enabled}})
+}
+
+func SetSubdayIsActive(channelID *string, isActive bool) {
+	channelInfo, _ := GetChannelInfo(channelID)
+	if channelInfo != nil {
+		channelInfo.SubdayIsActive= isActive
+	} else {
+		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, SubdayIsActive: isActive})
+	}
+	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subdayisactive": isActive}})
+}
 
 func CreateNewSubday(channelID *string, subsOnly bool, name *string) bool {
 	_, subdayError := GetLastActiveSubday(channelID)
-	if subdayError != nil {
+	if subdayError == nil {
 		return false
 	}
-	Db.C(subdayCollection).Insert(models.Subday{Name: *name, SubsOnly: subsOnly, Date: time.Now(), ChannelID:*channelID})
+	object :=models.Subday{Name: *name, SubsOnly: subsOnly, IsActive: true, Date: time.Now(), ChannelID:*channelID}
+	Db.C(subdayCollection).Insert(object)
+	SetSubdayIsActive(channelID, true)
 	return true
 }

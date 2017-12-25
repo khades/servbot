@@ -16,7 +16,7 @@ type SubdayWinnersHistory struct {
 	Winners []SubdayRecord `json:"winners"`
 }
 type Subday struct {
-	ID             bson.ObjectId
+	ID             bson.ObjectId          `bson:"_id,omitempty" json:"id"`
 	ChannelID      string                 `json:"channelID"`
 	IsActive       bool                   `json:"isActive"`
 	SubsOnly       bool                   `json:"subsOnly"`
@@ -25,4 +25,21 @@ type Subday struct {
 	Votes          []SubdayRecord         `json:"votes"`
 	Winners        []SubdayRecord         `json:"winners"`
 	WinnersHistory []SubdayWinnersHistory `json:"winnersHistory"`
+}
+type SubdayNoWinners struct {
+	ID             bson.ObjectId          `bson:"_id,omitempty" json:"id"`
+	ChannelID      string                 `json:"channelID"`
+	IsActive       bool                   `json:"isActive"`
+	SubsOnly       bool                   `json:"subsOnly"`
+	Name           string                 `json:"name"`
+	Date           time.Time              `json:"date"`
+	Votes          []SubdayRecord         `json:"votes"`
+}
+
+type SubdayList struct {
+	ID             bson.ObjectId          `bson:"_id,omitempty" json:"id"`
+	ChannelID      string                 `json:"channelID"`
+	IsActive       bool                   `json:"isActive"`
+	Name           string                 `json:"name"`
+	Date           time.Time              `json:"date"`
 }

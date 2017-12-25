@@ -81,7 +81,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			MessageStruct: models.MessageStruct{
 				Username:    message.User,
 				MessageType: "message",
-				MessageBody: message.Params[1],
+				MessageBody: strings.TrimSpace(message.Params[1]),
 				Date:        time.Now()},
 			Channel:   message.Params[0][1:],
 			ChannelID: message.Tags["room-id"].Encode(),
@@ -92,7 +92,13 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		repos.LogMessage(&formedMessage)
 		repos.DecrementAutoMessages(&formedMessage.ChannelID)
+	
 		commandBody, isCommand := formedMessage.GetCommand()
+
+		isVote := strings.HasPrefix(message.Params[1], "%")
+		if isVote == true {
+			commandHandlers.Vote(true, &formedMessage, commandBody, &IrcClientInstance)
+		}
 		bits, bitsFound := message.Tags.GetTag("bits")
 		if bitsFound {
 			parsedBits, parsedBitsError := strconv.Atoi(bits)

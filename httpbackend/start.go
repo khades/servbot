@@ -63,11 +63,26 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/time"), corsEnabled(getTime))
 	mux.HandleFunc(pat.Get("/api/timeticker"), corsEnabled(timeTicker))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/subtrain"),  withSessionAndChannel(subtrain))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subtrain"), withSessionAndChannel(subtrain))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subtrain"), corsEnabled(options))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/bans"),  withSessionAndChannel(channelBans))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/bans"), withMod(channelBans))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/bans"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays"), withMod(subdayList))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID"), withSessionAndChannel(subdayByID))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/close"), withMod(subdayClose))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/close"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/randomize"), withMod(subdayRandomize))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/randomize"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), withMod(subdayPullWinner))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), corsEnabled(options))
 
 	mux.HandleFunc(pat.Post("/api/channel/:channel/subtrain"), withMod(putSubtrain))
 

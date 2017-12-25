@@ -18,4 +18,7 @@ func (router RouterStruct) Go(command string) CommandHandler {
 var Router = RouterStruct{routes: map[string]CommandHandler{
 	"new":   New,
 	"alias": Alias,
-	"subdayNew": SubdayNew}}
+	"subdayNew": SubdayNew,
+	"subdayEnd": SubdayEnd,
+	"subdayDisable": SubdayDisable,
+	"subdayEnable": SubdayEnable}}

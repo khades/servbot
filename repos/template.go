@@ -23,7 +23,6 @@ func SetChannelTemplate(user *string, userID *string, channelID *string, command
 	if template.Template == "" {
 		_, templateError := mustache.ParseString(template.Template)
 		if templateError != nil {
-			//	log.Println(templateError)
 			return templateError
 		}
 	}
