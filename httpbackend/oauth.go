@@ -69,7 +69,7 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 	expiration := time.Now().Add(3 * 24 * time.Hour)
 
 	cookie := http.Cookie{Name:"oauth", Value: tokenStruct.Token, Expires: expiration}
-	r.AddCookie(&cookie)
+	http.SetCookie(w, &cookie)
 	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()
 }
