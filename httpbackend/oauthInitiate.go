@@ -7,26 +7,30 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/khades/servbot/repos"
 )
-
-func oauthInitiate(w http.ResponseWriter, r *http.Request) {
+func validateSession(r *http.Request) bool {
 	cookie, cookieErr := r.Cookie("oauth")
-	redirect := false
-	if cookieErr != nil || cookie.Value == "" {
-		redirect = true
-	}
+
+	if cookieErr != nil || cookie == nil || cookie.Value == "" {
+		return false
+	} 
 
 	userInfo, userInfoError := repos.GetUserInfoByOauth(&cookie.Value)
 	if (userInfoError != nil) {
-		redirect = true
+		return false
 
 	}
 
 	_, err := govalidator.ValidateStruct(userInfo)
 	if err != nil {
-		redirect = true
+		return false
 
 	}
-	if redirect == true {
+	return true
+}
+
+func oauthInitiate(w http.ResponseWriter, r *http.Request) {
+	isValidCookie := validateSession(r)
+	if isValidCookie == false {
 		log.Println("redirecting to api")
 		http.Redirect(w, r, "https://api.twitch.tv/kraken/oauth2/authorize"+
 			"?response_type=code"+
