@@ -23,7 +23,7 @@ func session(next sessionHandlerFunc) http.HandlerFunc {
 			return
 		}
 	
-		next(w, r, &userInfo)
+		next(w, r, userInfo)
 	}
 }
 
