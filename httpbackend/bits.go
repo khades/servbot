@@ -10,11 +10,6 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-type bitsResponse struct {
-	Bits    []models.UserBits `json:"bits"`
-	Channel string            `json:"channel"`
-}
-
 func bits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
 	bits, error := repos.GetBitsForChannel(channelID)
@@ -22,7 +17,7 @@ func bits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channel
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(bitsResponse{*bits, *channelName})
+	json.NewEncoder(w).Encode(*bits)
 }
 
 func userbits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
