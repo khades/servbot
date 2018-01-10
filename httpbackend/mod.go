@@ -11,14 +11,11 @@ import (
 func mod(next sessionAndChannelHandlerFunc) sessionAndChannelHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession, channelID *string, channelName *string) {
 		channelInfo, error := repos.GetChannelInfo(channelID)
-		//log.Println(channelInfo)
 		if error != nil {
 			log.Println(error)
 			writeJSONError(w, "That channel is not defined", http.StatusForbidden)
 			return
 		}
-		//log.Println("FIXING GETTING SESSION")
-		//log.Println(*session)
 		if channelInfo.GetIfUserIsMod(&session.UserID) == true {
 			next(w, r, session, channelID, channelName)
 		} else {

@@ -6,9 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-
-	"github.com/khades/servbot/httpclient"
-	"github.com/khades/servbot/models"
+	"time"
 	"github.com/khades/servbot/repos"
 )
 
@@ -68,38 +66,10 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, "Twitch Error, Can't marshall oauth token", http.StatusUnprocessableEntity)
 		return
 	}
-	url := "https://api.twitch.tv/kraken/user?oauth_token=" + tokenStruct.Token
-	nameResp, err := httpclient.TwitchV5(repos.Config.ClientID, "GET", url, nil)
-	if err != nil {
-		log.Println(err)
-		writeJSONError(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
-		return
-	}
+	expiration := time.Now().Add(3 * 24 * time.Hour)
 
-	if nameResp.StatusCode == 400 {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err == nil {
-			log.Println(string(body))
-		} else {
-			log.Println(err)
-			log.Println("We didnt parsed body of username request")
-		}
-		writeJSONError(w, "Twitch Error, Cant get username", http.StatusUnprocessableEntity)
-		return
-	}
-	var usernameStruct = new(nameResponse)
-
-	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
-	if nameMarshallError != nil {
-		log.Println(marshallError)
-		writeJSONError(w, "Twitch Error, Cant marshall username: "+nameMarshallError.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-	session, err := repos.GetSession(r)
-	session.Options.Path = "/"
-	sessionObject := models.HTTPSession{Username: usernameStruct.Name, UserID: usernameStruct.ID, Key: tokenStruct.Token, AvatarURL: usernameStruct.Logo}
-	session.Values["sessions"] = sessionObject
-	session.Save(r, w)
+	cookie := http.Cookie{Name:"oauth", Value: tokenStruct.Token, Expires: expiration}
+	r.AddCookie(&cookie)
 	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
 	defer resp.Body.Close()
 }

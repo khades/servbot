@@ -11,31 +11,19 @@ type sessionHandlerFunc func(w http.ResponseWriter, r *http.Request, s *models.H
 
 func session(next sessionHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := repos.GetSession(r)
-		if err != nil {
-			writeJSONError(w, err.Error(), http.StatusInternalServerError)
+		cookie, err := r.Cookie("oauth")
+		if err != nil || cookie.Value == "" {
+			writeJSONError(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		val := session.Values["sessions"]
-		var sessionObject = &models.HTTPSession{}
-		if val != nil {
-			var ok = false
-			sessionObject, ok = val.(*models.HTTPSession)
-			if ok == false {
-				writeJSONError(w, "what", http.StatusInternalServerError)
-				return
-			}
-		} else {
-			if repos.Config.Debug == true {
-				sessionObject = &models.HTTPSession{
-					Username:  "khadesru",
-					Key:       "123",
-					UserID:    "40635840",
-					AvatarURL: "https://static-cdn.jtvnw.net/jtv_user_pictures/khadesru-profile_image-d6f7260bc68376d7-300x300.jpeg"}
-			}
 
+		userInfo, userInfoError := repos.GetUserInfoByOauth(&cookie.Value)
+		if (userInfoError != nil) {
+			writeJSONError(w, userInfoError.Error(), http.StatusUnauthorized)
+			return
 		}
-		next(w, r, sessionObject)
+	
+		next(w, r, &userInfo)
 	}
 }
 
