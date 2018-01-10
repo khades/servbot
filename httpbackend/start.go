@@ -58,7 +58,7 @@ func Start() {
 	mux.HandleFunc(pat.Post("/api/channel/:channel/automessages/:id"), withMod(autoMessageUpdate))
 
 	mux.HandleFunc(pat.Get("/oauth"), oauth)
-	mux.HandleFunc(pat.Get("/oauth/initiate"), withSession(oauthInitiate))
+	mux.HandleFunc(pat.Get("/oauth/initiate"), oauthInitiate)
 
 	mux.HandleFunc(pat.Get("/api/time"), corsEnabled(getTime))
 	mux.HandleFunc(pat.Get("/api/timeticker"), corsEnabled(timeTicker))
