@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
 
