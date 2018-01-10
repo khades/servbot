@@ -15,10 +15,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-type subscriptionsResponse struct {
-	Channel       string                    `json:"channel"`
-	Subscriptions []models.SubscriptionInfo `json:"subscriptions"`
-}
+
 type subscriptionEvent struct {
 	Subscription     models.SubscriptionInfo `json:"subscription"`
 	CurrentCallTime  time.Time               `json:"currentCallTimetime"`
@@ -26,12 +23,8 @@ type subscriptionEvent struct {
 }
 
 func subscriptions(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	var response = subscriptionsResponse{Channel: *channelName}
-	result, error := repos.GetSubsForChannel(channelID)
-	if error == nil {
-		response.Subscriptions = *result
-	}
-	json.NewEncoder(w).Encode(response)
+	result, _:= repos.GetSubsForChannel(channelID)
+	json.NewEncoder(w).Encode(*result)
 }
 
 func subscriptionsWithLimit(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -48,12 +41,9 @@ func subscriptionsWithLimit(w http.ResponseWriter, r *http.Request, s *models.HT
 	//log.Println(unixTime)
 	date := time.Unix(0, unixTime*int64(time.Millisecond))
 	//log.Println(date)
-	var response = subscriptionsResponse{Channel: *channelName}
-	result, error := repos.GetSubsForChannelWithLimit(channelID, date)
-	if error == nil {
-		response.Subscriptions = *result
-	}
-	json.NewEncoder(w).Encode(response)
+	result, _ := repos.GetSubsForChannelWithLimit(channelID, date)
+
+	json.NewEncoder(w).Encode(*result)
 }
 func subscriptionEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 

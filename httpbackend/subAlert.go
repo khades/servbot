@@ -8,10 +8,6 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-type subAlertResponse struct {
-	Channel  string                     `json:"channel"`
-	SubAlert models.SubAlertWithHistory `json:"subAlert"`
-}
 
 func subAlert(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	subBody, error := repos.GetSubAlertWithHistory(channelID)
@@ -19,7 +15,7 @@ func subAlert(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 		writeJSONError(w, error.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	json.NewEncoder(w).Encode(subAlertResponse{*channelName, *subBody})
+	json.NewEncoder(w).Encode(*subBody)
 
 }
 

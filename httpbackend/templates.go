@@ -9,10 +9,7 @@ import (
 )
 
 
-type templatesResponse struct {
-	Templates []models.TemplateInfo `json:"templates"`
-	Channel   string                `json:"channel"`
-}
+
 
 func templates(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
@@ -21,5 +18,5 @@ func templates(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, ch
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(templatesResponse{*templates, *channelName})
+	json.NewEncoder(w).Encode(*templates)
 }

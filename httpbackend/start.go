@@ -3,15 +3,11 @@ package httpbackend
 import (
 	"net/http"
 
-	"github.com/khades/servbot/repos"
-	"github.com/kidstuff/mongostore"
-
 	goji "goji.io"
 
 	"goji.io/pat"
 )
 
-var sessionStore = mongostore.NewMongoStore(repos.Db.C("sessions"), 3600*24, true, []byte("something-very-secret"))
 
 // Start We are starting server here
 func Start() {
