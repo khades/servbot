@@ -9,19 +9,36 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func oauthInitiate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
-	_, err := govalidator.ValidateStruct(s)
+func oauthInitiate(w http.ResponseWriter, r *http.Request) {
+	cookie, cookieErr := r.Cookie("oauth")
+	redirect := false
+	if cookieErr != nil || cookie.Value == "" {
+		redirect = true
+	}
+
+	userInfo, userInfoError := repos.GetUserInfoByOauth(&cookie.Value)
+	if (userInfoError != nil) {
+		redirect = true
+
+	}
+
+	_, err := govalidator.ValidateStruct(userInfo)
 	if err != nil {
+		redirect = true
+
+	}
+	if redirect == true {
 		log.Println("redirecting to api")
 		http.Redirect(w, r, "https://api.twitch.tv/kraken/oauth2/authorize"+
 			"?response_type=code"+
 			"&client_id="+repos.Config.ClientID+
 			"&redirect_uri="+repos.Config.AppOauthURL+
 			"&scope=user_subscriptions+user_read", http.StatusFound)
-		return
+
+	} else {
+		http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
+
 	}
-	//log.Println("Session is fine")
-	http.Redirect(w, r, repos.Config.AppURL+"/#/afterAuth", http.StatusFound)
-	return
+
 
 }
