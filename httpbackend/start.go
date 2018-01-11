@@ -8,13 +8,14 @@ import (
 	"goji.io/pat"
 )
 
-
 // Start We are starting server here
 func Start() {
 	mux := goji.NewMux()
 	mux.HandleFunc(pat.Get("/api/channel/:channel"), withSessionAndChannel(channel))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/channelname"), withSessionAndChannel(channelName))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs"), withMod(logsUsers))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/search/:search"), withMod(logsUsersSearch))
+
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/username/:user"), withMod(logsByUsername))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/logs/userid/:userID"), withMod(logsByUserID))
 
