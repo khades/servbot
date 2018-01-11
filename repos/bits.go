@@ -1,8 +1,6 @@
 package repos
 
 import (
-	"log"
-
 	"github.com/khades/servbot/models"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -10,10 +8,6 @@ import (
 var bitsCollection = "bits"
 
 func AddBitsToUser(channelID *string, userID *string, user *string, amount int, reason string) {
-	log.Println(*channelID)
-	log.Println(*userID)
-	log.Println(amount)
-
 	Db.C(bitsCollection).Upsert(bson.M{
 		"channelid": *channelID,
 		"userid":    *userID},
@@ -27,10 +21,20 @@ func AddBitsToUser(channelID *string, userID *string, user *string, amount int, 
 					"$slice": 100}}})
 }
 
-func GetBitsForChannel(channelID *string) (*[]models.UserBits, error) {
+func GetBitsForChannel(channelID *string, pattern *string) (*[]models.UserBits, error) {
 	var result []models.UserBits
-	error := Db.C(bitsCollection).Find(models.ChannelSelector{ChannelID: *channelID}).All(&result)
+	if *pattern == "" {
+		error := Db.C(bitsCollection).Find(models.ChannelSelector{ChannelID: *channelID}).Sort("change.date").Limit(100).All(&result)
+		return &result, error
+	}
+
+	error := Db.C(bitsCollection).Find(bson.M{
+		"channelid": *channelID,
+		"user": bson.M{
+			"$regex":   *pattern,
+			"$options": "i"}}).Sort("change.date").Limit(100).All(&result)
 	return &result, error
+
 }
 
 func GetBitsForChannelUser(channelID *string, userID *string) (*models.UserBitsWithHistory, error) {

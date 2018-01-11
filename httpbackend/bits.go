@@ -11,8 +11,20 @@ import (
 )
 
 func bits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	search := ""
 
-	bits, error := repos.GetBitsForChannel(channelID)
+	bits, error := repos.GetBitsForChannel(channelID, &search)
+	if error != nil && error.Error() != "not found" {
+		writeJSONError(w, error.Error(), http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(*bits)
+}
+
+func bitsSearch(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	search := pat.Param(r, "userID")
+
+	bits, error := repos.GetBitsForChannel(channelID, &search)
 	if error != nil && error.Error() != "not found" {
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
