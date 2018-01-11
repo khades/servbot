@@ -22,7 +22,7 @@ func bits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channel
 }
 
 func bitsSearch(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	search := pat.Param(r, "userID")
+	search := pat.Param(r, "search")
 
 	bits, error := repos.GetBitsForChannel(channelID, &search)
 	if error != nil && error.Error() != "not found" {
