@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/asaskevich/govalidator"
+	"gopkg.in/asaskevich/govalidator.v4"
 	"github.com/khades/servbot/models"
 )
 

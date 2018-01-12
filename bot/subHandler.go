@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/belak/irc"
+	"gopkg.in/irc.v2"
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"

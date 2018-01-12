@@ -2,10 +2,8 @@ package ircClient
 
 import (
 	"fmt"
-	"log"
 	"time"
-
-	"github.com/belak/irc"
+	"gopkg.in/irc.v2"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -63,7 +61,6 @@ func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
 
 // SendModsCommand runs mod command
 func (ircClient *IrcClient) SendModsCommand() {
-	log.Println("Sending MODS")
 	channelName := repos.Config.Channels[ircClient.ModChannelIndex]
 	if channelName != "" {
 		ircClient.SendPublic(&models.OutgoingMessage{Channel: channelName, Body: "/mods"})
@@ -73,10 +70,5 @@ func (ircClient *IrcClient) SendModsCommand() {
 	if ircClient.ModChannelIndex == len(repos.Config.Channels) || ircClient.ModChannelIndex > len(repos.Config.Channels) {
 		ircClient.ModChannelIndex = 0
 	}
-	log.Printf("Next Mods index: %d", ircClient.ModChannelIndex)
-	// if ircClient.Ready {
-	// 	for _, value := range repos.Config.Channels {
-	// 		ircClient.SendPublic(&models.OutgoingMessage{Channel: value, Body: "/mods"})
-	// 	}
-	// }
+
 }

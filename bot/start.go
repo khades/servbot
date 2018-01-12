@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/belak/irc"
+	"gopkg.in/irc.v2"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/repos"
 )

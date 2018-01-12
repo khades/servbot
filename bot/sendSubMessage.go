@@ -4,7 +4,7 @@ import (
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 	"strings"
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 )
 
 func sendSubMessage(channel *string, channelID *string, user *string, subPlan *string) {
@@ -38,7 +38,9 @@ func sendSubMessage(channel *string, channelID *string, user *string, subPlan *s
 	if channelInfoError == nil && channelInfo.SubTrain.Enabled {
 		localSubtrain := channelInfo.SubTrain
 		localSubtrain.CurrentStreak = localSubtrain.CurrentStreak + 1
-		template = template +" " + strings.TrimSpace(mustache.Render(channelInfo.SubTrain.AppendTemplate, localSubtrain))
+		subtrainAdditionalString, _ := mustache.Render(channelInfo.SubTrain.AppendTemplate, localSubtrain)
+
+		template = template +" " + strings.TrimSpace(subtrainAdditionalString)
 		repos.IncrementSubtrainCounterByChannelID(channelID, user)
 	}
 	

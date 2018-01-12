@@ -4,7 +4,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -25,8 +25,8 @@ func processMessage(message *models.AutoMessage) {
 	if templateError != nil {
 		return
 	}
-	compiledMessage := compiledTemplate.Render(channelInfo)
-	if  strings.TrimSpace(compiledMessage) == "" {
+	compiledMessage, compiledMessageError := compiledTemplate.Render(channelInfo)
+	if compiledMessageError != nil || strings.TrimSpace(compiledMessage) == "" {
 		return
 	}
 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
@@ -41,11 +41,6 @@ func SendAutoMessages() {
 		return
 	}
 	for _, message := range *messages {
-		//repos.ResetAutoMessageThreshold(&message)
 		processMessage(&message)
-		// channel, error := repos.GetUsernameByID(&message.ChannelID)
-		// if error == nil && strings.TrimSpace(message.Message) != "" {
-		// 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{Channel: *channel, Body: message.Message})
-		// }
 	}
 }

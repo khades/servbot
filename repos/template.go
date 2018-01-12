@@ -1,7 +1,7 @@
 package repos
 
 import (
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"
 	"gopkg.in/mgo.v2/bson"
 )

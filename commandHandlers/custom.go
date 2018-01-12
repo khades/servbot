@@ -8,7 +8,7 @@ import (
 
 	"html"
 
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -84,7 +84,10 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 		}
 	}
 
-	message := mustache.Render(template.Template, channelStatus)
+	message, renderError := mustache.Render(template.Template, channelStatus)
+	if renderError != nil {
+		return
+	}
 	message = strings.TrimSpace(message)
 	if utf8.RuneCountInString(message) > 400 {
 		message = Short(message, 397) + "..."

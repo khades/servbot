@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/asaskevich/govalidator"
+	"gopkg.in/asaskevich/govalidator.v4"
 	"github.com/khades/servbot/repos"
 )
 func validateSession(r *http.Request) bool {

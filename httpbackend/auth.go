@@ -3,7 +3,7 @@ package httpbackend
 import (
 	"net/http"
 
-	"github.com/asaskevich/govalidator"
+	"gopkg.in/asaskevich/govalidator.v4"
 	"github.com/khades/servbot/models"
 )
 
