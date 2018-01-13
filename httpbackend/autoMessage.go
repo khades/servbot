@@ -63,8 +63,11 @@ func autoMessageCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 		return
 
 	}
-	id := repos.CreateAutoMessage(&request)
-
+	id, validationError := repos.CreateAutoMessage(&request)
+	if validationError != nil {
+		writeJSONError(w, "Validation Failed", http.StatusUnprocessableEntity)
+		return
+	}
 	json.NewEncoder(w).Encode(autoMessageCreationResponse{*id})
 
 }
@@ -95,5 +98,10 @@ func autoMessageUpdate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 	request.UserID = s.UserID
 	request.ChannelID = *channelID
 	request.ID = id
-	repos.UpdateAutoMessage(&request)
+	validationError := repos.UpdateAutoMessage(&request)
+	if validationError != nil {
+		writeJSONError(w, "Validation Failed", http.StatusUnprocessableEntity)
+		return
+	}
+	
 }

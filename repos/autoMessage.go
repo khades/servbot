@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -57,9 +58,12 @@ func GetAutoMessages(channelID *string) (*[]models.AutoMessage, error) {
 	error := Db.C(autoMessageCollectionName).Find(bson.M{"channelid": *channelID}).All(&result)
 	return &result, error
 }
-func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) *bson.ObjectId {
+func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) (*bson.ObjectId, error) {
 	id := bson.NewObjectId()
 	now := time.Now()
+	if autoMessageUpdate.DurationLimit < 60 || autoMessageUpdate.MessageLimit < 20 {
+		return nil, errors.New("Validation Failed")
+	}
 	var durationLimit = time.Second * time.Duration(autoMessageUpdate.DurationLimit)
 	Db.C(autoMessageCollectionName).Insert(
 		models.AutoMessageWithHistory{
@@ -81,10 +85,13 @@ func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) *bson.Object
 					Message:       autoMessageUpdate.Message,
 					MessageLimit:  autoMessageUpdate.MessageLimit,
 					DurationLimit: durationLimit}}})
-	return &id
+	return &id, nil
 }
 
-func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) {
+func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) error {
+	if autoMessageUpdate.DurationLimit < 60 || autoMessageUpdate.MessageLimit < 20 {
+		return errors.New("Validation Failed")
+	}
 	now := time.Now()
 	var durationLimit = time.Second * time.Duration(autoMessageUpdate.DurationLimit)
 	Db.C(autoMessageCollectionName).Update(
@@ -111,5 +118,5 @@ func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) {
 				Game:              autoMessageUpdate.Game,
 				DurationLimit:     durationLimit,
 				DurationThreshold: now.Add(durationLimit)}})
-
+	return nil
 }
