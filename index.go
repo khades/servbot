@@ -35,6 +35,18 @@ func main() {
 
 	gob.Register(&models.HTTPSession{})
 	log.Println("Starting...")
+	ircClientTicker := time.NewTicker(time.Second * 3)
+
+	go func(wg *sync.WaitGroup) {
+		for {
+			wg.Add(1)
+			<-ircClientTicker.C
+			log.Println(bot.IrcClientInstance)
+			bot.IrcClientInstance.SendMessages(3)
+			wg.Done()
+
+		}
+	}(&wg)
 
 	modTicker := time.NewTicker(time.Second * 30)
 
@@ -132,5 +144,5 @@ func main() {
 
 	wg.Wait()
 	log.Println("Quitting...")
-
+	// Kseyko = PIDR
 }

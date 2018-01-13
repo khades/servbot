@@ -2,10 +2,12 @@ package ircClient
 
 import (
 	"fmt"
+	"log"
 	"time"
-	"gopkg.in/irc.v2"
+
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"gopkg.in/irc.v2"
 )
 
 // IrcClient struct defines object that will send messages to a twitch server
@@ -14,10 +16,39 @@ type IrcClient struct {
 	Bounces         map[string]time.Time
 	Ready           bool
 	ModChannelIndex int
+	MessageQueue    []string
+}
+
+// PushMessage adds message to array of messages to prevent global bans for bot
+func (ircClient *IrcClient) PushMessage(message string) {
+	log.Println("Pushing message: ", message)
+	ircClient.MessageQueue = append(ircClient.MessageQueue, message)
+}
+
+// SendMessages gets slice of messages to send periodically, sends them and updates list of messages
+func (ircClient *IrcClient) SendMessages(interval int) {
+	limit := 90
+	queueSliceSize := limit * interval / 60
+	arrayLen := len(ircClient.MessageQueue)
+	log.Println("Array length is", arrayLen)
+
+	if arrayLen == 0 {
+		return
+	}
+	if arrayLen < queueSliceSize {
+		queueSliceSize = arrayLen
+	}
+	messagesToSend := ircClient.MessageQueue[:queueSliceSize]
+	log.Println("Messages to send ", len(messagesToSend))
+
+	for _, message := range messagesToSend {
+		ircClient.Client.Write(message)
+	}
+	ircClient.MessageQueue = ircClient.MessageQueue[queueSliceSize:]
 }
 
 // SendDebounced prevents from sending data too frequent in public chat sending it to a PM
-func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage) {
+func (ircClient *IrcClient) SendDebounced(message models.OutgoingDebouncedMessage) {
 	key := fmt.Sprintf("%s-%s", message.Message.Channel, message.Command)
 	if ircClient.Bounces == nil {
 		ircClient.Bounces = make(map[string]time.Time)
@@ -35,27 +66,31 @@ func (ircClient IrcClient) SendDebounced(message models.OutgoingDebouncedMessage
 }
 
 // SendRaw is wrapper to Write
-func (ircClient IrcClient) SendRaw(message string) {
+func (ircClient *IrcClient) SendRaw(message string) {
 	if ircClient.Ready {
-		ircClient.Client.Write(message)
+		ircClient.PushMessage(message)
 	}
 }
 
 // SendPublic writes data to a specified chat
-func (ircClient IrcClient) SendPublic(message *models.OutgoingMessage) {
+func (ircClient *IrcClient) SendPublic(message *models.OutgoingMessage) {
 	if ircClient.Ready {
+		messageString := ""
 		if message.User != "" {
-			ircClient.Client.Write(fmt.Sprintf("PRIVMSG #%s :@%s %s", message.Channel, message.User, message.Body))
+			messageString = fmt.Sprintf("PRIVMSG #%s :@%s %s", message.Channel, message.User, message.Body)
 		} else {
-			ircClient.Client.Write(fmt.Sprintf("PRIVMSG #%s :%s", message.Channel, message.Body))
+			messageString = fmt.Sprintf("PRIVMSG #%s :%s", message.Channel, message.Body)
 		}
+		ircClient.PushMessage(messageString)
 	}
 }
 
 // SendPrivate writes data in private to a user
-func (ircClient IrcClient) SendPrivate(message *models.OutgoingMessage) {
+func (ircClient *IrcClient) SendPrivate(message *models.OutgoingMessage) {
 	if ircClient.Ready && message.User != "" {
-		ircClient.Client.Write(fmt.Sprintf("PRIVMSG #jtv :/w %s Channel %s: %s", message.User, message.Channel, message.Body))
+		messageString := fmt.Sprintf("PRIVMSG #jtv :/w %s Channel %s: %s", message.User, message.Channel, message.Body)
+		ircClient.PushMessage(messageString)
+
 	}
 }
 
@@ -64,7 +99,6 @@ func (ircClient *IrcClient) SendModsCommand() {
 	channelName := repos.Config.Channels[ircClient.ModChannelIndex]
 	if channelName != "" {
 		ircClient.SendPublic(&models.OutgoingMessage{Channel: channelName, Body: "/mods"})
-
 	}
 	ircClient.ModChannelIndex++
 	if ircClient.ModChannelIndex == len(repos.Config.Channels) || ircClient.ModChannelIndex > len(repos.Config.Channels) {

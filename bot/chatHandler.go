@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/irc.v2"
 	"github.com/khades/servbot/commandHandlers"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"gopkg.in/irc.v2"
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
@@ -25,7 +25,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		switch msgID {
 		case "subgift":
 			{
-				subHandler(message, &IrcClientInstance)
+				subHandler(message, IrcClientInstance)
 			}
 		case "room_mods":
 			{
@@ -38,12 +38,12 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			}
 		case "resub":
 			{
-				subHandler(message, &IrcClientInstance)
+				subHandler(message, IrcClientInstance)
 			}
 
 		case "sub":
 			{
-				subHandler(message, &IrcClientInstance)
+				subHandler(message, IrcClientInstance)
 			}
 		}
 	}
@@ -92,12 +92,12 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		repos.LogMessage(&formedMessage)
 		repos.DecrementAutoMessages(&formedMessage.ChannelID)
-	
+
 		commandBody, isCommand := formedMessage.GetCommand()
 
 		isVote := strings.HasPrefix(message.Params[1], "%")
 		if isVote == true {
-			commandHandlers.Vote(true, &formedMessage, commandBody, &IrcClientInstance)
+			commandHandlers.Vote(true, &formedMessage, commandBody, IrcClientInstance)
 		}
 		bits, bitsFound := message.Tags.GetTag("bits")
 		if bitsFound {
@@ -110,17 +110,16 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			if message.User == "khadesru" && commandBody.Command == "debugSub" {
 				subPlan := "2000"
 				sendSubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &subPlan)
-				
-		
+
 			}
 			if message.User == "khadesru" && commandBody.Command == "debugResub" {
 				resubCount := 3
 				subPlan := "2000"
 				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount, &subPlan)
-			
+
 			}
 			handlerFunction := commandHandlers.Router.Go(commandBody.Command)
-			handlerFunction(true, &formedMessage, commandBody, &IrcClientInstance)
+			handlerFunction(true, &formedMessage, commandBody, IrcClientInstance)
 		}
 	}
 
@@ -131,7 +130,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		for _, value := range repos.Config.Channels {
 			client.Write("JOIN #" + value)
 		}
-		IrcClientInstance = ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true, ModChannelIndex: 0}
+		IrcClientInstance = &ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true, ModChannelIndex: 0, MessageQueue: []string{}}
 		IrcClientInstance.SendModsCommand()
 		log.Println("Bot is started")
 	}
