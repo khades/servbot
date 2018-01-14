@@ -7,14 +7,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"goji.io/pat"
 
-	"github.com/JanBerktold/sse"
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
-
 
 type subscriptionEvent struct {
 	Subscription     models.SubscriptionInfo `json:"subscription"`
@@ -23,7 +22,7 @@ type subscriptionEvent struct {
 }
 
 func subscriptions(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	result, _:= repos.GetSubsForChannel(channelID)
+	result, _ := repos.GetSubsForChannel(channelID)
 	json.NewEncoder(w).Encode(*result)
 }
 
@@ -46,18 +45,58 @@ func subscriptionsWithLimit(w http.ResponseWriter, r *http.Request, s *models.HT
 	json.NewEncoder(w).Encode(*result)
 }
 func subscriptionEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	log.Println("Staring ws")
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin:     func(r *http.Request) bool { return true }}
 
-	conn, _ := sse.Upgrade(w, r)
-	channel := make(chan string)
+	conn, err := upgrader.Upgrade(w, r, nil)
+	pongWait := 40 * time.Second
+
+	conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error {
+		log.Println("Got pong")
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	ping := func(value string) {
+		log.Println(value)
+		if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			log.Println(err)
+
+			return
+		}
+	}
+
 	write := func(value string) {
-		channel <- value
+		log.Println(value)
+
+		if err := conn.WriteMessage(websocket.TextMessage, []byte(value)); err != nil {
+			log.Println(err)
+			return
+		}
 	}
-	eventbus.EventBus.On("ping "+eventbus.EventSub(channelID), write)
-	for conn.IsOpen() {
-		msg := <-channel
-		conn.WriteString(msg)
+	eventbus.EventBus.Subscribe("ping", ping)
+
+	eventbus.EventBus.Subscribe(eventbus.EventSub(channelID), write)
+
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			conn.Close()
+			break
+		}
 	}
-	defer eventbus.EventBus.Off("ping "+eventbus.EventSub(channelID), write)
-	defer log.Println("Disconnecting Subscription SSE")
+
+	defer eventbus.EventBus.Unsubscribe(eventbus.EventSub(channelID), write)
+	defer eventbus.EventBus.Unsubscribe("ping", ping)
+
+	defer log.Println("Disconnecting Subscription Socket")
 
 }

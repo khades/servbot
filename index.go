@@ -94,12 +94,12 @@ func main() {
 	// 		wg.Done()
 	// 	}
 	// }(&wg)
-	twentyticker := time.NewTicker(time.Second * 20)
+	twentyticker := time.NewTicker(time.Second * 30)
 
 	go func() {
 		for {
 			<-twentyticker.C
-			eventbus.EventBus.Trigger("ping")
+			eventbus.EventBus.Publish("ping", "ping")
 		}
 	}()
 

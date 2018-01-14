@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -40,9 +40,9 @@ func Short(s string, i int) string {
 }
 
 func CheckVK() {
-	log.Println("Checking VK")
+	//log.Println("Checking VK")
 	if repos.Config.VkClientKey == "" {
-		log.Println("VK key is not set")
+	//	log.Println("VK key is not set")
 		return
 	}
 	channels, error := repos.GetVKEnabledChannels()
@@ -54,10 +54,10 @@ func CheckVK() {
 	}
 }
 func checkOne(channel *models.ChannelInfo) {
-	log.Println("Checking group " + channel.VkGroupInfo.GroupName)
+//	log.Println("Checking group " + channel.VkGroupInfo.GroupName)
 	result, parseError := ParseVK(&channel.VkGroupInfo)
 	if parseError != nil {
-		log.Println("ParseError " + parseError.Error())
+	//	log.Println("ParseError " + parseError.Error())
 		return
 	}
 	if result.LastMessageID == channel.VkGroupInfo.LastMessageID {
@@ -70,7 +70,7 @@ func checkOne(channel *models.ChannelInfo) {
 	channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
 
 	if channelNameError == nil && *channelName != "" {
-		log.Println("SENDING MESSAGE")
+	//	log.Println("SENDING MESSAGE")
 		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
 			Channel: *channelName,
 			Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
@@ -86,10 +86,10 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 		url = "https://api.vk.com/method/wall.get?owner_id=-" + strings.Replace(vkInputGroupInfo.GroupName, "club", "", -1) + "&filter=owner&count=2&v=5.60"
 
 	}
-	log.Println("URL: " + url)
+//	log.Println("URL: " + url)
 	resp, error := httpclient.Get(url + "&access_token=" + repos.Config.VkClientKey)
 	if error != nil {
-		log.Println(error)
+	//	log.Println(error)
 		return &vkGroupInfo, error
 	}
 	if resp != nil {
@@ -98,7 +98,7 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 	vkResp := vkResponse{}
 	marshallError := json.NewDecoder(resp.Body).Decode(&vkResp)
 	if marshallError != nil {
-		log.Println(marshallError)
+//log.Println(marshallError)
 		return &vkGroupInfo, marshallError
 	}
 	if len(vkResp.Response.Items) == 0 {
@@ -127,6 +127,6 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 	loc, _ := time.LoadLocation("Europe/Moscow")
 	nowTime := time.Unix(0, int64(vkPost.Date)*1000000000).In(loc)
 	vkGroupInfo.LastMessageDate = nowTime.Format("Jan _2 15:04 MSK")
-	log.Println(vkGroupInfo)
+//	log.Println(vkGroupInfo)
 	return &vkGroupInfo, nil
 }

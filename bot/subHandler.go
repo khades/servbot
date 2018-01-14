@@ -55,7 +55,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 
 			log.Printf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
 
-			eventbus.EventBus.Trigger(eventbus.EventSub(&channelID))
+			eventbus.EventBus.Publish(eventbus.EventSub(&channelID))
 		}
 	}
 }

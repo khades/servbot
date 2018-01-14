@@ -1,11 +1,11 @@
 package eventbus
 
-import observable "github.com/GianlucaGuarini/go-observable"
+import evbus "github.com/asaskevich/EventBus"
 
-var EventBus = observable.New()
+var EventBus = evbus.New()
 
 func EventSub(channelID *string) string {
 	return "sub:" + *channelID
 }
 
-var SubtrainBus = observable.New()
+var SubtrainBus = evbus.New()
