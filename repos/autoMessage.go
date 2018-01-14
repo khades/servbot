@@ -30,10 +30,7 @@ func RemoveInactiveAutoMessages(channelID *string) (*[]models.AutoMessage, error
 	var result []models.AutoMessage
 	error := Db.C(autoMessageCollectionName).Find(bson.M{
 		"channelid": *channelID,
-		"message":   "",
-		"history.date": []bson.M{
-			bson.M{"$not": bson.M{"$gte": time.Now().Add(24 * -7 * time.Hour)}}}},
-	).All(&result)
+		"message":   ""}).All(&result)
 	return &result, error
 }
 func GetCurrentAutoMessages() (*[]models.AutoMessage, error) {
