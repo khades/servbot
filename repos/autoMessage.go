@@ -26,14 +26,14 @@ func DecrementAutoMessages(channelID *string) {
 			bson.M{"game": bson.M{"$exists": false}}}},
 		bson.M{"$inc": bson.M{"messagethreshold": -1}})
 }
-func RemoveInactiveAutoMessages(channelID *string) (*[]models.AutoMessage, error) {
-	var result []models.AutoMessage
-	error := Db.C(autoMessageCollectionName).Find(bson.M{
+func RemoveInactiveAutoMessages(channelID *string) {
+
+	Db.C(autoMessageCollectionName).Remove(bson.M{
 		"channelid": *channelID,
 		"message":   "",
 		"history.date": 
-			bson.M{"$not": bson.M{"$gte": time.Now().Add(24 * -7 * time.Hour)}}}).All(&result)
-	return &result, error
+			bson.M{"$not": bson.M{"$gte": time.Now().Add(24 * -7 * time.Hour)}}})
+
 }
 func GetCurrentAutoMessages() (*[]models.AutoMessage, error) {
 	//log.Println("AutoMessage: Getting Current AutoMessages")
