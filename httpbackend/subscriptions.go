@@ -54,17 +54,19 @@ func subscriptionEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSe
 	conn, err := upgrader.Upgrade(w, r, nil)
 	pongWait := 40 * time.Second
 
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	conn.SetReadDeadline(time.Now().Add(pongWait))
 	conn.SetPongHandler(func(string) error {
 		log.Println("Got pong")
 		conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
+	
 	ping := func(value string) {
 		log.Println(value)
 		if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
