@@ -28,7 +28,9 @@ func autoMessageList(w http.ResponseWriter, r *http.Request, s *models.HTTPSessi
 
 }
 func autoMessageRemoveInactive(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	repos.RemoveInactiveAutoMessages(channelID)
+	result, _ := repos.RemoveInactiveAutoMessages(channelID)
+	json.NewEncoder(w).Encode(*result)
+
 }
 func autoMessageGet(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	id := pat.Param(r, "messageID")
