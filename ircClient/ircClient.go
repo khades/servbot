@@ -17,18 +17,25 @@ type IrcClient struct {
 	Ready           bool
 	ModChannelIndex int
 	MessageQueue    []string
+	MessagesSent    int
 }
 
 // PushMessage adds message to array of messages to prevent global bans for bot
 func (ircClient *IrcClient) PushMessage(message string) {
 	log.Println("Pushing message: ", message)
-	ircClient.MessageQueue = append(ircClient.MessageQueue, message)
+	if ircClient.MessagesSent > 3 {
+		ircClient.MessageQueue = append(ircClient.MessageQueue, message)
+
+	} else {
+		ircClient.Client.Write(message)
+		ircClient.MessagesSent = ircClient.MessagesSent + 1
+	}
 }
 
 // SendMessages gets slice of messages to send periodically, sends them and updates list of messages
 func (ircClient *IrcClient) SendMessages(interval int) {
-	limit := 90
-	queueSliceSize := limit * interval / 60
+	ircClient.MessagesSent = 0
+	queueSliceSize := 3
 	arrayLen := len(ircClient.MessageQueue)
 	log.Println("Array length is:", arrayLen)
 
@@ -38,6 +45,8 @@ func (ircClient *IrcClient) SendMessages(interval int) {
 	if arrayLen < queueSliceSize {
 		queueSliceSize = arrayLen
 	}
+	ircClient.MessagesSent = queueSliceSize
+
 	messagesToSend := ircClient.MessageQueue[:queueSliceSize]
 	log.Println("Messages to send:", len(messagesToSend))
 
