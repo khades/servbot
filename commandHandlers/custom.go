@@ -104,6 +104,7 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 
 		}
 	}
+	redirectTo = strings.Replace(redirectTo, "@", " @", -1)
 	if template.OnlyPrivate == true {
 		ircClient.SendPrivate(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,

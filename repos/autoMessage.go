@@ -3,6 +3,7 @@ package repos
 import (
 	"errors"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/khades/servbot/models"
@@ -25,7 +26,17 @@ func DecrementAutoMessages(channelID *string) {
 			bson.M{"game": bson.M{"$exists": false}}}},
 		bson.M{"$inc": bson.M{"messagethreshold": -1}})
 }
+func RemoveInactiveAutoMessages(channelID *string) (*[]models.AutoMessage, error) {
+	var result []models.AutoMessage
+	error := Db.C(autoMessageCollectionName).Find(bson.M{
+		"channelid": *channelID,
+		"message":   "",
+		"history.date": []bson.M{
 
+			bson.M{"$not": bson.M{"$gte": time.Now().Add(24 * -7 * time.Hour)}}}},
+	).All(&result)
+	return &result, error
+}
 func GetCurrentAutoMessages() (*[]models.AutoMessage, error) {
 	//log.Println("AutoMessage: Getting Current AutoMessages")
 	var result []models.AutoMessage
@@ -53,15 +64,15 @@ func GetAutoMessage(id *string, channelID *string) (*models.AutoMessageWithHisto
 	return &result, error
 }
 
-func GetAutoMessages(channelID *string) (*[]models.AutoMessage, error) {
-	var result []models.AutoMessage
+func GetAutoMessages(channelID *string) (*[]models.AutoMessageWithHistory, error) {
+	var result []models.AutoMessageWithHistory
 	error := Db.C(autoMessageCollectionName).Find(bson.M{"channelid": *channelID}).All(&result)
 	return &result, error
 }
 func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) (*bson.ObjectId, error) {
 	id := bson.NewObjectId()
 	now := time.Now()
-	if autoMessageUpdate.DurationLimit < 60 || autoMessageUpdate.MessageLimit < 20 {
+	if strings.TrimSpace(autoMessageUpdate.Message) == "" || autoMessageUpdate.DurationLimit < 60 || autoMessageUpdate.MessageLimit < 20 {
 		return nil, errors.New("Validation Failed")
 	}
 	var durationLimit = time.Second * time.Duration(autoMessageUpdate.DurationLimit)

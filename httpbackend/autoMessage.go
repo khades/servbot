@@ -24,10 +24,12 @@ func autoMessageList(w http.ResponseWriter, r *http.Request, s *models.HTTPSessi
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode( *result )
+	json.NewEncoder(w).Encode(*result)
 
 }
-
+func autoMessageRemoveInactive(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	repos.RemoveInactiveAutoMessages(channelID)
+}
 func autoMessageGet(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	id := pat.Param(r, "messageID")
 
@@ -40,7 +42,7 @@ func autoMessageGet(w http.ResponseWriter, r *http.Request, s *models.HTTPSessio
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode( *result)
+	json.NewEncoder(w).Encode(*result)
 }
 
 func autoMessageCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -103,5 +105,5 @@ func autoMessageUpdate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 		writeJSONError(w, "Validation Failed", http.StatusUnprocessableEntity)
 		return
 	}
-	
+
 }

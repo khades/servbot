@@ -41,7 +41,6 @@ func main() {
 		for {
 			wg.Add(1)
 			<-ircClientTicker.C
-			log.Println(bot.IrcClientInstance)
 			bot.IrcClientInstance.SendMessages(3)
 			wg.Done()
 

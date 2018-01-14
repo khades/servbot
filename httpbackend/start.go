@@ -49,6 +49,9 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/automessages"), withMod(autoMessageList))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/automessages"), corsEnabled(options))
 
+	mux.HandleFunc(pat.Get("/api/channel/:channel/automessages/removeinactive"), withMod(autoMessageRemoveInactive))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/automessages/removeinactive"), corsEnabled(options))
+
 	mux.HandleFunc(pat.Get("/api/channel/:channel/automessages/:messageID"), withMod(autoMessageGet))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/automessages/:id"), corsEnabled(options))
 

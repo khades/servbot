@@ -30,7 +30,7 @@ func (ircClient *IrcClient) SendMessages(interval int) {
 	limit := 90
 	queueSliceSize := limit * interval / 60
 	arrayLen := len(ircClient.MessageQueue)
-	log.Println("Array length is", arrayLen)
+	log.Println("Array length is:", arrayLen)
 
 	if arrayLen == 0 {
 		return
@@ -39,12 +39,15 @@ func (ircClient *IrcClient) SendMessages(interval int) {
 		queueSliceSize = arrayLen
 	}
 	messagesToSend := ircClient.MessageQueue[:queueSliceSize]
-	log.Println("Messages to send ", len(messagesToSend))
+	log.Println("Messages to send:", len(messagesToSend))
 
 	for _, message := range messagesToSend {
 		ircClient.Client.Write(message)
 	}
 	ircClient.MessageQueue = ircClient.MessageQueue[queueSliceSize:]
+	if len(ircClient.MessageQueue) > 0 {
+		log.Println("Messaged Delayed:", len(ircClient.MessageQueue))
+	}
 }
 
 // SendDebounced prevents from sending data too frequent in public chat sending it to a PM
