@@ -25,6 +25,7 @@ func (ircClient *IrcClient) PushMessage(message string) {
 	log.Println("Pushing message: ", message)
 	if ircClient.MessagesSent > 3 {
 		ircClient.MessageQueue = append(ircClient.MessageQueue, message)
+		log.Println("Messages in queue :", len(ircClient.MessageQueue))
 
 	} else {
 		ircClient.Client.Write(message)
@@ -37,11 +38,12 @@ func (ircClient *IrcClient) SendMessages(interval int) {
 	ircClient.MessagesSent = 0
 	queueSliceSize := 3
 	arrayLen := len(ircClient.MessageQueue)
-	log.Println("Array length is:", arrayLen)
 
 	if arrayLen == 0 {
 		return
 	}
+	log.Println("Array length is:", arrayLen)
+
 	if arrayLen < queueSliceSize {
 		queueSliceSize = arrayLen
 	}
