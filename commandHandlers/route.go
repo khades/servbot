@@ -21,4 +21,5 @@ var Router = RouterStruct{routes: map[string]CommandHandler{
 	"subdayNew": SubdayNew,
 	"subdayEnd": SubdayEnd,
 	"subdayDisable": SubdayDisable,
-	"subdayEnable": SubdayEnable}}
+	"subdayEnable": SubdayEnable,
+	"songrequest": SongRequestAdd}}

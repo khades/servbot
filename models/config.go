@@ -12,4 +12,5 @@ type Config struct {
 	AppURL       string `valid:"required"`
 	Debug        bool
 	VkClientKey  string
+	YoutubeKey   string
 }

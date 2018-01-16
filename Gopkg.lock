@@ -26,6 +26,12 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/khades/iso8601duration"
+  packages = ["."]
+  revision = "db3984c4aea411822176fe158522635351326b33"
+
+[[projects]]
   name = "github.com/patrickmn/go-cache"
   packages = ["."]
   revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
@@ -69,6 +75,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fc71d08bc901cc2ce0cf4accafaa239b34e62ac48845375f990490a70361ef89"
+  inputs-digest = "9680c128f0cc613b138a97b7050f50bdcb2574fa070e7df68f48706e10eee47e"
   solver-name = "gps-cdcl"
   solver-version = 1

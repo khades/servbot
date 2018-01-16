@@ -19,7 +19,9 @@ type ChannelSongRequestSettings struct {
 	PlaylistLength int
 	MaxVideoLength int
 	MaxRequestsPerUser int
+	VideoViewLimit int64
 }
+
 type ChannelSongRequest struct {
 	ChannelID string
 	Settings ChannelSongRequestSettings
