@@ -21,7 +21,6 @@ type ChannelInfo struct {
 	OnlineCommands  []string    `json:"onlinecommands"`
 	SubTrain        SubTrain    `json:"subTrain"`
 	SubdayIsActive  bool        `json:"subdayIsActive"`
-	SubdayEnabled   bool        `json:"subdayEnabled"`
 }
 type ChannelInfoForTemplate struct {
 	ChannelInfo

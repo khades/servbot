@@ -9,12 +9,7 @@ import (
 )
 
 func Vote(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	channelInfo, error := repos.GetChannelInfo(&chatMessage.ChannelID)
-	if error != nil || channelInfo.SubdayEnabled == false {
-		return
-	}
-
-	if utf8.RuneCountInString(chatMessage.MessageBody) < 2 {
+    if utf8.RuneCountInString(chatMessage.MessageBody) < 2 {
 		return
 	}
 	game := chatMessage.MessageBody[1:]

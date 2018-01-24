@@ -20,6 +20,4 @@ var Router = RouterStruct{routes: map[string]CommandHandler{
 	"alias": Alias,
 	"subdayNew": SubdayNew,
 	"subdayEnd": SubdayEnd,
-	"subdayDisable": SubdayDisable,
-	"subdayEnable": SubdayEnable,
 	"songrequest": SongRequestAdd}}

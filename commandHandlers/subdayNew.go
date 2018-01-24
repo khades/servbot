@@ -11,10 +11,6 @@ import (
 )
 
 func SubdayNew(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	channelInfo, error := repos.GetChannelInfo(&chatMessage.ChannelID)
-	if error != nil || channelInfo.SubdayEnabled == false {
-		return
-	}
 	
 	
 	if chatMessage.IsMod == false {

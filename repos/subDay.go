@@ -152,15 +152,7 @@ func VoteForSubday(user *string, userID *string, id *bson.ObjectId, game *string
 			 Game: *game}}})
 
 }
-func SetSubdayEnabled(channelID *string, enabled bool) {
-	channelInfo, _ := GetChannelInfo(channelID)
-	if channelInfo != nil {
-		channelInfo.SubdayEnabled = enabled
-	} else {
-		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, SubdayEnabled: enabled})
-	}
-	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subdayenabled": enabled}})
-}
+
 
 func SetSubdayIsActive(channelID *string, isActive bool) {
 	channelInfo, _ := GetChannelInfo(channelID)
