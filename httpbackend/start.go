@@ -29,9 +29,9 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subs/events"), withMod(subscriptionEvents))
 	mux.HandleFunc(pat.Get("/api/user"), withAuth(user))
 	mux.HandleFunc(pat.Get("/api/user/index"), withAuth(userIndex))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/bits"), withMod(bits))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/bits/search/:search"), withMod(bitsSearch))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/bits/:userID"), withMod(userbits))
+	// mux.HandleFunc(pat.Get("/api/channel/:channel/bits"), withMod(bits))
+	// mux.HandleFunc(pat.Get("/api/channel/:channel/bits/search/:search"), withMod(bitsSearch))
+	// mux.HandleFunc(pat.Get("/api/channel/:channel/bits/:userID"), withMod(userbits))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), withMod(templates))
 
@@ -66,6 +66,8 @@ func Start() {
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subtrain"), withSessionAndChannel(subtrain))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subtrain"), corsEnabled(options))
+	mux.HandleFunc(pat.Post("/api/channel/:channel/subtrain"), withMod(putSubtrain))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subtrain/events"), withMod(subtrainEvents))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/bans"), withMod(channelBans))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/bans"), corsEnabled(options))
@@ -85,7 +87,10 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), withMod(subdayPullWinner))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), corsEnabled(options))
 
-	mux.HandleFunc(pat.Post("/api/channel/:channel/subtrain"), withMod(putSubtrain))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests"),  withSessionAndChannel(songrequests))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests"), corsEnabled(options))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/events"),  withSessionAndChannel(songrequestsEvents))
+
 
 	http.ListenAndServe("localhost:8000", mux)
 }

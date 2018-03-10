@@ -9,9 +9,9 @@ import (
 
 var channelBansCollectionName = "channelBans"
 
-
+// LogChannelBan logs user channel ban, limitting to last 500 
 func LogChannelBan(userID *string, user *string, channelID *string, duration *int) {
-	Db.C(channelBansCollectionName).Upsert(
+	db.C(channelBansCollectionName).Upsert(
 		bson.M{"channelid": *channelID},
 		bson.M{
 			"$push": bson.M{
@@ -25,8 +25,9 @@ func LogChannelBan(userID *string, user *string, channelID *string, duration *in
 					"$slice": 500}}})
 }
 
+// GetChannelBans returns list of all bans on channel (limited to last 500)
 func GetChannelBans(channelID *string) (*models.ChannelBans, error) {
 	var result = models.ChannelBans{}
-	error := Db.C(channelBansCollectionName).Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
+	error := db.C(channelBansCollectionName).Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
 	return &result, error
 }

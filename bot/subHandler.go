@@ -14,7 +14,6 @@ import (
 )
 
 func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
-	//log.Println(message.String())
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
 	msgID, _ := message.Tags.GetTag("msg-id")
@@ -56,6 +55,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 			log.Printf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
 
 			eventbus.EventBus.Publish(eventbus.EventSub(&channelID))
+			eventbus.EventBus.Publish(eventbus.Subtrain(&channelID), "newsub")
 		}
 	}
 }

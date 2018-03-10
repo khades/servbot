@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	//"strings"
@@ -9,7 +9,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func SubdayEnd(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func subdayEnd(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	
 	if chatMessage.IsMod == false {
 		ircClient.SendPublic(&models.OutgoingMessage{

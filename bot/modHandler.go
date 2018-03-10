@@ -2,19 +2,19 @@ package bot
 
 import "github.com/khades/servbot/repos"
 
-func modHandler(channel *string, mods *[]string) {
+func modHandler(channel *string, mods []string) {
 	filteredMods := []string{}
-	for _, mod := range *mods {
+	for _, mod := range mods {
 		if mod != "" {
 			filteredMods = append(filteredMods, mod)
 		}
 
 	}
-	users, error := repos.GetUsersID(&filteredMods)
+	users, error := repos.GetUsersID(filteredMods)
 	if error != nil {
 		return
 	}
-	values, error := repos.GetUsersID(&[]string{*channel})
+	values, error := repos.GetUsersID([]string{*channel})
 	channelID := (*values)[*channel]
 	if error != nil || channelID == "" {
 		return
@@ -24,5 +24,5 @@ func modHandler(channel *string, mods *[]string) {
 	for _, id := range *users {
 		userIDs = append(userIDs, id)
 	}
-	repos.PushMods(&channelID, &userIDs)
+	repos.PushMods(&channelID, userIDs)
 }

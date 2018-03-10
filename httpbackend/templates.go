@@ -18,5 +18,5 @@ func templates(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, ch
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*templates)
+	json.NewEncoder(w).Encode(templates)
 }

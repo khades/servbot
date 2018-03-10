@@ -15,7 +15,7 @@ func SendSubTrainNotification() {
 	if error != nil {
 		return
 	}
-	for _, channel := range *channels {
+	for _, channel := range channels {
 		compiledMessage, compiledMessageError := mustache.Render(channel.SubTrain.NotificationTemplate, channel.SubTrain)
 		if compiledMessageError != nil && strings.TrimSpace(compiledMessage) != "" {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{

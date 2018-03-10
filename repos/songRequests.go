@@ -4,21 +4,25 @@ import (
 	//"time"
 	"encoding/json"
 	"errors"
+	"log"
+	"net/http"
 	"sort"
 	"time"
 
-	"github.com/khades/servbot/httpclient"
+	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
 var songRequestCollectionName = "songrequests"
 
+// GetSongRequest gets full songrequest info for specified channel
 func GetSongRequest(channelID *string) *models.ChannelSongRequest {
 	songRequestInfo := models.ChannelSongRequest{Settings: models.ChannelSongRequestSettings{PlaylistLength: 30, MaxVideoLength: 300, MaxRequestsPerUser: 2}}
-	Db.C(songRequestCollectionName).Find(
+	db.C(songRequestCollectionName).Find(
 		bson.M{
 			"channelid": *channelID}).One(&songRequestInfo)
+
 	if songRequestInfo.Settings.PlaylistLength == 0 {
 		songRequestInfo.Settings.PlaylistLength = 30
 
@@ -32,24 +36,27 @@ func GetSongRequest(channelID *string) *models.ChannelSongRequest {
 
 	}
 	if songRequestInfo.Settings.VideoViewLimit == 0 {
-		songRequestInfo.Settings.VideoViewLimit  = 2000
+		songRequestInfo.Settings.VideoViewLimit = 2000
 
 	}
 	return &songRequestInfo
 }
 
+// PushSongRequest pushes songrequest for specified channel
 func PushSongRequest(channelID *string, request *models.SongRequest) {
-	Db.C(songRequestCollectionName).Upsert(
+	db.C(songRequestCollectionName).Upsert(
 		bson.M{
 			"channelid": *channelID}, bson.M{"$push": bson.M{"requests": *request}})
 }
 
+// PushSongRequestSettings updates songrequest settings for specified channel
 func PushSongRequestSettings(channelID *string, settings *models.ChannelSongRequestSettings) {
-	Db.C(songRequestCollectionName).Upsert(
+	db.C(songRequestCollectionName).Upsert(
 		bson.M{
 			"channelid": *channelID}, bson.M{"$set": bson.M{"settings": *settings}})
 }
 
+// AddSongRequest processes youtube video link before pushing it to songrequest database
 func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *string, videoID *string) error {
 	songRequestInfo := GetSongRequest(channelID)
 
@@ -69,7 +76,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	if userRequestsCount >= songRequestInfo.Settings.MaxRequestsPerUser {
 		return errors.New("Too many requests per user")
 	}
-	video, videoError := GetYoutubeVideoInfo(videoID)
+	video, videoError := getYoutubeVideoInfo(videoID)
 	if videoError != nil {
 		return videoError
 	}
@@ -85,26 +92,41 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 
 	}
 	if video.Items[0].Statistics.GetViewCount() < songRequestInfo.Settings.VideoViewLimit {
-		return errors.New("Too little views on video, got "+string(video.Items[0].Statistics.ViewCount) )
+		return errors.New("Too little views on video, got " + string(video.Items[0].Statistics.ViewCount))
 
 	}
-	songRequest := models.SongRequest{User: *user, UserID: *userID, Date: time.Now(), VideoID: *videoID, Length: *duration, Title: video.Items[0].Snippet.Title}
+	songRequest := models.SongRequest{
+		User:    *user,
+		UserID:  *userID,
+		Date:    time.Now(),
+		VideoID: *videoID,
+		Length:  *duration,
+		Title:   video.Items[0].Snippet.Title}
+
 	PushSongRequest(channelID, &songRequest)
+
+	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+
 	return errors.New("Video " + video.Items[0].Snippet.Title + " , length: " + duration.String())
 }
 
+// PullSongRequest removes songrequest, specified by youtube video ID on specified channel
 func PullSongRequest(channelID *string, videoID *string) {
-	Db.C(songRequestCollectionName).Update(
+	db.C(songRequestCollectionName).Update(
 		bson.M{
-			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests":  bson.M{"videoid":*videoID}}})
+			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests": bson.M{"videoid": *videoID}}})
+	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 }
 
+// PullUserSongRequest removes specified user request, specified by youtube video ID on specified channel
 func PullUserSongRequest(channelID *string, videoID *string, userID *string) {
-	Db.C(songRequestCollectionName).Update(
+	db.C(songRequestCollectionName).Update(
 		bson.M{
-			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests":  bson.M{"userid:":*userID,"videoid":*videoID}}})
+			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests": bson.M{"userid:": *userID, "videoid": *videoID}}})
+	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 }
 
+// PullLastUserSongRequest removes last specified user request on specified channel
 func PullLastUserSongRequest(channelID *string, userID *string) {
 	songRequestInfo := GetSongRequest(channelID)
 	if len(songRequestInfo.Requests) == 0 {
@@ -120,14 +142,15 @@ func PullLastUserSongRequest(channelID *string, userID *string) {
 	}
 	if id != "" {
 		PullUserSongRequest(channelID, &id, userID)
+		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
 }
 
-func GetYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
+func getYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
 	if Config.YoutubeKey == "" {
 		return nil, errors.New("YT key is not set")
 	}
-	resp, error := httpclient.YoutubeVideo(id, &Config.YoutubeKey)
+	resp, error := getYoutubeVideo(id)
 	if error != nil {
 		return nil, error
 	}
@@ -140,4 +163,12 @@ func GetYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
 		return nil, marshallError
 	}
 	return &ytVideo, nil
+}
+
+func getYoutubeVideo(id *string) (*http.Response, error) {
+	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + Config.YoutubeKey
+	log.Println(url)
+	var timeout = 5 * time.Second
+	var client = http.Client{Timeout: timeout}
+	return client.Get(url)
 }

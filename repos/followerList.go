@@ -7,16 +7,17 @@ import (
 
 var followersListСollectioName = "followersList"
 
+// AddFollowerToList records user that followed channel, used to prevent follow\unfollow spam
 func AddFollowerToList(channelID *string, follower *string) {
-	Db.C(followersListСollectioName).Upsert(
+	db.C(followersListСollectioName).Upsert(
 		bson.M{"channelid": *channelID},
 		bson.M{"$addToSet": bson.M{"followers": *follower}})
 }
 
+// CheckIfFollowerGreeted returns if user was already greeted on channel
 func CheckIfFollowerGreeted(channelID *string, follower *string) (bool, error) {
-
 	var result models.FollowersList
-	error := Db.C(followersListСollectioName).Find(bson.M{"channelid": *channelID, "followers": *follower}).One(&result)
+	error := db.C(followersListСollectioName).Find(bson.M{"channelid": *channelID, "followers": *follower}).One(&result)
 	if error == nil {
 		return true, nil
 	}

@@ -3,25 +3,32 @@ package repos
 import (
 	"time"
 
-	"gopkg.in/mgo.v2/bson"
-
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var subAlertCollection = "subAlert"
 
-type SubAlertValidation struct {
-	Error           bool `json:"error"`
-	PrimeError      bool `json:"primeError"`
-	FiveError       bool `json:"fiveError"`
-	TenError        bool `json:"tenError"`
-	TwentyFiveError bool `json:"twentyFiveError"`
+// GetSubAlert returns subalert for specified channel
+func GetSubAlert(channelID *string) (*models.SubAlert, error) {
+	var result models.SubAlert
+	error := db.C(subAlertCollection).Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
+	return &result, error
 }
 
+// GetSubAlertWithHistory returns subalert for specified channel with changelog
+func GetSubAlertWithHistory(channelID *string) (*models.SubAlertWithHistory, error) {
+	var result models.SubAlertWithHistory
+	error := db.C(subAlertCollection).Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
+	return &result, error
+}
+
+
+
 // SetSubAlert updates stream status (start of stream, topic of stream)
-func SetSubAlert(user *string, userID *string, subAlert *models.SubAlert) *SubAlertValidation {
-	templateValidation := SubAlertValidation{false, false, false, false, false}
+func SetSubAlert(user *string, userID *string, subAlert *models.SubAlert) *models.SubAlertValidation {
+	templateValidation := models.SubAlertValidation{false, false, false, false, false}
 
 	_, primeError := mustache.ParseString(subAlert.ResubPrimeMessage)
 	if primeError != nil {
@@ -47,7 +54,7 @@ func SetSubAlert(user *string, userID *string, subAlert *models.SubAlert) *SubAl
 		templateValidation.Error = true
 	}
 	if templateValidation.Error == false {
-		Db.C(subAlertCollection).Upsert(models.ChannelSelector{ChannelID: subAlert.ChannelID}, bson.M{
+		db.C(subAlertCollection).Upsert(models.ChannelSelector{ChannelID: subAlert.ChannelID}, bson.M{
 			"$set": &subAlert,
 			"$push": bson.M{
 				"history": bson.M{

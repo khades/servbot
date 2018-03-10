@@ -21,7 +21,7 @@ type nameResponse struct {
 	ID   string `json:"_id"`
 	Logo string `json:"logo"`
 }
-
+// GetUserInfoByOauth returns information of user specified by his oauth key
 func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 	cacheKey := "OauthKey:"+*oauthKey
 	binaryData, found := cacheObject.Get(cacheKey)

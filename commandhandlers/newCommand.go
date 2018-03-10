@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	"strings"
@@ -8,8 +8,8 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-// New creates or modifies mustache templates for channel
-func New(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+// newCommand creates or modifies mustache templates for channel
+func newCommand(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	if chatMessage.IsMod {
 		commandName := ""
 		template := ""

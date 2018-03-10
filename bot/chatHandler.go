@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khades/servbot/commandHandlers"
+	"github.com/khades/servbot/commandhandlers"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -33,7 +33,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				if commaIndex != -1 {
 					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
 					channel := message.Params[0][1:]
-					modHandler(&channel, &mods)
+					modHandler(&channel, mods)
 				}
 			}
 		case "resub":
@@ -97,15 +97,15 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 
 		isVote := strings.HasPrefix(message.Params[1], "%")
 		if isVote == true {
-			commandHandlers.Vote(true, &formedMessage, commandBody, IrcClientInstance)
+			commandhandlers.Vote(true, &formedMessage, commandBody, IrcClientInstance)
 		}
-		bits, bitsFound := message.Tags.GetTag("bits")
-		if bitsFound {
-			parsedBits, parsedBitsError := strconv.Atoi(bits)
-			if parsedBitsError == nil {
-				repos.AddBitsToUser(&formedMessage.ChannelID, &formedMessage.UserID, &formedMessage.User, parsedBits, "bits")
-			}
-		}
+		// bits, bitsFound := message.Tags.GetTag("bits")
+		// if bitsFound {
+		// 	parsedBits, parsedBitsError := strconv.Atoi(bits)
+		// 	if parsedBitsError == nil {
+		// 		repos.AddBitsToUser(&formedMessage.ChannelID, &formedMessage.UserID, &formedMessage.User, parsedBits, "bits")
+		// 	}
+		// }
 		if isCommand {
 			if message.User == "khadesru" && commandBody.Command == "debugSub" {
 				subPlan := "2000"
@@ -118,7 +118,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount, &subPlan)
 
 			}
-			handlerFunction := commandHandlers.Router.Go(commandBody.Command)
+			handlerFunction := commandhandlers.Router.Go(commandBody.Command)
 			handlerFunction(true, &formedMessage, commandBody, IrcClientInstance)
 		}
 	}

@@ -26,18 +26,17 @@ type followerResponse struct {
 	Follows []follows `json:"follows"`
 }
 
-// https://api.twitch.tv/kraken/channels/areyouready_88/follows?client_id=1icafjrio64l3n0uwg5qlkdseu0j8d6&direction=ASC&cursor=1494757816579821000
 func CheckChannelsFollowers() {
-	userIDs, error := repos.GetUsersID(&repos.Config.Channels)
-	if error != nil {
-		return
-	}
-	for key, value := range *userIDs {
-		checkOneChannelFollowers(&key, &value)
+	// userIDs, error := repos.GetUsersID(&repos.Config.Channels)
+	// if error != nil {
+	// 	return
+	// }
+	for _, value := range repos.Config.ChannelIDs {
+		checkOneChannelFollowers(&value)
 	}
 
 }
-func checkOneChannelFollowers(channel *string, channelID *string) {
+func checkOneChannelFollowers(channelID *string) {
 	cursor := ""
 	cursorObject, error := repos.GetFollowerCursor(channelID)
 	if error != nil && error.Error() != "not found" {
@@ -70,20 +69,15 @@ func checkOneChannelFollowers(channel *string, channelID *string) {
 			followersToGreet = append(followersToGreet, follow.User.Name)
 
 			repos.AddFollowerToList(channelID, &follow.User.Name)
-			// alertInfo, alertError := repos.GetSubAlert(channelID)
-			// if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
-			// 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-			// 		Channel: *channel,
-			// 		Body:    alertInfo.FollowerMessage,
-			// 		User:    follow.User.Name})
-			// }
-
 		}
 
 	}
 	if len(followersToGreet) > 0 {
+
 		alertInfo, alertError := repos.GetSubAlert(channelID)
-		if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+		
+		channel, channelError := repos.GetChannelNameByID(channelID)
+		if channelError == nil && alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
 				Channel: *channel,
 				Body:    "@" + strings.Join(followersToGreet, " @") + " " + alertInfo.FollowerMessage})

@@ -31,18 +31,16 @@ type responseBodyStruct struct {
 // CheckStreamStatus runs gettting all data from all channels bot applied to
 func CheckStreamStatus() {
 	streams := make(map[string]models.StreamStatus)
-	userIDs, error := repos.GetStreamersID()
+	userIDs := repos.Config.ChannelIDs
 
-	if error != nil {
-		return
-	}
 
-	for _, channel := range *userIDs {
+
+	for _, channel := range userIDs {
 		streams[channel] = models.StreamStatus{
 			Online: false}
 	}
 
-	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(*userIDs, ",")
+	url := "https://api.twitch.tv/kraken/streams?channel=" + strings.Join(userIDs, ",")
 	resp, respError := httpclient.TwitchV5(repos.Config.ClientID, "GET", url, nil)
 	if respError != nil {
 		return

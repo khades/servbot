@@ -11,3 +11,10 @@ type TimerMessageInfo struct {
 	Body              string
 	LastRun           time.Time
 }
+
+// TimerMessageHistory is history-item for TimerMessageInfo
+type TimerMessageHistory struct {
+	TimerMessageInfo `bson:",inline"`
+	User             string
+	Date             time.Time
+}

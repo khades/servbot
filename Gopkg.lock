@@ -38,6 +38,12 @@
   version = "v2.1.0"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+  version = "v1.0.4"
+
+[[projects]]
   name = "goji.io"
   packages = [
     ".",
@@ -47,6 +53,21 @@
   ]
   revision = "0d89ff54b2c18c9c4ba530e32496aef902d3c6cd"
   version = "v2.0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "85f98707c97e11569271e4d9b3d397e079c4f4d0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "7dca6fe1f43775aa6d1334576870ff63f978f539"
 
 [[projects]]
   name = "gopkg.in/asaskevich/govalidator.v4"
@@ -75,6 +96,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9680c128f0cc613b138a97b7050f50bdcb2574fa070e7df68f48706e10eee47e"
+  inputs-digest = "a78b86a1ee791a436f760d8fc022043ef438760a59e363a1ef86f7dd38ae5499"
   solver-name = "gps-cdcl"
   solver-version = 1

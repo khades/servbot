@@ -2,7 +2,14 @@ package repos
 
 import "gopkg.in/mgo.v2"
 
-var dbSession, err = mgo.Dial("localhost")
+var db *mgo.Database 
 
-// Db is database connection object
-var Db = dbSession.DB(Config.DbName)
+// InitializeDB initates database connection and connects to specified database
+func InitializeDB(dbName string) error {
+	var dbSession, err = mgo.Dial("localhost")
+	if err != nil {
+		return err
+	}
+	db = dbSession.DB(dbName)
+	return nil
+}

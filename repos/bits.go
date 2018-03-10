@@ -7,8 +7,9 @@ import (
 
 var bitsCollection = "bits"
 
+// AddBitsToUser is obsolete
 func AddBitsToUser(channelID *string, userID *string, user *string, amount int, reason string) {
-	Db.C(bitsCollection).Upsert(bson.M{
+	db.C(bitsCollection).Upsert(bson.M{
 		"channelid": *channelID,
 		"userid":    *userID},
 		bson.M{
@@ -21,30 +22,32 @@ func AddBitsToUser(channelID *string, userID *string, user *string, amount int, 
 					"$slice": 100}}})
 }
 
-func GetBitsForChannel(channelID *string, pattern *string) (*[]models.UserBits, error) {
+// GetBitsForChannel is obsolete
+func GetBitsForChannel(channelID *string, pattern *string) ([]models.UserBits, error) {
 	var result []models.UserBits
 	if *pattern == "" {
-		error := Db.C(bitsCollection).Find(models.ChannelSelector{ChannelID: *channelID}).Sort("change.date").Limit(100).All(&result)
-		return &result, error
+		error := db.C(bitsCollection).Find(models.ChannelSelector{ChannelID: *channelID}).Sort("change.date").Limit(100).All(&result)
+		return result, error
 	}
 
-	error := Db.C(bitsCollection).Find(bson.M{
+	error := db.C(bitsCollection).Find(bson.M{
 		"channelid": *channelID,
 		"user": bson.M{
 			"$regex":   *pattern,
 			"$options": "i"}}).Sort("change.date").Limit(100).All(&result)
-	return &result, error
+	return result, error
 
 }
 
+// GetBitsForChannelUser is obsolete
 func GetBitsForChannelUser(channelID *string, userID *string) (*models.UserBitsWithHistory, error) {
 	var result models.UserBitsWithHistory
-	error := Db.C(bitsCollection).Find(bson.M{
+	error := db.C(bitsCollection).Find(bson.M{
 		"channelid": *channelID,
 		"userid":    *userID}).One(&result)
 	return &result, error
 }
-
+// PutSubscriptionBits is obsolete
 func PutSubscriptionBits(channelID *string, userID *string, user *string, subPlan *string) {
 	switch *subPlan {
 	case "Prime":

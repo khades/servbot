@@ -15,6 +15,6 @@ type userIndexResponse struct {
 func userIndex(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 	response := userIndexResponse{}
 	channels, _ := repos.GetModChannels(&s.UserID)
-	response.ModChannels = *channels
+	response.ModChannels = channels
 	json.NewEncoder(w).Encode(response)
 }

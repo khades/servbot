@@ -18,7 +18,7 @@ func bits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channel
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*bits)
+	json.NewEncoder(w).Encode(bits)
 }
 
 func bitsSearch(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -29,7 +29,7 @@ func bitsSearch(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, c
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*bits)
+	json.NewEncoder(w).Encode(bits)
 }
 
 func userbits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -46,11 +46,8 @@ func userbits(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 	}
 	if error != nil && error.Error() == "not found" {
 
-		userName, userNameError := repos.GetUsernameByID(&userID)
 		userNameResult := ""
-		if userNameError == nil {
-			userNameResult = *userName
-		}
+
 		bitsEmptyResult := models.UserBitsWithHistory{
 			UserBits: models.UserBits{
 				ChannelID: *channelID,

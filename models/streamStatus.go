@@ -8,10 +8,12 @@ import (
 	"unicode/utf8"
 )
 
+// StreamStatusGameHistory struct describes game on stream and its starting time
 type StreamStatusGameHistory struct {
 	Game  string    `bson:",omitempty"`
 	Start time.Time `bson:",omitempty"`
 }
+// GamesHistory is type alias to array of StreamStatusGameHistory, used to properly sorting history by date
 type GamesHistory []StreamStatusGameHistory
 
 func (history GamesHistory) Len() int {
@@ -26,6 +28,7 @@ func (history GamesHistory) Swap(i, j int) {
 	history[i], history[j] = history[j], history[i]
 }
 
+// ReturnHistory forms one-line human-readable history of games on running stream
 func (history GamesHistory) ReturnHistory() string {
 	sort.Sort(sort.Reverse(history))
 	stringHistory := ""

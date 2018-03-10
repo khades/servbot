@@ -19,7 +19,7 @@ func sessionAndChannel(next sessionAndChannelHandlerFunc) sessionHandlerFunc {
 			writeJSONError(w, "channel variable is not defined", http.StatusUnprocessableEntity)
 			return
 		}
-		channelName, error := repos.GetUsernameByID(&channelID)
+		channelName, error := repos.GetChannelNameByID(&channelID)
 
 		if error != nil {
 			writeJSONError(w, error.Error(), http.StatusInternalServerError)

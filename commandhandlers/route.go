@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 // RouterStruct is struct for handling command to handler
 type RouterStruct struct {
@@ -11,13 +11,13 @@ func (router RouterStruct) Go(command string) CommandHandler {
 	if found {
 		return handler
 	}
-	return Custom
+	return custom
 }
 
 // Router explicitly maps input chat command to a handler
 var Router = RouterStruct{routes: map[string]CommandHandler{
-	"new":   New,
-	"alias": Alias,
-	"subdayNew": SubdayNew,
-	"subdayEnd": SubdayEnd,
-	"songrequest": SongRequestAdd}}
+	"new":   newCommand,
+	"alias": aliasCommand,
+	"subdayNew": subdayNew,
+	"subdayEnd": subdayEnd,
+	"songrequest": songRequestAdd}}

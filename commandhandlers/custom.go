@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func Short(s string, i int) string {
+func short(s string, i int) string {
 	runes := []rune(s)
 	if len(runes) > i {
 		return string(runes[:i])
@@ -22,15 +22,15 @@ func Short(s string, i int) string {
 	return s
 }
 
-// Custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
-func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+// custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
+func custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	channelInfo, error := repos.GetChannelInfo(&chatMessage.ChannelID)
 	if error != nil {
 		return
 	}
-	channelStatus := &models.ChannelInfoForTemplate{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
-	channelStatus.IsMod = chatMessage.IsMod
-	channelStatus.IsSub = chatMessage.IsSub
+	templateObject := &models.TemplateExtendedObject{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
+	templateObject.IsMod = chatMessage.IsMod
+	templateObject.IsSub = chatMessage.IsSub
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
 	user := chatMessage.User
 	if err != nil || template.Template == "" {
@@ -38,29 +38,29 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 	}
 
 	if chatMessage.IsMod == false {
-		if channelStatus.StreamStatus.Online == true && template.ShowOnline == false {
+		if templateObject.StreamStatus.Online == true && template.ShowOnline == false {
 			return
 		}
-		if channelStatus.StreamStatus.Online == false && template.ShowOffline == false {
+		if templateObject.StreamStatus.Online == false && template.ShowOffline == false {
 			return
 		}
 	}
 	if template.IntegerRandomizer.Enabled == true && template.IntegerRandomizer.UpperLimit > template.IntegerRandomizer.LowerLimit {
-		channelStatus.RandomInteger = template.IntegerRandomizer.LowerLimit + rand.Intn(template.IntegerRandomizer.UpperLimit-template.IntegerRandomizer.LowerLimit)
-		if channelStatus.RandomInteger == template.IntegerRandomizer.LowerLimit {
-			channelStatus.RandomIntegerIsMinimal = true
+		templateObject.RandomInteger = template.IntegerRandomizer.LowerLimit + rand.Intn(template.IntegerRandomizer.UpperLimit-template.IntegerRandomizer.LowerLimit)
+		if templateObject.RandomInteger == template.IntegerRandomizer.LowerLimit {
+			templateObject.RandomIntegerIsMinimal = true
 		}
-		if channelStatus.RandomInteger == template.IntegerRandomizer.UpperLimit {
-			channelStatus.RandomIntegerIsMaximal = true
+		if templateObject.RandomInteger == template.IntegerRandomizer.UpperLimit {
+			templateObject.RandomIntegerIsMaximal = true
 		}
-		if channelStatus.RandomInteger == 0 {
-			channelStatus.RandomIntegerIsMinimal = true
+		if templateObject.RandomInteger == 0 {
+			templateObject.RandomIntegerIsMinimal = true
 		}
-		if template.IntegerRandomizer.TimeoutAfter == true && channelStatus.RandomInteger > 0 {
+		if template.IntegerRandomizer.TimeoutAfter == true && templateObject.RandomInteger > 0 {
 			if chatMessage.IsMod == false {
 				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
-					Body:    fmt.Sprintf("/timeout %s %d ", user, channelStatus.RandomInteger)})
+					Body:    fmt.Sprintf("/timeout %s %d ", user, templateObject.RandomInteger)})
 			} else {
 				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
@@ -76,21 +76,21 @@ func Custom(online bool, chatMessage *models.ChatMessage, chatCommand models.Cha
 		if len(template.StringRandomizer.Strings) == 0 {
 			commandValues := strings.Split(chatCommand.Body, ",")
 			if len(commandValues) != 0 {
-				channelStatus.RandomString = strings.TrimSpace(commandValues[rand.Intn(len(commandValues)-1)])
+				templateObject.RandomString = strings.TrimSpace(commandValues[rand.Intn(len(commandValues)-1)])
 
 			}
 		} else {
-			channelStatus.RandomString = strings.TrimSpace(template.StringRandomizer.Strings[rand.Intn(len(template.StringRandomizer.Strings)-1)])
+			templateObject.RandomString = strings.TrimSpace(template.StringRandomizer.Strings[rand.Intn(len(template.StringRandomizer.Strings)-1)])
 		}
 	}
 
-	message, renderError := mustache.Render(template.Template, channelStatus)
+	message, renderError := mustache.Render(template.Template, templateObject)
 	if renderError != nil {
 		return
 	}
 	message = strings.TrimSpace(message)
 	if utf8.RuneCountInString(message) > 400 {
-		message = Short(message, 397) + "..."
+		message = short(message, 397) + "..."
 	}
 	if message == "" {
 		return

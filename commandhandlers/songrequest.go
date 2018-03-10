@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	//"strings"
@@ -9,7 +9,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func SongRequestAdd(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func songRequestAdd(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	id := &chatCommand.Body
 	log.Println(chatCommand.Body)
 	result := repos.AddSongRequest(&chatMessage.User, chatMessage.IsSub, &chatMessage.UserID, &chatMessage.ChannelID, id)

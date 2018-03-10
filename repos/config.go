@@ -6,11 +6,15 @@ import (
 	"io/ioutil"
 	"log"
 
-	"gopkg.in/asaskevich/govalidator.v4"
 	"github.com/khades/servbot/models"
+	"gopkg.in/asaskevich/govalidator.v4"
+	"gopkg.in/mgo.v2/bson"
 )
 
-func readConfig() models.Config {
+var configCollection = "config"
+
+// ReadConfigFromFile returns config object parsed from config.json
+func ReadConfigFromFile() models.Config {
 	var configfile string
 	flag.StringVar(&configfile, "config", "config.json", "defines configuration file for application")
 
@@ -33,5 +37,18 @@ func readConfig() models.Config {
 	return config
 }
 
-// Config represents config file as object
-var Config = readConfig()
+// ReadConfigFromDatabase returns config object parsed from mongodb
+func ReadConfigFromDatabase() (models.Config, error) {
+	var result models.Config
+	error := db.C(configCollection).Find(bson.M{"entity": "config"}).One(&result)
+	return result, error
+}
+
+// SaveConfigToDatabase saves current config object to database
+func SaveConfigToDatabase() {
+	db.C(configCollection).Upsert(bson.M{"entity": "config"}, bson.M{"$set": Config})
+
+}
+
+// Config represents config file as object, it is populated from config.json at bot initialization phase
+var Config models.Config

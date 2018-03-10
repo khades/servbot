@@ -1,6 +1,7 @@
 package httpbackend
 
 import (
+	"github.com/khades/servbot/eventbus"
 	"encoding/json"
 	"net/http"
 
@@ -32,4 +33,8 @@ func putSubtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 	request.Users = []string{}
 	repos.PutChannelSubtrainWeb(channelID, &request)
 	json.NewEncoder(w).Encode(optionResponse{"OK"})
+}
+
+func subtrainEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	websocketEventbusWriter(w,r,eventbus.Subtrain(channelID))
 }

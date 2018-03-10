@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	"strings"
@@ -8,8 +8,8 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-// Alias creates alias of existing command by copying its content and setting that it is alias to a parent command
-func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+// aliasCommand creates alias of existing command by copying its content and setting that it is alias to a parent command
+func aliasCommand(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	if chatMessage.IsMod {
 		commandName := ""
 		aliasTo := ""
@@ -36,4 +36,5 @@ func Alias(online bool, chatMessage *models.ChatMessage, chatCommand models.Chat
 	// 		Body:    "Создание алиaса: Вы не модер SMOrc",
 	// 		User:    chatMessage.User})
 	// }
+	
 }

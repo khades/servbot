@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	"github.com/khades/servbot/ircClient"

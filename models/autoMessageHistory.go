@@ -2,6 +2,8 @@ package models
 
 import "time"
 
+
+// AutoMessageHistory struct describes edit history of automessage
 type AutoMessageHistory struct {
 	User          string        `valid:"required" json:"user"`
 	UserID        string        `valid:"required" json:"userID"`

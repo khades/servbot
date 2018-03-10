@@ -1,5 +1,6 @@
 package models
 
+//ChatMessageLog struct describes specific user logs on specific channel
 type ChatMessageLog struct {
 	User           string          `json:"user"`
 	Channel        string          `json:"channel"`

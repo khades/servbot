@@ -1,4 +1,4 @@
-package commandHandlers
+package commandhandlers
 
 import (
 	"log"
@@ -10,7 +10,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func SubdayNew(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func subdayNew(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	
 	
 	if chatMessage.IsMod == false {

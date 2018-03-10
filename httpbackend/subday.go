@@ -19,6 +19,25 @@ type subdayWithModNoWinners struct {
 	*models.SubdayNoWinners
 	IsMod bool `json:"isMod"`
 }
+type subdayCreateStruct struct {
+	Name         string `json:"name"`
+	AllowNonSubs bool   `json:"allowNonSubs"`
+}
+
+func subdayCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	decoder := json.NewDecoder(r.Body)
+	var request subdayCreateStruct
+	err := decoder.Decode(&request)
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+	created := repos.CreateNewSubday(channelID, request.AllowNonSubs, &request.Name)
+	if created == false {
+		writeJSONError(w, "Subday already exists", http.StatusNotAcceptable)
+		return
+	}
+}
 
 func subdayList(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	results, error := repos.GetSubdays(channelID)
@@ -28,33 +47,6 @@ func subdayList(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, c
 	}
 	json.NewEncoder(w).Encode(&results)
 }
-
-// func subdayLast(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-// 	channelInfo, error := repos.GetChannelInfo(channelID)
-// 	if error != nil {
-// 		writeJSONError(w, "That channel is not defined", http.StatusForbidden)
-// 		return
-// 	}
-// 	if channelInfo.GetIfUserIsMod(&s.UserID) == true {
-// 		result, error := repos.GetLastSubdayMod(channelID)
-// 		if error != nil {
-// 			writeJSONError(w, error.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-// 		object := subdayWithMod{result, true}
-// 		json.NewEncoder(w).Encode(object)
-// 	} else {
-// 		result, error := repos.GetLastSubday(channelID)
-// 		if error != nil {
-// 			writeJSONError(w, error.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-// 		object := subdayWithModNoWinners{result, false}
-
-// 		json.NewEncoder(w).Encode(object)
-// 	}
-
-// }
 
 func subdayByID(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	channelInfo, error := repos.GetChannelInfo(channelID)
@@ -70,7 +62,7 @@ func subdayByID(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, c
 	if channelInfo.GetIfUserIsMod(&s.UserID) == true {
 		var result *models.Subday
 		if (id != "last") {
-			result, error = repos.GetSubdayByIdMod(&id)
+			result, error = repos.GetSubdayByIDMod(&id)
 			if error != nil {
 				writeJSONError(w, error.Error(), http.StatusInternalServerError)
 				return
@@ -91,7 +83,7 @@ func subdayByID(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, c
 	} else {
 		var result *models.SubdayNoWinners
 		if (id != "last") {
-			result, error = repos.GetSubdayById(&id)
+			result, error = repos.GetSubdayByID(&id)
 			if error != nil {
 				writeJSONError(w, error.Error(), http.StatusInternalServerError)
 				return

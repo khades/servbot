@@ -20,7 +20,7 @@ func CheckTwitchDJTrack() {
 	if error != nil {
 		return
 	}
-	for _, channel := range *channels {
+	for _, channel := range channels {
 		checkOneTwitchDJTrack(&channel)
 	}
 }
@@ -54,10 +54,9 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 		return
 	}
 	if channel.TwitchDJ.NotifyOnChange == true {
-		channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
-		if channelNameError == nil && *channelName != "" && status.Playing == true && channel.TwitchDJ.Track != status.Track {
+		if status.Playing == true && channel.TwitchDJ.Track != status.Track {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-				Channel: *channelName,
+				Channel: channel.Channel,
 				Body:    "[TwitchDJ] Now Playing: " + status.Track})
 		}
 	}

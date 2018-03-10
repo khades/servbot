@@ -7,9 +7,10 @@ import (
 	"github.com/khades/servbot/models"
 )
 
-func GetChannelsWithSubtrainNotification() (*[]models.ChannelInfo, error) {
+// GetChannelsWithSubtrainNotification returns channels where subtrain notification should be shown
+func GetChannelsWithSubtrainNotification() ([]models.ChannelInfo, error) {
 	result := []models.ChannelInfo{}
-	error := Db.C(channelInfoCollection).Find(
+	error := db.C(channelInfoCollection).Find(
 		bson.M{
 			"subtrain.enabled": true,
 			"subtrain.notificationshown" : false,
@@ -17,21 +18,23 @@ func GetChannelsWithSubtrainNotification() (*[]models.ChannelInfo, error) {
 				"$ne":0},
 			"subtrain.notificationtime":bson.M{
 				"$lt": time.Now()}}).All(&result)
-	return &result, error
+	return result, error
 }
 
-func GetChannelsWithExpiredSubtrain() (*[]models.ChannelInfo, error) {
+// GetChannelsWithExpiredSubtrain returns channels where subtrain has expired
+func GetChannelsWithExpiredSubtrain() ([]models.ChannelInfo, error) {
 	result := []models.ChannelInfo{}
-	error := Db.C(channelInfoCollection).Find(
+	error := db.C(channelInfoCollection).Find(
 		bson.M{
 			"subtrain.enabled": true,
 			"subtrain.currentstreak": bson.M{
 				"$ne":0},
 			"subtrain.expirationtime":bson.M{
 				"$lt": time.Now()}}).All(&result)
-	return &result, error
+	return result, error
 }
 
+// PutChannelSubtrain upserts subtrain infromation for channel
 func PutChannelSubtrain(channelID *string, subTrain *models.SubTrain) {
 	channelInfo, _ := GetChannelInfo(channelID)
 	if channelInfo != nil {
@@ -39,9 +42,10 @@ func PutChannelSubtrain(channelID *string, subTrain *models.SubTrain) {
 	} else {
 		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, SubTrain: *subTrain})
 	}
-	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
+	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
 }
 
+// PutChannelSubtrainWeb upserts subtrain infromation for channel, unlike previous function, it tries to save current streak if possible
 func PutChannelSubtrainWeb(channelID *string, subTrain *models.SubTrain) {
 	channelInfo, _ := GetChannelInfo(channelID)
 	localSubtrain := channelInfo.SubTrain
@@ -57,15 +61,17 @@ func PutChannelSubtrainWeb(channelID *string, subTrain *models.SubTrain) {
 	} else {
 		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, SubTrain: *subTrain})
 	}
-	Db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
+	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
 }
 
+// SetSubtrainNotificationShown sets "notificationshown" flag to true
 func SetSubtrainNotificationShown(channelInfo *models.ChannelInfo) {
 	subTrain := channelInfo.SubTrain
 	subTrain.NotificationShown = true
 	PutChannelSubtrain(&channelInfo.ChannelID, &subTrain)
 }	
 
+// IncrementSubtrainCounterByChannelID is version of IncrementSubtrainCounter that gets channelInfo based on channelID
 func IncrementSubtrainCounterByChannelID(channelID *string, user *string) {
 	log.Println("Got to incrementSubTrainByID")
 	channelInfo, error := GetChannelInfo(channelID)
@@ -76,6 +82,7 @@ func IncrementSubtrainCounterByChannelID(channelID *string, user *string) {
 	log.Println(error)
 }
 
+// IncrementSubtrainCounter increments specified channel subtrain information, also records subscriber username
 func IncrementSubtrainCounter(channelInfo *models.ChannelInfo, user *string) {
 	subTrain := channelInfo.SubTrain
 	if subTrain.Enabled == false {
@@ -90,6 +97,7 @@ func IncrementSubtrainCounter(channelInfo *models.ChannelInfo, user *string) {
 	PutChannelSubtrain(&channelInfo.ChannelID, &subTrain)
 }
 
+// ResetSubtrainCounter resets current subtrain counters
 func ResetSubtrainCounter(channelInfo *models.ChannelInfo) {
 	subTrain := channelInfo.SubTrain
 	subTrain.CurrentStreak = 0

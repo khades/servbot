@@ -11,10 +11,7 @@ import (
 )
 
 func processMessage(message *models.AutoMessage) {
-	channel, error := repos.GetUsernameByID(&message.ChannelID)
-	if error != nil {
-		return
-	}
+
 	channelInfo, error := repos.GetChannelInfo(&message.ChannelID)
 	if error != nil {
 		return
@@ -30,7 +27,7 @@ func processMessage(message *models.AutoMessage) {
 		return
 	}
 	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-		Channel: *channel,
+		Channel: channelInfo.Channel,
 		Body:    html.UnescapeString(compiledMessage)})
 
 }
@@ -40,7 +37,7 @@ func SendAutoMessages() {
 	if error != nil {
 		return
 	}
-	for _, message := range *messages {
+	for _, message := range messages {
 		processMessage(&message)
 	}
 }

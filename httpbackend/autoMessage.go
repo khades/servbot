@@ -24,7 +24,7 @@ func autoMessageList(w http.ResponseWriter, r *http.Request, s *models.HTTPSessi
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(*result)
+	json.NewEncoder(w).Encode(result)
 
 }
 func autoMessageRemoveInactive(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {

@@ -49,7 +49,7 @@ func CheckVK() {
 	if error != nil {
 		return
 	}
-	for _, channel := range *channels {
+	for _, channel := range channels {
 		checkOne(&channel)
 	}
 }
@@ -67,14 +67,13 @@ func checkOne(channel *models.ChannelInfo) {
 	if result.NotifyOnChange == false {
 		return
 	}
-	channelName, channelNameError := repos.GetUsernameByID(&channel.ChannelID)
 
-	if channelNameError == nil && *channelName != "" {
+
 	//	log.Println("SENDING MESSAGE")
 		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-			Channel: *channelName,
+			Channel: channel.Channel,
 			Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
-	}
+
 }
 
 // https://api.vk.com/method/wall.get?domain=mob5tervk&filter=owner&count=1&v=5.60
@@ -86,10 +85,8 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 		url = "https://api.vk.com/method/wall.get?owner_id=-" + strings.Replace(vkInputGroupInfo.GroupName, "club", "", -1) + "&filter=owner&count=2&v=5.60"
 
 	}
-//	log.Println("URL: " + url)
 	resp, error := httpclient.Get(url + "&access_token=" + repos.Config.VkClientKey)
 	if error != nil {
-	//	log.Println(error)
 		return &vkGroupInfo, error
 	}
 	if resp != nil {
@@ -98,7 +95,6 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 	vkResp := vkResponse{}
 	marshallError := json.NewDecoder(resp.Body).Decode(&vkResp)
 	if marshallError != nil {
-//log.Println(marshallError)
 		return &vkGroupInfo, marshallError
 	}
 	if len(vkResp.Response.Items) == 0 {

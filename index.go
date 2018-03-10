@@ -2,30 +2,70 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/khades/servbot/bot"
+	"github.com/khades/servbot/models"
+	"github.com/sirupsen/logrus"
+
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/httpbackend"
-	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 	"github.com/khades/servbot/services"
 )
 
 func main() {
-	var wg sync.WaitGroup
-	result, resultError := repos.GetUsersID(&repos.Config.Channels)
-	if resultError != nil {
-		log.Printf("INITIALISATION ERROR: ", resultError)
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logger := logrus.WithFields(logrus.Fields{"package": "main"})
+	logger.Info("Starting")
+	convertConfig := flag.Bool("convertconfig", false, "forces importing config file to database")
+	dbName := flag.String("db", "servbot", "mongo database name")
+	logger.Infof("Database name: %s", *dbName)
+	// Initializing database
+	dbErr := repos.InitializeDB(*dbName)
+	if dbErr != nil {
+		logger.Fatal("Database Conenction Error: " + dbErr.Error())
+	}
+	log.Println(*convertConfig)
+	if *convertConfig == false {
+		logrus.SetLevel(logrus.DebugLevel)
+
+		logger.Info("Running configuration importer.")
+		repos.Config = repos.ReadConfigFromFile()
+		users, usersError := repos.GetUsersID(repos.Config.Channels)
+		if usersError != nil {
+			log.Fatal(usersError)
+		}
+		channelIDs := []string{}
+		for _, value := range *users {
+			channelIDs = append(channelIDs, value)
+		}
+		repos.Config.ChannelIDs = channelIDs
+		repos.SaveConfigToDatabase()
+		logger.Info("Configuration import successed.")
+
 		return
 	}
-	for _, value := range *result {
-		repos.PushCommandsForChannel(&value)
+	// Database initialisation and preprocessing
+
+	// Reading config from database
+	localConfig, configError := repos.ReadConfigFromDatabase()
+
+	if configError != nil {
+		logger.Fatalf("Reading config from database failed: %s", configError)
 	}
 
-	repos.CreateChannels()
+	repos.Config = localConfig
+	if repos.Config.Debug == true {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
+	repos.PreprocessChannels()
+	var wg sync.WaitGroup
+
 	wg.Add(1)
 	go func() {
 		services.CheckTwitchDJTrack()
@@ -34,7 +74,7 @@ func main() {
 	}()
 
 	gob.Register(&models.HTTPSession{})
-	log.Println("Starting...")
+	logger.Info("Starting...")
 	ircClientTicker := time.NewTicker(time.Second * 3)
 
 	go func(wg *sync.WaitGroup) {
@@ -68,6 +108,7 @@ func main() {
 			wg.Done()
 		}
 	}(&wg)
+
 	subTrainNotificationTicker := time.NewTicker(time.Second * 5)
 	go func(wg *sync.WaitGroup) {
 		for {
@@ -77,6 +118,7 @@ func main() {
 			wg.Done()
 		}
 	}(&wg)
+
 	subTrainTimeoutTicker := time.NewTicker(time.Second * 5)
 	go func(wg *sync.WaitGroup) {
 		for {
@@ -86,19 +128,12 @@ func main() {
 			wg.Done()
 		}
 	}(&wg)
-	// go func(wg *sync.WaitGroup) {
-	// 	for {
-	// 		<-thirtyTicker.C
-	// 		wg.Add(1)
-	// 		services.CheckDubTrack()
-	// 		wg.Done()
-	// 	}
-	// }(&wg)
-	twentyticker := time.NewTicker(time.Second * 30)
+
+	pingticker := time.NewTicker(time.Second * 30)
 
 	go func() {
 		for {
-			<-twentyticker.C
+			<-pingticker.C
 			eventbus.EventBus.Publish("ping", "ping")
 		}
 	}()
@@ -142,6 +177,6 @@ func main() {
 	}(&wg)
 
 	wg.Wait()
-	log.Println("Quitting...")
+	logger.Info("Quitting...")
 	// Kseyko = PIDR
 }

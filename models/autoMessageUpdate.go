@@ -1,5 +1,6 @@
 package models
 
+// AutoMessageUpdate struct describes update to automessage
 type AutoMessageUpdate struct {
 	ID            string
 	User          string `valid:"required"`

@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// MessageStruct describes parsed chat message
 type MessageStruct struct {
 	Date        time.Time `json:"date"`
 	Username    string    `json:"username"`

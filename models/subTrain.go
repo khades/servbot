@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// SubTrain descibes subtrain settings and state on specified channel
 type SubTrain struct {
 	Enabled              bool      `json:"enabled"`
 	OnlyNewSubs          bool      `json:"onlyNewSubs"`

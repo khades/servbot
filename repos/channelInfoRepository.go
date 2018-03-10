@@ -2,8 +2,6 @@ package repos
 
 import "github.com/khades/servbot/models"
 
-var channelInfoCollection = "channelInfo"
-
 type channelInfoRepository struct {
 	dataArray map[string]*models.ChannelInfo
 }

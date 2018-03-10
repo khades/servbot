@@ -1,17 +1,15 @@
 package repos
 
 import (
-	"encoding/json"
-	"errors"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/khades/servbot/httpclient"
 	cache "github.com/patrickmn/go-cache"
+	"github.com/sirupsen/logrus"
 )
 
-var userIDCacheObject = cache.New(60*time.Minute, 600*time.Second)
+var userIDCacheObject = cache.New(360*time.Minute, 60*time.Second)
 
 type twitchUserInfo struct {
 	ID          string `json:"_id"`
@@ -23,43 +21,53 @@ type usersLoginStruct struct {
 	Users []twitchUserInfo `json:"users"`
 }
 
-func GetUsernameByID(userID *string) (*string, error) {
-	value, found := userIDCacheObject.Get("id-" + *userID)
-	if found == false {
-		usersString := "https://api.twitch.tv/kraken/users/" + *userID
-		resp, error := httpclient.TwitchV5(*userID, "GET", usersString, nil)
-		if error != nil {
-			return nil, error
-		}
-		if resp != nil {
-			defer resp.Body.Close()
-		}
-		var twitchUser twitchUserInfo
-		marshallError := json.NewDecoder(resp.Body).Decode(&twitchUser)
-		if marshallError != nil {
-			return nil, marshallError
-		}
-		if twitchUser.Name == "" {
-			return nil, errors.New("Not found")
-		}
-
-		userName := strings.ToLower(twitchUser.Name)
-		userIDCacheObject.Set("username-"+userName, *userID, 0)
-		userIDCacheObject.Set("id-"+*userID, userName, 0)
-		return &userName, nil
-
-	} else {
+// GetChannelNameByID tries to fetch channelname for specified channelid from cache, falling back to channelInfo database
+func GetChannelNameByID(channelID *string) (*string, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"action":  "GetChannelNameByID"})
+	logger.Debugf("Function is called")
+	logger.Debugf("Looking for channel by id %s", *channelID)
+	value, found := userIDCacheObject.Get("id-" + *channelID)
+	if found == true {
 		result := value.(string)
+		logger.Debugf("Channel by id %s is found in cache: %s", *channelID, result)
+
 		return &result, nil
 	}
+
+	logger.Debugf("Channel by id %s is not found in cache", *channelID)
+
+	channel, channelError := GetChannelInfo(channelID)
+
+	if channelError != nil {
+		logger.Debugf("Looking for channelid %s in database failed: %s", *channelID, channelError.Error())
+
+		return nil, channelError
+	}
+
+	userName := strings.ToLower(channel.Channel)
+	userIDCacheObject.Set("id-"+*channelID, userName, 0)
+	logger.Debugf("ChannelID %s has name: %s", *channelID, strings.ToLower(channel.Channel))
+
+	return &userName, nil
+
 }
-func GetUsersID(users *[]string) (*map[string]string, error) {
+// GetUsersID fetches usernames from twitch for specified users, and caches them for 6 hours
+func GetUsersID(users []string) (*map[string]string, error) {
+	// Cache every username -> userid pair for month
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"action":  "GetUsersId"})
+	logger.Debugf("Function is called")
+
 	notFoundUsers := []string{}
 	result := make(map[string]string)
-	//log.Printf("Input users: %d", len(*users))
-	////log.Println(*users)
-	for _, user := range *users {
-		value, found := userIDCacheObject.Get("username-" + user)
+	logger.Debugf("Input users length: %d", len(users))
+	logger.Debugf("Users: %s", strings.Join(users, ", "))
+
+	for _, user := range users {
+		value, found := userIDCacheObject.Get("username-" + strings.ToLower(user))
 		if found {
 			stringValue := value.(string)
 			if stringValue != "rejected" {
@@ -70,58 +78,31 @@ func GetUsersID(users *[]string) (*map[string]string, error) {
 		}
 	}
 	if len(notFoundUsers) == 0 {
-		//log.Printf("Found users: %d", len(result))
+		logger.Debugf("Total found users: %d, all users found", len(result))
+
 		return &result, nil
 	}
-	sliceStart := 0
-	//log.Printf("Found users: %d", len(result))
-	//log.Printf("Unfound users: %d", len(notFoundUsers))
+	logger.Debugf("Total found users: %d", len(result))
+	logger.Debugf("Total not found users: %d", len(notFoundUsers))
 
-	log.Println(notFoundUsers)
-	for index, _ := range notFoundUsers {
-		if index == len(notFoundUsers)-1 || index-sliceStart > 48 {
-			////log.Printf("%d - %d", sliceStart, index)
-			usersString := "https://api.twitch.tv/kraken/users?login=" + strings.Join(notFoundUsers[sliceStart:index+1], ",")
-			//log.Printf(usersString)
-			resp, error := httpclient.TwitchV5(Config.ClientID, "GET", usersString, nil)
-			if error != nil {
-				return nil, error
-			}
-			if resp != nil {
-				defer resp.Body.Close()
-			}
-			var usersWithID usersLoginStruct
-			marshallError := json.NewDecoder(resp.Body).Decode(&usersWithID)
-			if marshallError != nil {
-				return nil, marshallError
-			}
-			//log.Printf("That request returned %d users", len(usersWithID.Users))
-			//log.Println(usersWithID)
+	logger.Debugf("Not found users: %s", strings.Join(notFoundUsers, ", "))
 
-			for _, user := range usersWithID.Users {
-				result[user.DisplayName] = user.ID
-				userIDCacheObject.Set("username-"+strings.ToLower(user.Name), user.ID, 0)
-				userIDCacheObject.Set("id-"+user.ID, strings.ToLower(user.Name), 600*time.Minute)
-			}
-			if len(usersWithID.Users) == 0 {
-				//log.Println(len(notFoundUsers[sliceStart : index+1]))
-				//log.Println(sliceStart)
-				//log.Println(index + 1)
-				for _, user := range notFoundUsers[sliceStart : index+1] {
-					userIDCacheObject.Set("username-"+user, "rejected", 600*time.Minute)
-				}
-			}
-			sliceStart = index
-
-		}
+	for _, user := range notFoundUsers {
+		userIDCacheObject.Set("username-"+user, "rejected", 600*time.Minute)
 	}
-	// if len(result) != len(*users) {
-	// 	for _, user := range *users {
-	// 		if result[user] == "" {
-	// 		}
-	// 	}
-	// }
-	//log.Printf("Returning %d users", len(result))
+
+	twitchUsers, usersError := getTwitchUsersByDisplayName(notFoundUsers)
+	if usersError != nil {
+		logger.Debugf("External function error encountered: %s", usersError.Error())
+		return nil, usersError
+
+	}
+	for _, user := range twitchUsers {
+		result[strings.ToLower(user.DisplayName)] = user.ID
+		userIDCacheObject.Set("username-"+strings.ToLower(user.DisplayName), user.ID, 0)
+	}
+
+	log.Printf("Returning %d users", len(result))
 
 	return &result, nil
 }

@@ -1,6 +1,6 @@
-package models
+package httpbackend
 
-type HttpError struct {
+type httpError struct {
 	Code    int         `json:"code"`
 	Message interface{} `json:"message"`
 }

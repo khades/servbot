@@ -1,5 +1,0 @@
-package services
-
-func SwitchSongRequests() {
-
-}

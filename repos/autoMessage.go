@@ -2,23 +2,24 @@ package repos
 
 import (
 	"errors"
-	"log"
 	"strings"
 	"time"
 
 	"github.com/khades/servbot/models"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2/bson"
 )
 
 var autoMessageCollectionName = "autoMessages"
 
+// DecrementAutoMessages decrement message threshold every time someone writes in chat, with check if automessage is bound to specific game on stream
 func DecrementAutoMessages(channelID *string) {
 	channelInfo, error := GetChannelInfo(channelID)
 	games := []string{""}
 	if error == nil && channelInfo.StreamStatus.Online == true {
 		games = append(games, channelInfo.StreamStatus.Game)
 	}
-	Db.C(autoMessageCollectionName).UpdateAll(bson.M{
+	db.C(autoMessageCollectionName).UpdateAll(bson.M{
 		"channelid": *channelID,
 		"message":   bson.M{"$ne": ""},
 		"$or": []bson.M{
@@ -26,46 +27,60 @@ func DecrementAutoMessages(channelID *string) {
 			bson.M{"game": bson.M{"$exists": false}}}},
 		bson.M{"$inc": bson.M{"messagethreshold": -1}})
 }
-func RemoveInactiveAutoMessages(channelID *string) {
 
-	Db.C(autoMessageCollectionName).RemoveAll(bson.M{
+// RemoveInactiveAutoMessages removes all automessages on channel, which had no update for a week
+func RemoveInactiveAutoMessages(channelID *string) {
+	db.C(autoMessageCollectionName).RemoveAll(bson.M{
 		"channelid":    *channelID,
 		"message":      "",
 		"history.date": bson.M{"$not": bson.M{"$gte": time.Now().Add(24 * -7 * time.Hour)}}})
-
 }
-func GetCurrentAutoMessages() (*[]models.AutoMessage, error) {
-	//log.Println("AutoMessage: Getting Current AutoMessages")
+
+// GetCurrentAutoMessages returns list of ALL automessage, which are served on that chatbot instance
+func GetCurrentAutoMessages() ([]models.AutoMessage, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "automessages",
+		"action":  "GetCurrentAutoMessage"})
+	logger.Debug("AutoMessage: Getting Current AutoMessages")
 	var result []models.AutoMessage
-	error := Db.C(autoMessageCollectionName).Find(bson.M{
+	error := db.C(autoMessageCollectionName).Find(bson.M{
 		"message":           bson.M{"$ne": ""},
 		"messagethreshold":  bson.M{"$lte": 0},
 		"durationthreshold": bson.M{"$lte": time.Now()}}).All(&result)
-	log.Printf("AutoMessage: Got %d AutoMessages", len(result))
-	//log.Println(error)
-	return &result, error
+	logger.Infof("AutoMessage: Got %d AutoMessages", len(result))
+	return result, error
 }
 
+// ResetAutoMessageThreshold resets automessage thresholds after successfull automessage execution
 func ResetAutoMessageThreshold(autoMessage *models.AutoMessage) {
-	log.Printf("AutoMessage: Resetting AutoMessage %s", autoMessage.ID)
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "automessages",
+		"action":  "ResetAutoMessageThreshold"})
+	logger.Infof("AutoMessage: Resetting AutoMessage %s", autoMessage.ID)
 	now := time.Now()
-	Db.C(autoMessageCollectionName).Update(bson.M{"_id": autoMessage.ID}, bson.M{"$set": bson.M{
+	db.C(autoMessageCollectionName).Update(bson.M{"_id": autoMessage.ID}, bson.M{"$set": bson.M{
 		"messagethreshold":  autoMessage.MessageLimit,
 		"durationthreshold": now.Add(autoMessage.DurationLimit)}})
 }
 
+// GetAutoMessage returns specific automessage for specific channel
 func GetAutoMessage(id *string, channelID *string) (*models.AutoMessageWithHistory, error) {
 	var result models.AutoMessageWithHistory
 	objectID := bson.ObjectIdHex(*id)
-	error := Db.C(autoMessageCollectionName).Find(bson.M{"_id": objectID, "channelid": *channelID}).One(&result)
+	error := db.C(autoMessageCollectionName).Find(bson.M{"_id": objectID, "channelid": *channelID}).One(&result)
 	return &result, error
 }
 
-func GetAutoMessages(channelID *string) (*[]models.AutoMessageWithHistory, error) {
+// GetAutoMessages returns all automessages for specific channel
+func GetAutoMessages(channelID *string) ([]models.AutoMessageWithHistory, error) {
 	var result []models.AutoMessageWithHistory
-	error := Db.C(autoMessageCollectionName).Find(bson.M{"channelid": *channelID}).All(&result)
-	return &result, error
+	error := db.C(autoMessageCollectionName).Find(bson.M{"channelid": *channelID}).All(&result)
+	return result, error
 }
+
+// CreateAutoMessage inserts new automessage to channel, specified in AutoMessageUpdate object
 func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) (*bson.ObjectId, error) {
 	id := bson.NewObjectId()
 	now := time.Now()
@@ -73,7 +88,7 @@ func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) (*bson.Objec
 		return nil, errors.New("Validation Failed")
 	}
 	var durationLimit = time.Second * time.Duration(autoMessageUpdate.DurationLimit)
-	Db.C(autoMessageCollectionName).Insert(
+	db.C(autoMessageCollectionName).Insert(
 		models.AutoMessageWithHistory{
 			AutoMessage: models.AutoMessage{
 				ID:                id,
@@ -96,13 +111,14 @@ func CreateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) (*bson.Objec
 	return &id, nil
 }
 
+// UpdateAutoMessage updates specific automessage, which details are specified in AutoMessageUpdate object
 func UpdateAutoMessage(autoMessageUpdate *models.AutoMessageUpdate) error {
 	if autoMessageUpdate.DurationLimit < 60 || autoMessageUpdate.MessageLimit < 20 {
 		return errors.New("Validation Failed")
 	}
 	now := time.Now()
 	var durationLimit = time.Second * time.Duration(autoMessageUpdate.DurationLimit)
-	Db.C(autoMessageCollectionName).Update(
+	db.C(autoMessageCollectionName).Update(
 		bson.M{"_id": bson.ObjectIdHex(autoMessageUpdate.ID), "channelid": autoMessageUpdate.ChannelID},
 		bson.M{
 			"$push": bson.M{

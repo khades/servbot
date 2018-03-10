@@ -12,28 +12,20 @@ type ChannelInfo struct {
 	ChannelID       string       `json:"channelId"`
 	Channel         string       `json:"channel"`
 	StreamStatus    StreamStatus `json:"streamStatus"`
-	Banme           Banme
 	TwitchDJ        TwitchDJ    `json:"twitchDJ"`
-	DubTrack        DubTrack    `json:"dubTrack"`
 	VkGroupInfo     VkGroupInfo `json:"vkGroupInfo"`
 	Mods            []string    `json:"mods"`
 	OfflineCommands []string    `json:"offlinecommands"`
 	OnlineCommands  []string    `json:"onlinecommands"`
 	SubTrain        SubTrain    `json:"subTrain"`
 	SubdayIsActive  bool        `json:"subdayIsActive"`
+	SongRequest ChannelInfoSongRequest `json:"songRequest"`
 }
-type ChannelInfoForTemplate struct {
-	ChannelInfo
-	RandomInteger          int
-	RandomIntegerIsMinimal bool
-	RandomIntegerIsMaximal bool
-	RandomIngegerIsZero    bool
-	RandomString           string
-	IsMod                  bool
-	IsSub                  bool
-	CommandBody            string
-	CommandBodyIsEmpty     bool
+// ChannelInfoSongRequest struct describes current state of songrequest on channel
+type ChannelInfoSongRequest struct{
+	IsPlaying bool`json:"isPlaying"`
 }
+
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {
@@ -60,8 +52,9 @@ func (channelInfo ChannelInfo) GetIfUserIsMod(userID *string) bool {
 	return isMod
 }
 
-func (chnanelInfo ChannelInfo) GetGamesHistory() string {
-	return chnanelInfo.StreamStatus.GamesHistory.ReturnHistory()
+// GetGamesHistory returns formatted game history on channel
+func (channelInfo ChannelInfo) GetGamesHistory() string {
+	return channelInfo.StreamStatus.GamesHistory.ReturnHistory()
 }
 
 // GetStreamDuration Helper Command for time for mustashe

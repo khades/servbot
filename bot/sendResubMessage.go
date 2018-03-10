@@ -14,6 +14,7 @@ func sendResubMessage(channel *string, channelID *string, user *string, resubCou
 	if error != nil || subAlert.Enabled == false {
 		return
 	}
+	
 	template := subAlert.ResubFiveMessage
 	smile := subAlert.ResubFiveSmile
 	switch *subPlan {

@@ -32,7 +32,7 @@ func setSubAlert(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 	if validator.Error == true {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(&models.HttpError{Code: http.StatusUnprocessableEntity, Message: *validator})
+		json.NewEncoder(w).Encode(&httpError{Code: http.StatusUnprocessableEntity, Message: *validator})
 		return
 	}
 	json.NewEncoder(w).Encode(optionResponse{"OK"})

@@ -20,7 +20,7 @@ func logsUsers(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, ch
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*channelUsers)
+	json.NewEncoder(w).Encode(channelUsers)
 }
 
 func logsUsersSearch(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -31,5 +31,5 @@ func logsUsersSearch(w http.ResponseWriter, r *http.Request, s *models.HTTPSessi
 		writeJSONError(w, error.Error(), http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(*channelUsers)
+	json.NewEncoder(w).Encode(channelUsers)
 }

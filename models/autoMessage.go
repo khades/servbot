@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// AutoMessage struct describes one automessage item on specified channel
 type AutoMessage struct {
 	ID                bson.ObjectId `bson:"_id,omitempty" json:"id"`
 	ChannelID         string        `json:"channelID"`

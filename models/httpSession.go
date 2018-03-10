@@ -1,6 +1,6 @@
 package models
 
-// HTTPSession defines nasfasf
+// HTTPSession struct describes session information of user
 type HTTPSession struct {
 	Username  string `valid:"required"`
 	UserID    string `valid:"required"`
