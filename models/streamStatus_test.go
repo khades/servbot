@@ -20,6 +20,4 @@ func TestStreamStatusOrdering(t *testing.T) {
 			Start: time.Now().Add(-2 * time.Minute)}}
 
 	sort.Sort(sort.Reverse(games))
-	log.Println(games)
-	log.Println(games.ReturnHistory())
 }

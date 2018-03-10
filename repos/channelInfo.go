@@ -1,19 +1,23 @@
 package repos
 
 import (
-	"log"
 	"strings"
 	"time"
 
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/khades/servbot/models"
+	"github.com/sirupsen/logrus"
 )
 
 var channelInfoCollection = "channelInfo"
 
 // GetChannelInfo gets channel info, and stores copy of that object in memory
 func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "channelInfo",
+		"action":  "GetChannelInfo"})
 	item, found := channelInfoRepositoryObject.dataArray[*channelID]
 	if found {
 		return item, nil
@@ -21,7 +25,7 @@ func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
 	var dbObject = &models.ChannelInfo{}
 	error := db.C(channelInfoCollection).Find(models.ChannelSelector{ChannelID: *channelID}).One(dbObject)
 	if error != nil {
-		log.Println("Error ", error)
+		logger.Info("Error ", error)
 		return nil, error
 	}
 	channelInfoRepositoryObject.dataArray[*channelID] = dbObject
@@ -140,7 +144,7 @@ func PushMods(channelID *string, mods []string) {
 func SetSubdayIsActive(channelID *string, isActive bool) {
 	channelInfo, _ := GetChannelInfo(channelID)
 	if channelInfo != nil {
-		channelInfo.SubdayIsActive= isActive
+		channelInfo.SubdayIsActive = isActive
 	} else {
 		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, SubdayIsActive: isActive})
 	}

@@ -1,12 +1,13 @@
 package models
 
 import (
-	"log"
 	"strconv"
 	"time"
 
 	duration "github.com/khades/iso8601duration"
+	"github.com/sirupsen/logrus"
 )
+
 // YoutubeVideo describes youtube video information, returned by youtube
 type YoutubeVideo struct {
 	PageInfo YTPageInfo `json:"pageInfo"`
@@ -42,9 +43,13 @@ type YTStatistics struct {
 
 // GetViewCount returns view count of one youtube video
 func (ytStatistics YTStatistics) GetViewCount() int64 {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "models",
+		"feature": "youtube",
+		"action":  "GetViewCount"})
 	value, error := strconv.ParseInt(ytStatistics.ViewCount, 10, 64)
 	if error != nil {
-		log.Println("ERROR: " + error.Error())
+		logger.Infof("ERROR: " + error.Error())
 	}
 	return value
 }

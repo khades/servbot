@@ -2,11 +2,11 @@ package ircClient
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/irc.v2"
 )
 
@@ -22,10 +22,14 @@ type IrcClient struct {
 
 // PushMessage adds message to array of messages to prevent global bans for bot
 func (ircClient *IrcClient) PushMessage(message string) {
-	log.Println("Pushing message: ", message)
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "ircclient",
+		"feature": "ircClient",
+		"action":  "PushMessage"})
+	logger.Infof("Pushing message: ", message)
 	if ircClient.MessagesSent > 3 {
 		ircClient.MessageQueue = append(ircClient.MessageQueue, message)
-		log.Println("Messages in queue :", len(ircClient.MessageQueue))
+		logger.Debugf("Messages in queue :", len(ircClient.MessageQueue))
 
 	} else {
 		ircClient.Client.Write(message)
@@ -35,6 +39,10 @@ func (ircClient *IrcClient) PushMessage(message string) {
 
 // SendMessages gets slice of messages to send periodically, sends them and updates list of messages
 func (ircClient *IrcClient) SendMessages(interval int) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "ircclient",
+		"feature": "ircClient",
+		"action":  "SendMessages"})
 	ircClient.MessagesSent = 0
 	queueSliceSize := 3
 	arrayLen := len(ircClient.MessageQueue)
@@ -42,7 +50,7 @@ func (ircClient *IrcClient) SendMessages(interval int) {
 	if arrayLen == 0 {
 		return
 	}
-	log.Println("Array length is:", arrayLen)
+	logger.Debugf("Array length is:", arrayLen)
 
 	if arrayLen < queueSliceSize {
 		queueSliceSize = arrayLen
@@ -50,14 +58,14 @@ func (ircClient *IrcClient) SendMessages(interval int) {
 	ircClient.MessagesSent = queueSliceSize
 
 	messagesToSend := ircClient.MessageQueue[:queueSliceSize]
-	log.Println("Messages to send:", len(messagesToSend))
+	logger.Debugf("Messages to send:", len(messagesToSend))
 
 	for _, message := range messagesToSend {
 		ircClient.Client.Write(message)
 	}
 	ircClient.MessageQueue = ircClient.MessageQueue[queueSliceSize:]
 	if len(ircClient.MessageQueue) > 0 {
-		log.Println("Messaged Delayed:", len(ircClient.MessageQueue))
+		logger.Debugf("Messaged Delayed:", len(ircClient.MessageQueue))
 	}
 }
 

@@ -1,7 +1,6 @@
 package httpbackend
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/khades/servbot/models"
@@ -12,7 +11,6 @@ func mod(next sessionAndChannelHandlerFunc) sessionAndChannelHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *models.HTTPSession, channelID *string, channelName *string) {
 		channelInfo, error := repos.GetChannelInfo(channelID)
 		if error != nil {
-			log.Println(error)
 			writeJSONError(w, "That channel is not defined", http.StatusForbidden)
 			return
 		}

@@ -4,7 +4,6 @@ import (
 	//"time"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -167,7 +166,6 @@ func getYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
 
 func getYoutubeVideo(id *string) (*http.Response, error) {
 	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + Config.YoutubeKey
-	log.Println(url)
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
 	return client.Get(url)

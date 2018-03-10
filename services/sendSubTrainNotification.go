@@ -10,6 +10,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
+// SendSubTrainNotification gets all expired notifications and sends them in channels
 func SendSubTrainNotification() {
 	channels, error := repos.GetChannelsWithSubtrainNotification()
 	if error != nil {

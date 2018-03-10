@@ -1,19 +1,23 @@
 package bot
 
 import (
-	"log"
 	"strconv"
 	"strings"
 	"time"
 
-	"gopkg.in/irc.v2"
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/irc.v2"
 )
 
 func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "subHandler",
+		"action":  "subHandler"})
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
 	msgID, _ := message.Tags.GetTag("msg-id")
@@ -52,7 +56,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 			}
 			repos.LogSubscription(&loggedSubscription)
 
-			log.Printf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
+			logger.Debugf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
 
 			eventbus.EventBus.Publish(eventbus.EventSub(&channelID))
 			eventbus.EventBus.Publish(eventbus.Subtrain(&channelID), "newsub")

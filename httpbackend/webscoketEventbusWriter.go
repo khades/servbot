@@ -1,15 +1,19 @@
 package httpbackend
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/khades/servbot/eventbus"
+	"github.com/sirupsen/logrus"
 )
 
 func websocketEventbusWriter(w http.ResponseWriter, r *http.Request, messageID string) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "websocket",
+		"action":  messageID})
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -19,7 +23,7 @@ func websocketEventbusWriter(w http.ResponseWriter, r *http.Request, messageID s
 	pongWait := 40 * time.Second
 
 	if err != nil {
-		log.Println(err)
+		logger.Debug(err)
 		return
 	}
 

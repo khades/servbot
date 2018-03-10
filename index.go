@@ -29,7 +29,6 @@ func main() {
 	if dbErr != nil {
 		logger.Fatal("Database Conenction Error: " + dbErr.Error())
 	}
-	log.Println(*convertConfig)
 	if *convertConfig == false {
 		logrus.SetLevel(logrus.DebugLevel)
 
@@ -37,7 +36,7 @@ func main() {
 		repos.Config = repos.ReadConfigFromFile()
 		users, usersError := repos.GetUsersID(repos.Config.Channels)
 		if usersError != nil {
-			log.Fatal(usersError)
+			logger.Fatalf("User conversion error: %s", usersError.Error())
 		}
 		channelIDs := []string{}
 		for _, value := range *users {

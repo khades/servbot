@@ -26,11 +26,8 @@ type followerResponse struct {
 	Follows []follows `json:"follows"`
 }
 
+// CheckChannelsFollowers process followers of all channels on that instance of bot
 func CheckChannelsFollowers() {
-	// userIDs, error := repos.GetUsersID(&repos.Config.Channels)
-	// if error != nil {
-	// 	return
-	// }
 	for _, value := range repos.Config.ChannelIDs {
 		checkOneChannelFollowers(&value)
 	}

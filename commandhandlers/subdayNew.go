@@ -22,7 +22,6 @@ func subdayNew(online bool, chatMessage *models.ChatMessage, chatCommand models.
 	}
 	_, subdayError := repos.GetLastActiveSubday(&chatMessage.ChannelID)
 	if subdayError == nil {
-		log.Println(subdayError)
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    "Сабдей уже существует",

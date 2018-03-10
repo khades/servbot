@@ -2,7 +2,6 @@ package httpbackend
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"gopkg.in/mgo.v2/bson"
@@ -10,6 +9,7 @@ import (
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 
 	"goji.io/pat"
 )
@@ -46,11 +46,15 @@ func autoMessageGet(w http.ResponseWriter, r *http.Request, s *models.HTTPSessio
 }
 
 func autoMessageCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "httpbackend",
+		"feature": "autoMessage",
+		"action":  "autoMessageCreate"})
 	decoder := json.NewDecoder(r.Body)
 	var request models.AutoMessageUpdate
 	err := decoder.Decode(&request)
 	if err != nil {
-		log.Println(err)
+		logger.Info("Decoding Error: %s")
 		writeJSONError(w, "Invalid entry", http.StatusUnprocessableEntity)
 		return
 	}
@@ -76,7 +80,10 @@ func autoMessageCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 
 func autoMessageUpdate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	id := pat.Param(r, "id")
-
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "httpbackend",
+		"feature": "autoMessage",
+		"action":  "autoMessageUpdate"})
 	if id == "" || bson.IsObjectIdHex(id) == false {
 		writeJSONError(w, "channel or id variable are not defined", http.StatusUnprocessableEntity)
 		return
@@ -85,7 +92,8 @@ func autoMessageUpdate(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 	var request models.AutoMessageUpdate
 	err := decoder.Decode(&request)
 	if err != nil {
-		log.Println(err)
+		logger.Info("Decoding Error: %s")
+
 		writeJSONError(w, "Invalid entry", http.StatusUnprocessableEntity)
 		return
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/khades/servbot/httpclient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 )
 
 type responseItem struct {
@@ -31,7 +32,7 @@ type response struct {
 	Items []responseItem `json:"items"`
 }
 
-func Short(s string, i int) string {
+func short(s string, i int) string {
 	runes := []rune(s)
 	if len(runes) > i {
 		return string(runes[:i])
@@ -39,10 +40,15 @@ func Short(s string, i int) string {
 	return s
 }
 
+// CheckVK checks all vk groups of all channels on that instance of bot
 func CheckVK() {
-	//log.Println("Checking VK")
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "services",
+		"feature": "vk",
+		"action":  "CheckVK("})
+	logger.Debugf("Checking VK")
 	if repos.Config.VkClientKey == "" {
-	//	log.Println("VK key is not set")
+		logger.Debugf("VK key is not set")
 		return
 	}
 	channels, error := repos.GetVKEnabledChannels()
@@ -54,10 +60,14 @@ func CheckVK() {
 	}
 }
 func checkOne(channel *models.ChannelInfo) {
-//	log.Println("Checking group " + channel.VkGroupInfo.GroupName)
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "services",
+		"feature": "vk",
+		"action":  "checkOne"})
+	logger.Debug("Checking group " + channel.VkGroupInfo.GroupName)
 	result, parseError := ParseVK(&channel.VkGroupInfo)
 	if parseError != nil {
-	//	log.Println("ParseError " + parseError.Error())
+		logger.Debug("ParseError " + parseError.Error())
 		return
 	}
 	if result.LastMessageID == channel.VkGroupInfo.LastMessageID {
@@ -68,15 +78,14 @@ func checkOne(channel *models.ChannelInfo) {
 		return
 	}
 
-
-	//	log.Println("SENDING MESSAGE")
-		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-			Channel: channel.Channel,
-			Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
+	logger.Debug("Sending message to channel")
+	bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
+		Channel: channel.Channel,
+		Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
 
 }
 
-// https://api.vk.com/method/wall.get?domain=mob5tervk&filter=owner&count=1&v=5.60
+// ParseVK gets latest vk group post
 func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) {
 	vkGroupInfo := models.VkGroupInfo{GroupName: vkInputGroupInfo.GroupName,
 		NotifyOnChange: vkInputGroupInfo.NotifyOnChange}
@@ -111,7 +120,7 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 
 	vkPost.Text = strings.Replace(vkPost.Text, "\n", " ", -1)
 	if utf8.RuneCountInString(vkPost.Text) > 300 {
-		vkPost.Text = Short(vkPost.Text, 297) + "..."
+		vkPost.Text = short(vkPost.Text, 297) + "..."
 	}
 	if vkPost.ID == 0 || vkPost.Owner == 0 {
 		return nil, errors.New("VK Error")
@@ -123,6 +132,5 @@ func ParseVK(vkInputGroupInfo *models.VkGroupInfo) (*models.VkGroupInfo, error) 
 	loc, _ := time.LoadLocation("Europe/Moscow")
 	nowTime := time.Unix(0, int64(vkPost.Date)*1000000000).In(loc)
 	vkGroupInfo.LastMessageDate = nowTime.Format("Jan _2 15:04 MSK")
-//	log.Println(vkGroupInfo)
 	return &vkGroupInfo, nil
 }

@@ -32,6 +32,7 @@ func processMessage(message *models.AutoMessage) {
 
 }
 
+// SendAutoMessages checks if there any expired messages in chat and sends them
 func SendAutoMessages() {
 	messages, error := repos.GetCurrentAutoMessages()
 	if error != nil {

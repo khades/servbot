@@ -1,12 +1,12 @@
 package bot
 
 import (
-	"log"
 	"net"
 
-	"gopkg.in/irc.v2"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/irc.v2"
 )
 
 type chatClient struct {
@@ -16,9 +16,13 @@ type chatClient struct {
 
 // Start function dials up connection for chathandler
 func Start() {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "bot",
+		"feature": "bot",
+		"action":  "Start"})
 	conn, err := net.Dial("tcp", "irc.chat.twitch.tv:6667")
 	if err != nil {
-		log.Fatalln(err)
+		logger.Fatalln(err)
 	}
 
 	config := irc.ClientConfig{
@@ -28,11 +32,11 @@ func Start() {
 		Name:    repos.Config.BotUserName,
 		Handler: chatHandler}
 	chatClient := irc.NewClient(conn, config)
-	log.Println("Bot is starting...")
+	logger.Info("Bot is starting")
 
 	clientError := chatClient.Run()
-	log.Println(clientError)
-	log.Println("Bot died...")
+	logger.Info(clientError)
+	logger.Info("Bot died")
 	IrcClientInstance = &ircClient.IrcClient{Ready: false, MessageQueue: []string{}}
 	conn.Close()
 }

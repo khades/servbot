@@ -1,7 +1,6 @@
 package repos
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -25,6 +24,7 @@ type usersLoginStruct struct {
 func GetChannelNameByID(channelID *string) (*string, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
+		"feature": "GetUsersID",
 		"action":  "GetChannelNameByID"})
 	logger.Debugf("Function is called")
 	logger.Debugf("Looking for channel by id %s", *channelID)
@@ -58,7 +58,8 @@ func GetUsersID(users []string) (*map[string]string, error) {
 	// Cache every username -> userid pair for month
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"action":  "GetUsersId"})
+		"feature": "GetUsersID",
+		"action":  "GetUsersID"})
 	logger.Debugf("Function is called")
 
 	notFoundUsers := []string{}
@@ -102,7 +103,7 @@ func GetUsersID(users []string) (*map[string]string, error) {
 		userIDCacheObject.Set("username-"+strings.ToLower(user.DisplayName), user.ID, 0)
 	}
 
-	log.Printf("Returning %d users", len(result))
+	logger.Debugf("Returning %d users", len(result))
 
 	return &result, nil
 }

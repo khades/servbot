@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -10,15 +9,20 @@ import (
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/irc.v2"
 )
 
 var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "bot",
+		"feature": "bot",
+		"action":  "chatHandler"})
 	if strings.Contains(message.String(), ":jtv") {
-		log.Println("JTV: " + message.String())
+		logger.Debug("JTV: " + message.String())
 	}
 	if strings.Contains(message.String(), ":tmi.twitch.tv") {
-		log.Println("TMI.TWITCH.TV: " + message.String())
+		logger.Debug("TMI.TWITCH.TV: " + message.String())
 	}
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
@@ -132,6 +136,6 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		}
 		IrcClientInstance = &ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true, ModChannelIndex: 0, MessageQueue: []string{}}
 		IrcClientInstance.SendModsCommand()
-		log.Println("Bot is started")
+		logger.Info("Bot is started")
 	}
 }

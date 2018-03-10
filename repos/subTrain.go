@@ -1,7 +1,6 @@
 package repos
 
 import (
-	"log"
 	"gopkg.in/mgo.v2/bson"
 	"time"
 	"github.com/khades/servbot/models"
@@ -73,21 +72,18 @@ func SetSubtrainNotificationShown(channelInfo *models.ChannelInfo) {
 
 // IncrementSubtrainCounterByChannelID is version of IncrementSubtrainCounter that gets channelInfo based on channelID
 func IncrementSubtrainCounterByChannelID(channelID *string, user *string) {
-	log.Println("Got to incrementSubTrainByID")
 	channelInfo, error := GetChannelInfo(channelID)
 	if error == nil {
 		IncrementSubtrainCounter(channelInfo, user)
 		return
 	} 
-	log.Println(error)
+
 }
 
 // IncrementSubtrainCounter increments specified channel subtrain information, also records subscriber username
 func IncrementSubtrainCounter(channelInfo *models.ChannelInfo, user *string) {
 	subTrain := channelInfo.SubTrain
 	if subTrain.Enabled == false {
-		log.Println("Got to incrementSubTrainByID FALSE")
-
 		return
 	}
 	subTrain.ExpirationTime = time.Now().Add(time.Second * time.Duration(subTrain.ExpirationLimit))

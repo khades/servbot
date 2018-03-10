@@ -31,7 +31,7 @@ func validateSession(r *http.Request) bool {
 func oauthInitiate(w http.ResponseWriter, r *http.Request) {
 	isValidCookie := validateSession(r)
 	if isValidCookie == false {
-		log.Println("redirecting to api")
+
 		http.Redirect(w, r, "https://api.twitch.tv/kraken/oauth2/authorize"+
 			"?response_type=code"+
 			"&client_id="+repos.Config.ClientID+

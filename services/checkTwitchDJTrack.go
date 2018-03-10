@@ -8,6 +8,7 @@ import (
 	"github.com/khades/servbot/httpclient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 )
 
 type tdjTrack struct {
@@ -26,14 +27,17 @@ func CheckTwitchDJTrack() {
 }
 
 func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
-
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "services",
+		"feature": "twitchdj",
+		"action":  "checkOneTwitchDJTrack"})
 	status := models.TwitchDJ{ID: channel.TwitchDJ.ID}
 	defer repos.PushTwitchDJ(&channel.ChannelID, &status)
-	//log.Printf("Checking %s twitchDj track \n", channel.Channel)
+	logger.Deubgf("Checking %s twitchDj track \n", channel.Channel)
 	resp, error := httpclient.Get("https://twitch-dj.ru/includes/back.php?func=get_track&channel=" + channel.TwitchDJ.ID)
 
 	if error != nil {
-		//log.Println(error)
+		logger.Debug(error)
 		return
 	}
 	if resp != nil {
@@ -43,7 +47,7 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 	track := tdjTrack{}
 	marshallError := json.NewDecoder(resp.Body).Decode(&track)
 	if marshallError != nil {
-		//log.Println(marshallError)
+		logger.Debug(marshallError)
 		return
 	}
 	if track.Title != "" {

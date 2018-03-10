@@ -11,6 +11,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
+// SendSubTrainTimeoutMessage gets all expired subtrains and sends expiration message in channels
 func SendSubTrainTimeoutMessage() {
 	channels, error := repos.GetChannelsWithExpiredSubtrain()
 
