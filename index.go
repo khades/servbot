@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/gob"
 	"flag"
-	"log"
 	"sync"
 	"time"
 
@@ -19,6 +18,8 @@ import (
 
 func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetLevel(logrus.DebugLevel)
+
 	logger := logrus.WithFields(logrus.Fields{"package": "main"})
 	logger.Info("Starting")
 	convertConfig := flag.Bool("convertconfig", false, "forces importing config file to database")
@@ -29,7 +30,7 @@ func main() {
 	if dbErr != nil {
 		logger.Fatal("Database Conenction Error: " + dbErr.Error())
 	}
-	if *convertConfig == false {
+	if *convertConfig == true {
 		logrus.SetLevel(logrus.DebugLevel)
 
 		logger.Info("Running configuration importer.")
@@ -41,9 +42,10 @@ func main() {
 		channelIDs := []string{}
 		for _, value := range *users {
 			channelIDs = append(channelIDs, value)
+			repos.EnableChannel(&value)
 		}
-		repos.Config.ChannelIDs = channelIDs
 		repos.SaveConfigToDatabase()
+		
 		logger.Info("Configuration import successed.")
 
 		return
@@ -68,7 +70,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		services.CheckTwitchDJTrack()
-		services.CheckStreamStatus()
+		services.CheckStreamStatuses()
 		// 	services.CheckDubTrack()
 	}()
 
@@ -86,6 +88,15 @@ func main() {
 		}
 	}(&wg)
 
+	gamesCheckerTicker := time.NewTicker(time.Second * 30)
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-gamesCheckerTicker.C
+			wg.Add(1)
+			services.GetTwitchGames()
+			wg.Done()
+		}
+	}(&wg)
 	modTicker := time.NewTicker(time.Second * 30)
 
 	go func(wg *sync.WaitGroup) {
@@ -151,7 +162,7 @@ func main() {
 		for {
 			<-minuteTicker.C
 			wg.Add(1)
-			services.CheckStreamStatus()
+			//services.CheckStreamStatus()
 			wg.Done()
 		}
 	}(&wg)

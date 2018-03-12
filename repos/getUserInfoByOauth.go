@@ -1,36 +1,24 @@
 package repos
 
 import (
-	"errors"
 	"encoding/json"
-
-	"github.com/khades/servbot/httpclient"
+	"errors"
+	"strings"
 	"github.com/khades/servbot/models"
 )
 
-type requestError struct {
-	Error   string
-	Status  string
-	Message string
-}
-type tokenResponse struct {
-	Token string `json:"access_token"`
-}
-type nameResponse struct {
-	Name string `json:"name"`
-	ID   string `json:"_id"`
-	Logo string `json:"logo"`
-}
+
+
 // GetUserInfoByOauth returns information of user specified by his oauth key
 func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
-	cacheKey := "OauthKey:"+*oauthKey
+	cacheKey := "OauthKey:" + *oauthKey
 	binaryData, found := cacheObject.Get(cacheKey)
 	if found {
-		result :=binaryData.(models.HTTPSession)
-		return  &result, nil
+		result := binaryData.(models.HTTPSession)
+		return &result, nil
 	}
-	url := "https://api.twitch.tv/kraken/user?oauth_token=" + *oauthKey
-	nameResp, err := httpclient.TwitchV5(Config.ClientID, "GET", url, nil)
+
+	nameResp, err := twitchHelixOauth("GET", "users", nil, *oauthKey)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +27,15 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 		return nil, errors.New("Twitch Error, Cant get username")
 
 	}
-	var usernameStruct = new(nameResponse)
+	var usernameStruct = twitchUserRepsonse{}
 
 	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
 	if nameMarshallError != nil {
-		return nil, errors.New("Twitch Error, Cant marshall username: "+nameMarshallError.Error())
+		return nil, errors.New("Twitch Error, Cant marshall username: " + nameMarshallError.Error())
 	}
-
-    result :=  models.HTTPSession{Username: usernameStruct.Name, UserID: usernameStruct.ID, Key: *oauthKey, AvatarURL: usernameStruct.Logo}
+	if len(usernameStruct.Data) == 0 {
+		return nil, errors.New("No user found")
+	}
+	result := models.HTTPSession{Username: strings.ToLower(usernameStruct.Data[0].DisplayName), UserID: usernameStruct.Data[0].ID, Key: *oauthKey, AvatarURL: usernameStruct.Data[0].ProfileImage}
 	return &result, nil
 }

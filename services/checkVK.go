@@ -45,7 +45,8 @@ func CheckVK() {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "services",
 		"feature": "vk",
-		"action":  "CheckVK("})
+		"action":  "CheckVK"})
+		
 	logger.Debugf("Checking VK")
 	if repos.Config.VkClientKey == "" {
 		logger.Debugf("VK key is not set")

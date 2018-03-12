@@ -26,7 +26,7 @@ func (ircClient *IrcClient) PushMessage(message string) {
 		"package": "ircclient",
 		"feature": "ircClient",
 		"action":  "PushMessage"})
-	logger.Infof("Pushing message: ", message)
+	logger.Infof("Pushing message: %s", message)
 	if ircClient.MessagesSent > 3 {
 		ircClient.MessageQueue = append(ircClient.MessageQueue, message)
 		logger.Debugf("Messages in queue :", len(ircClient.MessageQueue))

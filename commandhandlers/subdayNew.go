@@ -1,7 +1,7 @@
 package commandhandlers
 
 import (
-	"log"
+
 	"strings"
 	"time"
 

@@ -9,23 +9,24 @@ import (
 
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
-	ChannelID       string       `json:"channelId"`
-	Channel         string       `json:"channel"`
-	StreamStatus    StreamStatus `json:"streamStatus"`
-	TwitchDJ        TwitchDJ    `json:"twitchDJ"`
-	VkGroupInfo     VkGroupInfo `json:"vkGroupInfo"`
-	Mods            []string    `json:"mods"`
-	OfflineCommands []string    `json:"offlinecommands"`
-	OnlineCommands  []string    `json:"onlinecommands"`
-	SubTrain        SubTrain    `json:"subTrain"`
-	SubdayIsActive  bool        `json:"subdayIsActive"`
-	SongRequest ChannelInfoSongRequest `json:"songRequest"`
-}
-// ChannelInfoSongRequest struct describes current state of songrequest on channel
-type ChannelInfoSongRequest struct{
-	IsPlaying bool`json:"isPlaying"`
+	Enabled         bool                   `json:"enabled"`
+	ChannelID       string                 `json:"channelId"`
+	Channel         string                 `json:"channel"`
+	StreamStatus    StreamStatus           `json:"streamStatus"`
+	TwitchDJ        TwitchDJ               `json:"twitchDJ"`
+	VkGroupInfo     VkGroupInfo            `json:"vkGroupInfo"`
+	Mods            []string               `json:"mods"`
+	OfflineCommands []string               `json:"offlinecommands"`
+	OnlineCommands  []string               `json:"onlinecommands"`
+	SubTrain        SubTrain               `json:"subTrain"`
+	SubdayIsActive  bool                   `json:"subdayIsActive"`
+	SongRequest     ChannelInfoSongRequest `json:"songRequest"`
 }
 
+// ChannelInfoSongRequest struct describes current state of songrequest on channel
+type ChannelInfoSongRequest struct {
+	IsPlaying bool `json:"isPlaying"`
+}
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {

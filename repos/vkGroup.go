@@ -21,6 +21,6 @@ func PushVkGroupInfo(channelID *string, vkGroupInfo *models.VkGroupInfo) {
 // GetVKEnabledChannels returns list of channels, where VK group was configures
 func GetVKEnabledChannels() ([]models.ChannelInfo, error) {
 	result := []models.ChannelInfo{}
-	error := db.C(channelInfoCollection).Find(bson.M{"vkgroupinfo.groupname": bson.M{"$exists": true, "$ne": ""}}).All(&result)
+	error := db.C(channelInfoCollection).Find(bson.M{"enabled":true,"vkgroupinfo.groupname": bson.M{"$exists": true, "$ne": ""}}).All(&result)
 	return result, error
 }

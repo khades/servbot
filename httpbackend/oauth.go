@@ -11,18 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type requestError struct {
-	Error   string
-	Status  string
-	Message string
-}
 type tokenResponse struct {
 	Token string `json:"access_token"`
-}
-type nameResponse struct {
-	Name string `json:"name"`
-	ID   string `json:"_id"`
-	Logo string `json:"logo"`
 }
 
 func oauth(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +31,10 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		"grant_type":    {"authorization_code"},
 		"redirect_uri":  {repos.Config.AppOauthURL},
 		"code":          {code}}
-	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
+	resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", postValues)
 
 	if err != nil {
-		logger.Infof("Twitch Error: %s",err.Error())
+		logger.Infof("Twitch Error: %s", err.Error())
 		writeJSONError(w, "Twitch Error, Cant get auth token, Connection problem", http.StatusUnprocessableEntity)
 		return
 	}

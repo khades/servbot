@@ -10,9 +10,11 @@ import (
 
 // StreamStatusGameHistory struct describes game on stream and its starting time
 type StreamStatusGameHistory struct {
-	Game  string    `bson:",omitempty"`
-	Start time.Time `bson:",omitempty"`
+	Game   string    `bson:",omitempty"`
+	GameID string    `bson:",omitempty"`
+	Start  time.Time `bson:",omitempty"`
 }
+
 // GamesHistory is type alias to array of StreamStatusGameHistory, used to properly sorting history by date
 type GamesHistory []StreamStatusGameHistory
 
@@ -76,6 +78,7 @@ func (history GamesHistory) ReturnHistory() string {
 type StreamStatus struct {
 	Online         bool
 	Game           string       `bson:",omitempty"`
+	GameID         string       `bson:",omitempty"`
 	Title          string       `bson:",omitempty"`
 	Start          time.Time    `bson:",omitempty"`
 	LastOnlineTime time.Time    `bson:",omitempty"`

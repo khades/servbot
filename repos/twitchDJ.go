@@ -8,7 +8,7 @@ import (
 // GetTwitchDJEnabledChannels returns list of all twitchdj-configured channels
 func GetTwitchDJEnabledChannels() ([]models.ChannelInfo, error) {
 	result := []models.ChannelInfo{}
-	error := db.C(channelInfoCollection).Find(bson.M{"twitchdj.id": bson.M{"$exists": true, "$ne": ""}}).All(&result)
+	error := db.C(channelInfoCollection).Find(bson.M{"enabled": true, "twitchdj.id": bson.M{"$exists": true, "$ne": ""}}).All(&result)
 	return result, error
 }
 

@@ -1,7 +1,6 @@
 package httpbackend
 
 import (
-	"log"
 	"net/http"
 
 	"gopkg.in/asaskevich/govalidator.v4"
@@ -32,7 +31,7 @@ func oauthInitiate(w http.ResponseWriter, r *http.Request) {
 	isValidCookie := validateSession(r)
 	if isValidCookie == false {
 
-		http.Redirect(w, r, "https://api.twitch.tv/kraken/oauth2/authorize"+
+		http.Redirect(w, r, "https://id.twitch.tv/oauth2/authorize"+
 			"?response_type=code"+
 			"&client_id="+repos.Config.ClientID+
 			"&redirect_uri="+repos.Config.AppOauthURL+

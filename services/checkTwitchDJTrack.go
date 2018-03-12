@@ -33,7 +33,7 @@ func checkOneTwitchDJTrack(channel *models.ChannelInfo) {
 		"action":  "checkOneTwitchDJTrack"})
 	status := models.TwitchDJ{ID: channel.TwitchDJ.ID}
 	defer repos.PushTwitchDJ(&channel.ChannelID, &status)
-	logger.Deubgf("Checking %s twitchDj track \n", channel.Channel)
+	logger.Debugf("Checking %s twitchDj track", channel.Channel)
 	resp, error := httpclient.Get("https://twitch-dj.ru/includes/back.php?func=get_track&channel=" + channel.TwitchDJ.ID)
 
 	if error != nil {

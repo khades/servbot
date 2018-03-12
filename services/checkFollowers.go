@@ -26,24 +26,28 @@ type followerResponse struct {
 	Follows []follows `json:"follows"`
 }
 
-// CheckChannelsFollowers process followers of all channels on that instance of bot
-func CheckChannelsFollowers() {
-	for _, value := range repos.Config.ChannelIDs {
+// CheckChannelsFollowers process followers of all channels on that instance of bot, that code will be deprecated after webhooks will be done
+func CheckChannelsFollowers() error{
+	channels, error := repos.GetActiveChannels()
+	if error != nil {
+		return error
+	}
+	for _, value := range channels {
 		checkOneChannelFollowers(&value)
 	}
-
+	return nil
 }
-func checkOneChannelFollowers(channelID *string) {
+func checkOneChannelFollowers(channel *models.ChannelInfo) {
 	cursor := ""
-	cursorObject, error := repos.GetFollowerCursor(channelID)
+	cursorObject, error := repos.GetFollowerCursor(&channel.ChannelID)
 	if error != nil && error.Error() != "not found" {
 		return
 	}
 
 	if error != nil && error.Error() == "not found" || cursorObject.Cursor == "" {
-		cursor = getInitialCursor(channelID)
+		cursor = getInitialCursor(&channel.ChannelID)
 		if cursor != "" {
-			repos.SetFollowerCursor(channelID, &cursor)
+			repos.SetFollowerCursor(&channel.ChannelID, &cursor)
 		}
 
 	} else {
@@ -53,30 +57,30 @@ func checkOneChannelFollowers(channelID *string) {
 		return
 	}
 
-	followers, followersError := getFollowers(channelID, &cursor)
+	followers, followersError := getFollowers(&channel.ChannelID, &cursor)
 	if followersError != nil || followers.Cursor == "" || len(followers.Follows) == 0 {
 		return
 	}
 
-	repos.SetFollowerCursor(channelID, &followers.Cursor)
+	repos.SetFollowerCursor(&channel.ChannelID, &followers.Cursor)
 	followersToGreet := []string{}
 	for _, follow := range followers.Follows {
-		alreadyGreeted, _ := repos.CheckIfFollowerGreeted(channelID, &follow.User.Name)
+		alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&channel.ChannelID, &follow.User.Name)
 		if alreadyGreeted == false {
 			followersToGreet = append(followersToGreet, follow.User.Name)
 
-			repos.AddFollowerToList(channelID, &follow.User.Name)
+			repos.AddFollowerToList(&channel.ChannelID, &follow.User.Name)
 		}
 
 	}
 	if len(followersToGreet) > 0 {
 
-		alertInfo, alertError := repos.GetSubAlert(channelID)
+		alertInfo, alertError := repos.GetSubAlert(&channel.ChannelID)
 		
-		channel, channelError := repos.GetChannelNameByID(channelID)
-		if channelError == nil && alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+	
+		if  alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-				Channel: *channel,
+				Channel: channel.Channel,
 				Body:    "@" + strings.Join(followersToGreet, " @") + " " + alertInfo.FollowerMessage})
 		}
 	}

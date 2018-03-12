@@ -1,7 +1,7 @@
 package models
 
 import (
-	"log"
+
 	"sort"
 	"testing"
 	"time"
