@@ -10,7 +10,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func subdayNew(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	
 	
 	if chatMessage.IsMod == false {
@@ -20,8 +20,7 @@ func subdayNew(online bool, chatMessage *models.ChatMessage, chatCommand models.
 			User:    chatMessage.User})
 		return
 	}
-	_, subdayError := repos.GetLastActiveSubday(&chatMessage.ChannelID)
-	if subdayError == nil {
+	if channelInfo.SubdayIsActive == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    "Сабдей уже существует",

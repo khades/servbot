@@ -11,7 +11,7 @@ import (
 )
 
 var channelInfoCollection = "channelInfo"
-
+var timesCalled int64 
 // setChannelName sets channel name after processing
 func setChannelName(channelID *string, channel string) {
 	channelInfo, _ := GetChannelInfo(channelID)
@@ -60,6 +60,8 @@ func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
 		"package": "repos",
 		"feature": "channelInfo",
 		"action":  "GetChannelInfo"})
+	timesCalled = timesCalled + 1
+	logger.Debugf("Function was called %d times", timesCalled)
 	item, found := channelInfoRepositoryObject.dataArray[*channelID]
 	if found {
 		return item, nil
@@ -95,7 +97,6 @@ func PreprocessChannels() error {
 	channelIDList := []string{}
 	if channelError != nil {
 		logger.Debugf("Channels Error: %s", channelError.Error())
-
 		return channelError
 	}
 	for _, channel := range channels {

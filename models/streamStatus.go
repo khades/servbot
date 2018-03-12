@@ -31,8 +31,16 @@ func (history GamesHistory) Swap(i, j int) {
 }
 
 // ReturnHistory forms one-line human-readable history of games on running stream
-func (history GamesHistory) ReturnHistory() string {
+func (history GamesHistory) ReturnHistory(lang string) string {
 	sort.Sort(sort.Reverse(history))
+	var mPrefix = "m"
+	var hPrefix = "h"
+	var nowPrefix = "NOW"
+	if lang == "ru" {
+		mPrefix = "м"
+		hPrefix = "ч"
+		nowPrefix = "СЕЙЧАС"
+	}
 	stringHistory := ""
 	if len(history) == 0 {
 		return ""
@@ -50,17 +58,17 @@ func (history GamesHistory) ReturnHistory() string {
 		hours := int(duration.Hours())
 		stringDuration := "["
 		if hours > 0 {
-			stringDuration = fmt.Sprintf("[%dh", hours)
+			stringDuration = fmt.Sprintf("[%d%s", hours, hPrefix)
 		}
 
 		if minutes < 10 {
-			stringDuration = stringDuration + fmt.Sprintf("0%dm]", minutes)
+			stringDuration = stringDuration + fmt.Sprintf("0%d%s]", minutes, mPrefix)
 		} else {
-			stringDuration = stringDuration + fmt.Sprintf("%dm]", minutes)
+			stringDuration = stringDuration + fmt.Sprintf("%d%s]", minutes, mPrefix)
 		}
 
 		if stringHistory == "" {
-			newStringHistory = "NOW " + history[index].Game + " " + stringDuration
+			newStringHistory = nowPrefix + " " + history[index].Game + " " + stringDuration
 		} else {
 			newStringHistory = history[index].Game + " " + stringDuration + " > " + stringHistory
 		}

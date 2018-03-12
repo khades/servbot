@@ -23,11 +23,8 @@ func short(s string, i int) string {
 }
 
 // custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
-func custom(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	channelInfo, error := repos.GetChannelInfo(&chatMessage.ChannelID)
-	if error != nil {
-		return
-	}
+func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+
 	templateObject := &models.TemplateExtendedObject{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
 	templateObject.IsMod = chatMessage.IsMod
 	templateObject.IsSub = chatMessage.IsSub

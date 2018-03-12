@@ -53,6 +53,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 	}
 
 	if message.Command == "CLEARCHAT" {
+
 		banDuration, banDurationFound := message.Tags.GetTag("ban-duration")
 		intBanDuration := 0
 		if banDurationFound {
@@ -81,6 +82,8 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		repos.LogMessage(&formedMessage)
 	}
 	if message.Command == "PRIVMSG" {
+		logger.Debug("Got PRIVMSG, parsing")
+
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
 				Username:    message.User,
@@ -94,14 +97,17 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			IsMod:     message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
 			IsSub:     message.Tags["subscriber"] == "1",
 			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
+		logger.Debug("Logging PRIVMSG")
 		repos.LogMessage(&formedMessage)
-		repos.DecrementAutoMessages(&formedMessage.ChannelID)
+		channelInfo, _ := repos.GetChannelInfo(&formedMessage.ChannelID)
+		repos.DecrementAutoMessages(channelInfo)
 
 		commandBody, isCommand := formedMessage.GetCommand()
 
 		isVote := strings.HasPrefix(message.Params[1], "%")
 		if isVote == true {
-			commandhandlers.Vote(true, &formedMessage, commandBody, IrcClientInstance)
+	
+			commandhandlers.Vote(channelInfo, &formedMessage, commandBody, IrcClientInstance)
 		}
 		// bits, bitsFound := message.Tags.GetTag("bits")
 		// if bitsFound {
@@ -110,20 +116,22 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		// 		repos.AddBitsToUser(&formedMessage.ChannelID, &formedMessage.UserID, &formedMessage.User, parsedBits, "bits")
 		// 	}
 		// }
-		if isCommand {
+		if isCommand == true {
+			logger.Debug("PRIVMGS is chat command")
 			if message.User == "khadesru" && commandBody.Command == "debugSub" {
 				subPlan := "2000"
-				sendSubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &subPlan)
+				sendSubMessage(channelInfo, &formedMessage.User, &subPlan)
 
 			}
 			if message.User == "khadesru" && commandBody.Command == "debugResub" {
 				resubCount := 3
 				subPlan := "2000"
-				sendResubMessage(&formedMessage.Channel, &formedMessage.ChannelID, &formedMessage.User, &resubCount, &subPlan)
+				sendResubMessage(channelInfo,  &formedMessage.User, &resubCount, &subPlan)
 
 			}
 			handlerFunction := commandhandlers.Router.Go(commandBody.Command)
-			handlerFunction(true, &formedMessage, commandBody, IrcClientInstance)
+			logger.Debug("Getting channel info")
+			handlerFunction(channelInfo, &formedMessage, commandBody, IrcClientInstance)
 		}
 	}
 

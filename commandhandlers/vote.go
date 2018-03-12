@@ -8,7 +8,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 // Vote handlers processes incoming subday vote variants
-func Vote(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func Vote(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
     if utf8.RuneCountInString(chatMessage.MessageBody) < 2 {
 		return
 	}

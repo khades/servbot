@@ -6,4 +6,4 @@ import (
 )
 
 // CommandHandler is interface for functions that will handle stuff
-type CommandHandler func(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient)
+type CommandHandler func(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient)

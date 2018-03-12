@@ -7,8 +7,8 @@ import (
 	"github.com/cbroglie/mustache"
 )
 
-func sendSubMessage(channel *string, channelID *string, user *string, subPlan *string) {
-	subAlert, error := repos.GetSubAlert(channelID)
+func sendSubMessage(channelInfo *models.ChannelInfo,user *string, subPlan *string) {
+	subAlert, error := repos.GetSubAlert(&channelInfo.ChannelID)
 
 	if error != nil || subAlert.Enabled == false {
 		return
@@ -34,20 +34,19 @@ func sendSubMessage(channel *string, channelID *string, user *string, subPlan *s
 			}
 		}
 	}
-	channelInfo, channelInfoError := repos.GetChannelInfo(channelID)
-	if channelInfoError == nil && channelInfo.SubTrain.Enabled {
+	if channelInfo.SubTrain.Enabled {
 		localSubtrain := channelInfo.SubTrain
 		localSubtrain.CurrentStreak = localSubtrain.CurrentStreak + 1
 		subtrainAdditionalString, _ := mustache.Render(channelInfo.SubTrain.AppendTemplate, localSubtrain)
 
 		template = template +" " + strings.TrimSpace(subtrainAdditionalString)
-		repos.IncrementSubtrainCounterByChannelID(channelID, user)
+		repos.IncrementSubtrainCounterByChannelID(&channelInfo.ChannelID, user)
 	}
 	
 	if template != "" {
 		IrcClientInstance.SendPublic(&models.OutgoingMessage{
 			Body:    template,
-			Channel: *channel,
+			Channel: channelInfo.Channel,
 			User:    *user})
 	}
 }

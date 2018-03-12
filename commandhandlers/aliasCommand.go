@@ -9,7 +9,7 @@ import (
 )
 
 // aliasCommand creates alias of existing command by copying its content and setting that it is alias to a parent command
-func aliasCommand(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func aliasCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	if chatMessage.IsMod {
 		commandName := ""
 		aliasTo := ""

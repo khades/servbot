@@ -35,7 +35,7 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 	}
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
 	userID, userIDFound := message.Tags.GetTag("user-id")
-
+	channelInfo, _ := repos.GetChannelInfo(&channelID)
 	channel := message.Params[0][1:]
 	if msgParamMonthsFound && userFound && channel != "" && channelIDFound && userIDFound {
 		subCount, subCountError := strconv.Atoi(msgParamMonths)
@@ -50,13 +50,13 @@ func subHandler(message *irc.Message, ircClient *ircClient.IrcClient) {
 				Date:      time.Now()}
 
 			if subCount == 1 {
-				sendSubMessage(&channel, &channelID, &user, &subplanMsg)
+				sendSubMessage(channelInfo, &user, &subplanMsg)
 			} else {
-				sendResubMessage(&channel, &channelID, &user, &subCount, &subplanMsg)
+				sendResubMessage(channelInfo, &user, &subCount, &subplanMsg)
 			}
 			repos.LogSubscription(&loggedSubscription)
 
-			logger.Debugf("Channel %v: %v subbed for %v months\n", channel, user, subCount)
+			logger.Debugf("Channel %v: %v subbed for %v months", channel, user, subCount)
 
 			eventbus.EventBus.Publish(eventbus.EventSub(&channelID))
 			eventbus.EventBus.Publish(eventbus.Subtrain(&channelID), "newsub")

@@ -6,6 +6,6 @@ import (
 )
 
 // Nothing does nothing, it is stub
-func Nothing(online bool, chatMessage *models.ChatMessage,  chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func Nothing(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage,  chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	return
 }

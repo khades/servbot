@@ -13,14 +13,13 @@ import (
 var autoMessageCollectionName = "autoMessages"
 
 // DecrementAutoMessages decrement message threshold every time someone writes in chat, with check if automessage is bound to specific game on stream
-func DecrementAutoMessages(channelID *string) {
-	channelInfo, error := GetChannelInfo(channelID)
+func DecrementAutoMessages(channelInfo *models.ChannelInfo) {
 	games := []string{""}
-	if error == nil && channelInfo.StreamStatus.Online == true {
+	if channelInfo.StreamStatus.Online == true {
 		games = append(games, channelInfo.StreamStatus.Game)
 	}
 	db.C(autoMessageCollectionName).UpdateAll(bson.M{
-		"channelid": *channelID,
+		"channelid": channelInfo.ChannelID,
 		"message":   bson.M{"$ne": ""},
 		"$or": []bson.M{
 			bson.M{"game": bson.M{"$in": games}},

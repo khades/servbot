@@ -8,8 +8,8 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func sendResubMessage(channel *string, channelID *string, user *string, resubCount *int, subPlan *string) {
-	subAlert, error := repos.GetSubAlert(channelID)
+func sendResubMessage(channelInfo *models.ChannelInfo,  user *string, resubCount *int, subPlan *string) {
+	subAlert, error := repos.GetSubAlert(&channelInfo.ChannelID)
 
 	if error != nil || subAlert.Enabled == false {
 		return
@@ -44,19 +44,18 @@ func sendResubMessage(channel *string, channelID *string, user *string, resubCou
 	if error == nil {
 		resubInfo := models.ResubInfo{Smiles: strings.Repeat(smile+" ", *resubCount), ResubCount: *resubCount}
 		compiledMessage, _ := compiledTemplate.Render(resubInfo)
-		channelInfo, channelInfoError := repos.GetChannelInfo(channelID)
-		if channelInfoError == nil && channelInfo.SubTrain.Enabled && channelInfo.SubTrain.OnlyNewSubs == false{
+		if  channelInfo.SubTrain.Enabled && channelInfo.SubTrain.OnlyNewSubs == false{
 			localSubtrain := channelInfo.SubTrain
 			localSubtrain.CurrentStreak = localSubtrain.CurrentStreak + 1
 			subtrainAdditionalString, _ := mustache.Render(channelInfo.SubTrain.AppendTemplate, localSubtrain)
 			compiledMessage = compiledMessage + " " + strings.TrimSpace(subtrainAdditionalString)
-			repos.IncrementSubtrainCounterByChannelID(channelID, user)
+			repos.IncrementSubtrainCounterByChannelID(&channelInfo.ChannelID, user)
 		}
 		
 		if compiledMessage != "" {
 			IrcClientInstance.SendPublic(&models.OutgoingMessage{
 				Body:    compiledMessage,
-				Channel: *channel,
+				Channel: channelInfo.Channel,
 				User:    *user})
 		}
 	}

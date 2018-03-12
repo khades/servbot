@@ -9,7 +9,7 @@ import (
 	"github.com/khades/servbot/repos"
 )
 
-func subdayEnd(online bool, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
+func subdayEnd(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 	
 	if chatMessage.IsMod == false {
 		ircClient.SendPublic(&models.OutgoingMessage{
@@ -18,8 +18,7 @@ func subdayEnd(online bool, chatMessage *models.ChatMessage, chatCommand models.
 			User:    chatMessage.User})
 		return
 	}
-	_, subdayError := repos.GetLastActiveSubday(&chatMessage.ChannelID)
-	if subdayError == nil {
+	if channelInfo.SubdayIsActive == true {
 		repos.CloseActiveSubday(&chatMessage.ChannelID)
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
