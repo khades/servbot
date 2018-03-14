@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/khades/servbot/ircClient"
+	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -23,21 +24,21 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 		if strings.HasPrefix(template, "!") || strings.HasPrefix(template, ".") || strings.HasPrefix(template, "/") {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Запрещено зацикливать команды",
+				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).CommandCyclingIsForbidden,
 				User:    chatMessage.User})
 			return
 		}
 		if commandName == "" {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Запрещено создавать пустые команды",
+				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).EmptyCommandNameIsForbidden,
 				User:    chatMessage.User})
 			return
 		}
-		if commandName == "new" {
+		if (commandName == "new" || commandName == "alias") {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Запрещено создавать команды для зарезервированных слов",
+				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).ReservedCommandNameIsForbidden,
 				User:    chatMessage.User})
 			return
 		}
@@ -49,20 +50,14 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 		if templateError == nil {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Ну в принципе готово VoHiYo",
+				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).CommandCyclingIsForbidden,
 				User:    chatMessage.User})
 		} else {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    "Создание команды: Невалидный шаблон для команды etmSad",
+				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).InvalidCommandTemplate,
 				User:    chatMessage.User})
 		}
 
 	}
-	//  else {
-	// 	ircClient.SendPublic(&models.OutgoingMessage{
-	// 		Channel: chatMessage.Channel,
-	// 		Body:    "Создание алиaса: Вы не модер SMOrc",
-	// 		User:    chatMessage.User})
-	// }
 }

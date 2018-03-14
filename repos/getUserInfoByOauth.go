@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+
 	"github.com/khades/servbot/models"
 )
-
-
 
 // GetUserInfoByOauth returns information of user specified by his oauth key
 func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
@@ -22,7 +21,9 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if nameResp != nil {
+		defer nameResp.Body.Close()
+	}
 	if nameResp.StatusCode == 400 {
 		return nil, errors.New("Twitch Error, Cant get username")
 

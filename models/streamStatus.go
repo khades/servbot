@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/khades/servbot/l10n"
 	"fmt"
 	"math"
 	"sort"
@@ -35,11 +36,11 @@ func (history GamesHistory) ReturnHistory(lang string) string {
 	sort.Sort(sort.Reverse(history))
 	var mPrefix = "m"
 	var hPrefix = "h"
-	var nowPrefix = "NOW"
+	var nowPrefix = l10n.GetL10n(lang).GameHistoryActivePrefix
 	if lang == "ru" {
 		mPrefix = "м"
 		hPrefix = "ч"
-		nowPrefix = "СЕЙЧАС"
+
 	}
 	stringHistory := ""
 	if len(history) == 0 {

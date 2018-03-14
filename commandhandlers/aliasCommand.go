@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/khades/servbot/ircClient"
+	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -26,15 +27,15 @@ func aliasCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessa
 
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
-			Body:    "Создание алиaса: Ну в принципе готово VoHiYo",
-			User:    chatMessage.User})
+			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).AliasCreationSuccess,
+			User: chatMessage.User})
 
-	} 
+	}
 	// else {
 	// 	ircClient.SendPublic(&models.OutgoingMessage{
 	// 		Channel: chatMessage.Channel,
 	// 		Body:    "Создание алиaса: Вы не модер SMOrc",
 	// 		User:    chatMessage.User})
 	// }
-	
+
 }

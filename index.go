@@ -43,6 +43,8 @@ func main() {
 		for _, value := range *users {
 			channelIDs = append(channelIDs, value)
 			repos.EnableChannel(&value)
+			lang := "ru"
+			repos.SetChannelLang(&value, &lang)
 		}
 		repos.SaveConfigToDatabase()
 		

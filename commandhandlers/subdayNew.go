@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -14,16 +15,16 @@ func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage,
 	
 	
 	if chatMessage.IsMod == false {
-		ircClient.SendPublic(&models.OutgoingMessage{
-			Channel: chatMessage.Channel,
-			Body:    "Создание сабдня: Вы не модер SMOrc",
-			User:    chatMessage.User})
+		// ircClient.SendPublic(&models.OutgoingMessage{
+		// 	Channel: chatMessage.Channel,
+		// 	Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationYoureNotModerator,
+		// 	User:    chatMessage.User})
 		return
 	}
 	if channelInfo.SubdayIsActive == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
-			Body:    "Сабдей уже существует",
+			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationAlreadyExists,
 			User:    chatMessage.User})
 		return
 	}
@@ -33,20 +34,19 @@ func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage,
 		subsOnly = false
 	}
 	if subdayName == "" {
-		subdayName = "Сабдей, созданный " + time.Now().Format(time.UnixDate)
+		subdayName =  l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
 	}
 	created := repos.CreateNewSubday(&chatMessage.ChannelID, subsOnly, &subdayName)
 	if created == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
-			Body:    "Сабдей создан! VoHiYo",
+			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationSuccess,
 			User:    chatMessage.User})
 		return
-
 	}
 	ircClient.SendPublic(&models.OutgoingMessage{
 		Channel: chatMessage.Channel,
-		Body:    "Что-то пошло не так etmSad",
+		Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationGeneralError,
 		User:    chatMessage.User})
 	return
 }

@@ -202,6 +202,16 @@ func PushMods(channelID *string, mods []string) {
 	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"mods": mods}})
 }
 
+// SetChannelLang sets channel language
+func SetChannelLang(channelID *string, lang *string) {
+	channelInfo, _ := GetChannelInfo(channelID)
+	if channelInfo != nil {
+		channelInfo.Lang = *lang
+	} else {
+		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{ChannelID: *channelID, Lang: *lang})
+	}
+	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"lang": *lang}})
+}
 // SetSubdayIsActive sets channelinfo flag "subdayisactive" to true
 func SetSubdayIsActive(channelID *string, isActive bool) {
 	channelInfo, _ := GetChannelInfo(channelID)

@@ -10,6 +10,7 @@ import (
 
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/ircClient"
+	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
@@ -62,7 +63,7 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
 					User:    user,
-					Body:    "Модератора нельзя затаймаутить SMOrc"})
+					Body:    l10n.GetL10n(channelInfo.GetChannelLang()).CantMuteModerator})
 				return
 			}
 

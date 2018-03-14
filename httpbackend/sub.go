@@ -24,8 +24,10 @@ func sub(next sessionHandlerFunc) sessionHandlerFunc {
 			if respError == nil && (resp.StatusCode == 200 || resp.StatusCode == 204) {
 				isSub = true
 			}
+			if resp != nil {
+				defer resp.Body.Close()
+			}
 			repos.SetIfSubToChannel(&session.Username, &channel, &isSub)
-			defer resp.Body.Close()
 		}
 		if isSub == true {
 			next(w, r, session)
