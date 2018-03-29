@@ -16,7 +16,7 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 		template := ""
 		separator := strings.Index(chatCommand.Body, "=")
 		if separator != -1 {
-			commandName = chatCommand.Body[:separator]
+			commandName = strings.ToLower(chatCommand.Body[:separator])
 			template = strings.TrimSpace(chatCommand.Body[separator+1:])
 		} else {
 			commandName = chatCommand.Body

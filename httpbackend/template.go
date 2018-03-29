@@ -3,6 +3,7 @@ package httpbackend
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
@@ -17,10 +18,9 @@ type aliasToRequest struct {
 	AliasTo string `json:"aliasTo"`
 }
 
-
 func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
-	commandName := pat.Param(r, "commandName")
+	commandName := strings.ToLower(pat.Param(r, "commandName"))
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
@@ -46,7 +46,7 @@ func putTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	commandName := pat.Param(r, "commandName")
+	commandName := strings.ToLower(pat.Param(r, "commandName"))
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
@@ -74,14 +74,14 @@ func aliasTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession
 		return
 	}
 
-	commandName := pat.Param(r, "commandName")
+	commandName := strings.ToLower(pat.Param(r, "commandName"))
 
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
-
-	repos.SetChannelTemplateAlias(&s.Username, &s.UserID, channelID, &commandName, &request.AliasTo)
+	lcaseAlias := strings.ToLower(request.AliasTo)
+	repos.SetChannelTemplateAlias(&s.Username, &s.UserID, channelID, &commandName, &lcaseAlias)
 
 	json.NewEncoder(w).Encode(optionResponse{"OK"})
 

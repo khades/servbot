@@ -16,8 +16,8 @@ func aliasCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessa
 		aliasTo := ""
 		separator := strings.Index(chatCommand.Body, "=")
 		if separator != -1 {
-			commandName = chatCommand.Body[:separator]
-			aliasTo = strings.TrimSpace(chatCommand.Body[separator+1:])
+			commandName = strings.ToLower(chatCommand.Body[:separator])
+			aliasTo = strings.ToLower(strings.TrimSpace(chatCommand.Body[separator+1:]))
 
 		} else {
 			commandName = chatCommand.Body
@@ -28,7 +28,7 @@ func aliasCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessa
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).AliasCreationSuccess,
-			User: chatMessage.User})
+			User:    chatMessage.User})
 
 	}
 	// else {
