@@ -24,6 +24,7 @@ var requestsCounter = make(map[string]requestCounterRecord)
 func auth(next sessionHandlerFunc) sessionHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *models.HTTPSession) {
 		_, err := govalidator.ValidateStruct(s)
+		// time.Sleep(2 * time.Second)
 		if err != nil {
 			writeJSONError(w, "Not authorized", http.StatusUnauthorized)
 			return

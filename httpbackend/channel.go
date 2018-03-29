@@ -9,8 +9,9 @@ import (
 )
 
 type channelInfoResponseStruct struct {
-	Channel string `json:"channel"`
-	IsMod   bool   `json:"isMod"`
+	Channel     string                 `json:"channel"`
+	IsMod       bool                   `json:"isMod"`
+	ModChannels []models.ChannelWithID `json:"modChannels"`
 }
 
 func channel(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -20,9 +21,13 @@ func channel(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, chan
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	modChannels, _ := repos.GetModChannels(&s.UserID)
+
 	channelInfoResponse := channelInfoResponseStruct{
-		Channel: *channelName,
-		IsMod:   channelInfo.GetIfUserIsMod(&s.UserID)}
+		Channel:     *channelName,
+		IsMod:       channelInfo.GetIfUserIsMod(&s.UserID),
+		ModChannels: modChannels}
 
 	json.NewEncoder(w).Encode(&channelInfoResponse)
 }
