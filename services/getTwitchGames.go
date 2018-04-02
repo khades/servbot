@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// GetTwitchGames resolves twitch gameID into game name
 func GetTwitchGames() {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "services",

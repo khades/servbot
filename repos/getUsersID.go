@@ -51,8 +51,8 @@ func GetChannelNameByID(channelID *string) (*string, error) {
 	logger.Debugf("ChannelID %s has name: %s", *channelID, strings.ToLower(channel.Channel))
 
 	return &userName, nil
-
 }
+
 // GetUsersID fetches usernames from twitch for specified users, and caches them for 6 hours
 func GetUsersID(users []string) (*map[string]string, error) {
 	// Cache every username -> userid pair for month

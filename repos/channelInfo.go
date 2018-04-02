@@ -4,14 +4,15 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
 )
 
 var channelInfoCollection = "channelInfo"
-var timesCalled int64 
+var timesCalled int64
+
 // setChannelName sets channel name after processing
 func setChannelName(channelID *string, channel string) {
 	channelInfo, _ := GetChannelInfo(channelID)
@@ -102,17 +103,19 @@ func PreprocessChannels() error {
 	for _, channel := range channels {
 		channelIDList = append(channelIDList, channel.ChannelID)
 	}
+	Config.ChannelIDs = channelIDList
 	users, error := getTwitchUsersByID(channelIDList)
 	if error != nil {
 		logger.Debugf("Twitch Channels detection error: %s", error.Error())
 		return error
 	}
-
+	channelsList := []string{}
 	for _, user := range users {
+		channelsList = append(channelsList, user.DisplayName)
 		userIDCacheObject.Set("username-"+strings.ToLower(user.DisplayName), user.ID, 0)
 		setChannelName(&user.ID, strings.ToLower(user.DisplayName))
 	}
-
+	Config.Channels = channelsList
 	return nil
 }
 
@@ -212,6 +215,7 @@ func SetChannelLang(channelID *string, lang *string) {
 	}
 	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"lang": *lang}})
 }
+
 // SetSubdayIsActive sets channelinfo flag "subdayisactive" to true
 func SetSubdayIsActive(channelID *string, isActive bool) {
 	channelInfo, _ := GetChannelInfo(channelID)
@@ -262,10 +266,10 @@ func updateGamesByID(gameID *string, game *string) {
 		"feature": "twitchGames",
 		"action":  "updateGamesByID"})
 	logger.Debugf("Updating gameID %s with proper name \"%s\"", *gameID, *game)
-	db.C(channelInfoCollection).UpdateAll(bson.M{"streamstatus.game":bson.M{"$exists":false}, "streamstatus.gameid": *gameID},
+	db.C(channelInfoCollection).UpdateAll(bson.M{"streamstatus.game": bson.M{"$exists": false}, "streamstatus.gameid": *gameID},
 		bson.M{"$set": bson.M{"streamstatus.game": *game}})
 
-	db.C(channelInfoCollection).UpdateAll(bson.M{"streamstatus.gameshistory.game":bson.M{"$exists":false}, "streamstatus.gameshistory.gameid": *gameID},
+	db.C(channelInfoCollection).UpdateAll(bson.M{"streamstatus.gameshistory.game": bson.M{"$exists": false}, "streamstatus.gameshistory.gameid": *gameID},
 		bson.M{"$set": bson.M{"streamstatus.gameshistory.$.game": *game}})
 
 	for _, channel := range channelInfoRepositoryObject.dataArray {

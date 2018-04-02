@@ -8,10 +8,38 @@ import (
 	"time"
 
 	"github.com/khades/servbot/models"
+	"github.com/sirupsen/logrus"
 )
 
 type twitchUserRepsonse struct {
 	Data []models.TwitchUserInfo `json:"data"`
+}
+type twitchFollower struct {
+	UserID    string    `json:"from_id"`
+	ChannelID string    `json:"to_id"`
+	Date      time.Time `json:"followed_at"`
+}
+type twitchFollowerResponsePagination struct {
+	Cursor string `json:"cursor"`
+}
+type twitchFollowers []twitchFollower
+
+func (followers twitchFollowers) Len() int {
+	return len(followers)
+}
+
+func (followers twitchFollowers) Less(i, j int) bool {
+	return followers[i].Date.Before(followers[j].Date)
+}
+
+func (followers twitchFollowers) Swap(i, j int) {
+	followers[i], followers[j] = followers[j], followers[i]
+}
+
+type twitchFollowerResponse struct {
+	Total      int64                            `json:"total"`
+	Pagination twitchFollowerResponsePagination `json:"pagination"`
+	Followers  twitchFollowers                  `json:"data"`
 }
 
 func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) (*http.Response, error) {
@@ -26,10 +54,70 @@ func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) 
 	return client.Do(req)
 }
 
+func getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "followers",
+		"action":  "getFollowers"})
+	url := "users/follows?to_id=" + *channelID
+	if noCursor == true {
+		url = url + "&first=1"
+
+	}
+	logger.Debugf("Request url is %s", url)
+
+	resp, error := twitchHelix("GET", url, nil)
+	if error != nil {
+		return nil, error
+	}
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	// htmlData, _ := ioutil.ReadAll(resp.Body)
+	// logger.Debugf("Response body is %s", htmlData)
+	var twitchResponseStruct twitchFollowerResponse
+	marshallError := json.NewDecoder(resp.Body).Decode(&twitchResponseStruct)
+	if marshallError != nil {
+		logger.Debugf("Marshalling error: %s", marshallError.Error())
+		return nil, marshallError
+	}
+	return &twitchResponseStruct, nil
+}
+
 func twitchHelix(method string, urlStr string, body io.Reader) (*http.Response, error) {
 	return twitchHelixOauth(method, urlStr, body, Config.OauthKey)
 }
+func getUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "followers",
+		"action":  "getUserFollowDate"})
+	url := "users/follows?from_id=" + *userID + "&to_id=" + *channelID
 
+	logger.Debugf("Request url is %s", url)
+
+	resp, error := twitchHelix("GET", url, nil)
+	if error != nil {
+		return false, time.Now()
+	}
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
+	var twitchResponseStruct twitchFollowerResponse
+	marshallError := json.NewDecoder(resp.Body).Decode(&twitchResponseStruct)
+	if marshallError != nil {
+		logger.Debugf("Marshalling error: %s", marshallError.Error())
+		return false, time.Now()
+	}
+	logger.Debugf("Response %+v", twitchResponseStruct)
+
+	logger.Debugf("Checking if user %s follows channel %s %s: %s", *userID, *channelID, len(twitchResponseStruct.Followers), twitchResponseStruct.Total == 0)
+	if len(twitchResponseStruct.Followers) == 0 {
+		return false, time.Now()
+	}
+	return true, twitchResponseStruct.Followers[0].Date
+}
 func getUsersByParameterPaged(idSlice []string, idType string) ([]models.TwitchUserInfo, error) {
 	var delimiter = "&" + idType + "="
 

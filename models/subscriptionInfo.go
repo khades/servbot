@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 // SubscriptionInfo shows how many t imes user is subscribed to a channel

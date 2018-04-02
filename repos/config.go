@@ -8,7 +8,7 @@ import (
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/asaskevich/govalidator.v4"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 var configCollection = "config"

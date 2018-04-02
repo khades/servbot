@@ -47,11 +47,12 @@ func main() {
 			repos.SetChannelLang(&value, &lang)
 		}
 		repos.SaveConfigToDatabase()
-		
+
 		logger.Info("Configuration import successed.")
 
 		return
 	}
+
 	// Database initialisation and preprocessing
 
 	// Reading config from database
@@ -67,6 +68,7 @@ func main() {
 	}
 
 	repos.PreprocessChannels()
+
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -78,6 +80,7 @@ func main() {
 
 	gob.Register(&models.HTTPSession{})
 	logger.Info("Starting...")
+	services.CheckChannelsFollowers()
 	ircClientTicker := time.NewTicker(time.Second * 3)
 
 	go func(wg *sync.WaitGroup) {
@@ -173,16 +176,16 @@ func main() {
 		httpbackend.Start()
 		wg.Done()
 	}(&wg)
-	followerTicker := time.NewTicker(time.Second * 30)
+	// followerTicker := time.NewTicker(time.Second * 30)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-followerTicker.C
-			wg.Add(1)
-			services.CheckChannelsFollowers()
-			wg.Done()
-		}
-	}(&wg)
+	// go func(wg *sync.WaitGroup) {
+	// 	for {
+	// 		<-followerTicker.C
+	// 		wg.Add(1)
+	// 		services.CheckChannelsFollowers()
+	// 		wg.Done()
+	// 	}
+	// }(&wg)
 	go func(wg *sync.WaitGroup) {
 		bot.Start()
 		wg.Done()

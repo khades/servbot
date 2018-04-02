@@ -22,11 +22,11 @@ func (chatMessage ChatMessage) GetCommand() (ChatCommand, bool) {
 		spaceIndex := strings.Index(chatMessage.MessageBody, " ")
 		if spaceIndex != -1 {
 			chatCommand = ChatCommand{
-				Command: strings.ToLower(chatMessage.MessageBody[1:spaceIndex]),
+				Command: strings.ToLower(strings.TrimSpace(chatMessage.MessageBody[1:spaceIndex])),
 				Body:    chatMessage.MessageBody[spaceIndex+1:]}
 		} else {
 			chatCommand = ChatCommand{
-				Command: strings.ToLower(chatMessage.MessageBody[1:])}
+				Command: strings.ToLower(strings.TrimSpace(chatMessage.MessageBody[1:]))}
 		}
 	}
 	return chatCommand, isCommand

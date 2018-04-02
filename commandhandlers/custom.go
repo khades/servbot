@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"html"
@@ -23,12 +24,41 @@ func short(s string, i int) string {
 	return s
 }
 
+type templateExtendedObject struct {
+	models.ChannelInfo
+	UserID                 string
+	RandomInteger          int
+	RandomIntegerIsMinimal bool
+	RandomIntegerIsMaximal bool
+	RandomIngegerIsZero    bool
+	RandomString           string
+	IsMod                  bool
+	IsSub                  bool
+	CommandBody            string
+	CommandBodyIsEmpty     bool
+}
+type FollowerDuration struct {
+	IsFollower       bool
+	FollowerDuration string
+}
+
+func (channelInfo templateExtendedObject) FollowerInfo() FollowerDuration {
+
+	isFollower, dur := repos.GetIfFollowerToChannel(&channelInfo.ChannelID, &channelInfo.UserID)
+	if isFollower == true {
+		return FollowerDuration{true, l10n.HumanizeDuration(time.Now().Sub(dur), channelInfo.Lang)}
+
+	}
+	return FollowerDuration{false, ""}
+}
+
 // custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 
-	templateObject := &models.TemplateExtendedObject{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
+	templateObject := &templateExtendedObject{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
 	templateObject.IsMod = chatMessage.IsMod
 	templateObject.IsSub = chatMessage.IsSub
+	templateObject.UserID = chatMessage.UserID
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
 	user := chatMessage.User
 	if err != nil || template.Template == "" {

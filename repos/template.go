@@ -5,7 +5,7 @@ import (
 
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 var templateCollection = "templates"

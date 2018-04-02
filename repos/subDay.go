@@ -6,7 +6,7 @@ import (
 
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 var subdayCollection = "subdays"

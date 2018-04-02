@@ -11,13 +11,22 @@
   branch = "master"
   name = "github.com/asaskevich/EventBus"
   packages = ["."]
-  revision = "68a521d7cbbb7a859c2608b06342f384b3bd5f5a"
+  revision = "d46933a94f05c6657d7b923fcf5ac563ee37ec79"
 
 [[projects]]
-  branch = "master"
   name = "github.com/cbroglie/mustache"
   packages = ["."]
-  revision = "6b01858ec889c7240e02d553d42c238afbb62eac"
+  revision = "2eb171290cbdc792c57bcd10f5a030b53500b28f"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "development"
+  name = "github.com/globalsign/mgo"
+  packages = [
+    "bson",
+    "internal/json"
+  ]
+  revision = "876956d3205ac690e6488c1ba6fed94943c82718"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -40,8 +49,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
 
 [[projects]]
   name = "goji.io"
@@ -58,7 +67,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "85f98707c97e11569271e4d9b3d397e079c4f4d0"
+  revision = "12892e8c234f4fe6f6803f052061de9057903bb2"
 
 [[projects]]
   branch = "master"
@@ -67,7 +76,7 @@
     "unix",
     "windows"
   ]
-  revision = "7dca6fe1f43775aa6d1334576870ff63f978f539"
+  revision = "378d26f46672a356c46195c28f61bdb4c0a781dd"
 
 [[projects]]
   name = "gopkg.in/asaskevich/govalidator.v4"
@@ -96,6 +105,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a78b86a1ee791a436f760d8fc022043ef438760a59e363a1ef86f7dd38ae5499"
+  inputs-digest = "8396d98a1146f678d3f39bdf107586c2f22bfd5ee7dd03d33deed82f07f24cbf"
   solver-name = "gps-cdcl"
   solver-version = 1

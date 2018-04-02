@@ -48,3 +48,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/cbroglie/mustache"
+
+[[constraint]]
+  branch = "development"
+  name = "github.com/globalsign/mgo"

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"

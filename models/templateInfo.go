@@ -9,7 +9,7 @@ type TemplateInfo struct {
 	TemplateInfoBody `bson:",inline"`
 }
 
-// TemplateInfoBody describes template settings 
+// TemplateInfoBody describes template settings
 type TemplateInfoBody struct {
 	ShowOnline        bool                      `json:"showOnline"`
 	ShowOffline       bool                      `json:"showOffline"`
@@ -21,6 +21,7 @@ type TemplateInfoBody struct {
 	IntegerRandomizer TemplateIntegerRandomizer `json:"integerRandomizer"`
 	StringRandomizer  TemplateStringRandomizer  `json:"stringRandomizer"`
 }
+
 // TemplateIntegerRandomizer describes template integer randomizator settings
 type TemplateIntegerRandomizer struct {
 	Enabled      bool `json:"enabled"`
@@ -33,20 +34,6 @@ type TemplateIntegerRandomizer struct {
 type TemplateStringRandomizer struct {
 	Enabled bool     `json:"enabled"`
 	Strings []string `json:"strings"`
-}
-
-// TemplateExtendedObject describes extended channelInfo object for template processing
-type TemplateExtendedObject struct {
-	ChannelInfo
-	RandomInteger          int
-	RandomIntegerIsMinimal bool
-	RandomIntegerIsMaximal bool
-	RandomIngegerIsZero    bool
-	RandomString           string
-	IsMod                  bool
-	IsSub                  bool
-	CommandBody            string
-	CommandBodyIsEmpty     bool
 }
 
 // TemplateInfoWithHistory describes full template with edit history

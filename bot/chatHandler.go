@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -106,7 +107,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 
 		isVote := strings.HasPrefix(message.Params[1], "%")
 		if isVote == true {
-	
+
 			commandhandlers.Vote(channelInfo, &formedMessage, commandBody, IrcClientInstance)
 		}
 		// bits, bitsFound := message.Tags.GetTag("bits")
@@ -126,7 +127,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			if message.User == "khadesru" && commandBody.Command == "debugResub" {
 				resubCount := 3
 				subPlan := "2000"
-				sendResubMessage(channelInfo,  &formedMessage.User, &resubCount, &subPlan)
+				sendResubMessage(channelInfo, &formedMessage.User, &resubCount, &subPlan)
 
 			}
 			handlerFunction := commandhandlers.Router.Go(commandBody.Command)
@@ -139,8 +140,10 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		client.Write("CAP REQ twitch.tv/tags")
 		client.Write("CAP REQ twitch.tv/membership")
 		client.Write("CAP REQ twitch.tv/commands")
-		for _, value := range repos.Config.Channels {
-			client.Write("JOIN #" + value)
+		activeChannels, _ := repos.GetActiveChannels()
+		log.Println(activeChannels)
+		for _, value := range activeChannels {
+			client.Write("JOIN #" + value.Channel)
 		}
 		IrcClientInstance = &ircClient.IrcClient{Client: client, Bounces: make(map[string]time.Time), Ready: true, ModChannelIndex: 0, MessageQueue: []string{}}
 		IrcClientInstance.SendModsCommand()

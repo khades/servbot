@@ -74,7 +74,7 @@ func aliasTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession
 		return
 	}
 
-	commandName := strings.ToLower(pat.Param(r, "commandName"))
+	commandName := strings.ToLower(strings.TrimSpace(pat.Param(r, "commandName")))
 
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)

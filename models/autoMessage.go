@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 // AutoMessage struct describes one automessage item on specified channel
