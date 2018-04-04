@@ -3,8 +3,8 @@ package repos
 import (
 	"time"
 
-	"github.com/khades/servbot/models"
 	"github.com/globalsign/mgo/bson"
+	"github.com/khades/servbot/models"
 )
 
 var messageLogsCollection = "messageLogs"
@@ -27,7 +27,10 @@ func GetChannelUsers(channelID *string, pattern *string) ([]models.ChannelUser, 
 
 //LogMessage logs the users chat message on channel with logging its known nicknames
 func LogMessage(message *models.ChatMessage) {
-
+	if message.UserID != "" && message.UserID != "" {
+		updateUserToUserIDFromChat(&message.UserID, &message.User)
+	}
+	
 	query := bson.M{
 		"$set":      bson.M{"user": message.User, "channel": message.Channel},
 		"$addToSet": bson.M{"knownnicknames": message.User},

@@ -32,8 +32,39 @@ func InitializeDB(dbName string) error {
 	db.C(channelInfoCollection).EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
 
+	db.C(followerCursorsCollectionName).EnsureIndex(mgo.Index{
+		Key: []string{"channelid"}})
+
+	db.C(subAlertCollection).EnsureIndex(mgo.Index{
+		Key: []string{"channelid"}})
+
 	db.C(gamesCollection).EnsureIndex(mgo.Index{
 		Key: []string{"gameid"}})
+
+	db.C(usernameCacheCollection).EnsureIndex(mgo.Index{
+		Key: []string{"id"}})
+
+	db.C(usernameCacheCollection).EnsureIndex(mgo.Index{
+		Key: []string{"userid"}})
+
+	db.C(subscriptionInfoCollection).EnsureIndex(mgo.Index{
+		Key: []string{"channelid", "userid"}})
+
+	db.C(templateCollection).EnsureIndex(mgo.Index{
+		Key: []string{"channelid", "commandname"}})
+
+	db.C(followersListСollectionName).EnsureIndex(mgo.Index{
+		Key: []string{"channelid", "userid"}})
+
+	db.C(messageLogsCollection).EnsureIndex(mgo.Index{
+		Key: []string{"channelid", "userid"}})
+
+	db.C(messageLogsCollection).EnsureIndex(mgo.Index{
+		Key: []string{"channelid", "$text:knownnicknames"}})
+
+	db.C(usernameCacheCollection).EnsureIndex(mgo.Index{
+		Key:         []string{"createdat"},
+		ExpireAfter: 60 * 12 * time.Minute})
 
 	return nil
 }

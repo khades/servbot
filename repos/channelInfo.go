@@ -111,9 +111,10 @@ func PreprocessChannels() error {
 	}
 	channelsList := []string{}
 	for _, user := range users {
-		channelsList = append(channelsList, user.DisplayName)
-		userIDCacheObject.Set("username-"+strings.ToLower(user.DisplayName), user.ID, 0)
+		username := strings.ToLower(user.DisplayName)
 		setChannelName(&user.ID, strings.ToLower(user.DisplayName))
+		updateUserToUserIDFromChat(&user.ID, &username)
+		channelsList = append(channelsList, user.DisplayName)
 	}
 	Config.Channels = channelsList
 	return nil

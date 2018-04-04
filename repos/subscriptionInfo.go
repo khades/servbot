@@ -12,7 +12,8 @@ var subscriptionInfoCollection  = "subsciptionInfo"
 
 // LogSubscription writes user subscription 
 func LogSubscription(info *models.SubscriptionInfo) {
-	db.C(subscriptionInfoCollection).Insert(*info)
+	//db.C(subscriptionInfoCollection).Insert(*info)
+	db.C(subscriptionInfoCollection).Upsert(bson.M{"userid":info.UserID, "channelid":info.ChannelID}, info)
 	//PutSubscriptionBits(&info.ChannelID, &info.UserID, &info.User, &info.SubPlan)
 }
 

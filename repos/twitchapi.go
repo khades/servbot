@@ -11,6 +11,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type twitchUserInfo struct {
+	ID          string `json:"_id"`
+	DisplayName string `json:"display_name"`
+	Name        string `json:"name"`
+}
+
+type usersLoginStruct struct {
+	Users []twitchUserInfo `json:"users"`
+}
+
 type twitchUserRepsonse struct {
 	Data []models.TwitchUserInfo `json:"data"`
 }
@@ -119,9 +129,14 @@ func getUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 	return true, twitchResponseStruct.Followers[0].Date
 }
 func getUsersByParameterPaged(idSlice []string, idType string) ([]models.TwitchUserInfo, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "followers",
+		"action":  "getUsersByParameterPaged"})
 	var delimiter = "&" + idType + "="
 
 	usersString := "users?" + idType + "=" + strings.Join(idSlice, delimiter)
+	logger.Debugf("Url string to get users from twitch: %s", usersString)
 	resp, error := twitchHelix("GET", usersString, nil)
 	if error != nil {
 		return nil, error
@@ -138,9 +153,15 @@ func getUsersByParameterPaged(idSlice []string, idType string) ([]models.TwitchU
 }
 
 func getUsersByParameter(idList []string, idType string) ([]models.TwitchUserInfo, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "followers",
+		"action":  "getUsersByParameter"})
+	logger.Debugf("Fetching users: %s", strings.Join(idList, ", "))
 	var result []models.TwitchUserInfo
 	sliceStart := 0
-	for index := range idList {
+	for index:= range idList {
+
 		if index == len(idList)-1 || index-sliceStart > 48 {
 			pageResult, error := getUsersByParameterPaged(idList[sliceStart:index+1], idType)
 

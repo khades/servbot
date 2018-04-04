@@ -23,8 +23,11 @@
   branch = "development"
   name = "github.com/globalsign/mgo"
   packages = [
+    ".",
     "bson",
-    "internal/json"
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
   ]
   revision = "876956d3205ac690e6488c1ba6fed94943c82718"
 
@@ -39,12 +42,6 @@
   name = "github.com/khades/iso8601duration"
   packages = ["."]
   revision = "db3984c4aea411822176fe158522635351326b33"
-
-[[projects]]
-  name = "github.com/patrickmn/go-cache"
-  packages = ["."]
-  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
-  version = "v2.1.0"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -90,21 +87,9 @@
   revision = "01e72ff44254c3a85e6544295da4ce04be23c356"
   version = "v2.0.0"
 
-[[projects]]
-  branch = "v2"
-  name = "gopkg.in/mgo.v2"
-  packages = [
-    ".",
-    "bson",
-    "internal/json",
-    "internal/sasl",
-    "internal/scram"
-  ]
-  revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8396d98a1146f678d3f39bdf107586c2f22bfd5ee7dd03d33deed82f07f24cbf"
+  inputs-digest = "067228c91ca910861d83bd21394e45fcfa6bd24d2fbb979b8bad01c39b46e854"
   solver-name = "gps-cdcl"
   solver-version = 1

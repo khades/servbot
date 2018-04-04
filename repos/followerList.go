@@ -24,11 +24,7 @@ func GetIfFollowerToChannel(channelID *string, userID *string) (bool, time.Time)
 		"package": "repos",
 		"feature": "followers",
 		"action":  "GetIfFollowerToChannel"})
-	// value, found := followerCacheObject.Get(*userID + *channelID + "-follower")
-	// if found {
-	// 	result := value.(followerCacheStruct)
-	// 	return result.isFollower, result.Date
-	// }
+
 	var followerResult models.Follower
 	error := db.C(followersListСollectionName).Find(bson.M{"channelid": *channelID, "userid": *userID}).One(&followerResult)
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/models"
 )
@@ -21,7 +22,13 @@ type httpSessionDBstruct struct {
 // GetUserInfoByOauth returns information of user specified by his oauth key
 func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 	result := httpSessionDBstruct{}
-	error := db.C(httpsessionCollection).Find(bson.M{"key": *oauthKey}).One(&result)
+	change := mgo.Change{
+		Update:    bson.M{"$set": bson.M{"cretedat": time.Now()}},
+		ReturnNew: true,
+	}
+
+	_, error := db.C(httpsessionCollection).Find(bson.M{"key": *oauthKey}).Apply(change, &result)
+	
 	if error != nil {
 
 		return &result.HTTPSession, nil
