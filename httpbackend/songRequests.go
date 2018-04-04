@@ -29,12 +29,23 @@ func songrequests(w http.ResponseWriter, r *http.Request, s *models.HTTPSession,
 }
 
 func songrequestsSkip(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	id := pat.Param(r, "songID")
+	id := pat.Param(r, "videoID")
 	if id == "" {
 		writeJSONError(w, "song id is not defined", http.StatusNotFound)
 		return
 	}
 	repos.PullSongRequest(channelID, &id)
+	
+	value := repos.GetSongRequest(channelID)
+	
+	channelInfo, error := repos.GetChannelInfo(channelID)
+	if error != nil {
+		writeJSONError(w, "That channel is not defined", http.StatusForbidden)
+		return
+	}
+
+	result := songRequest{value, channelInfo.GetIfUserIsMod(&s.UserID), *channelID == s.UserID}
+	json.NewEncoder(w).Encode(&result)
 }
 
 func songrequestsEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {

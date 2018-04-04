@@ -1,6 +1,8 @@
 package repos
 
 import (
+	"strings"
+	"unicode/utf8"
 	//"time"
 	"encoding/json"
 	"errors"
@@ -8,12 +10,39 @@ import (
 	"sort"
 	"time"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/models"
-	"github.com/globalsign/mgo/bson"
 )
 
 var songRequestCollectionName = "songrequests"
+
+func short(s string, i int) string {
+	runes := []rune(s)
+	if len(runes) > i {
+		return string(runes[:i])
+	}
+	return s
+}
+
+func parseYoutubeLink(input string) string {
+
+	if utf8.RuneCountInString(input) == 11 {
+		return input
+
+	}
+	if strings.Contains(input, "youtube.com/watch?v=") {
+		return short(strings.Split(input, "youtube.com/watch?v=")[1], 11)
+	}
+	if strings.Contains(input, "youtube.com/v/") {
+		return short(strings.Split(input, "youtube.com/v/")[1], 11)
+
+	}
+	if strings.Contains(input, "youtu.be/") {
+		return short(strings.Split(input, "youtu.be/")[1], 11)
+	}
+	return ""
+}
 
 // GetSongRequest gets full songrequest info for specified channel
 func GetSongRequest(channelID *string) *models.ChannelSongRequest {
@@ -72,10 +101,18 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 			userRequestsCount = userRequestsCount + 1
 		}
 	}
+
 	if userRequestsCount >= songRequestInfo.Settings.MaxRequestsPerUser {
 		return errors.New("Too many requests per user")
 	}
-	video, videoError := getYoutubeVideoInfo(videoID)
+
+	parsedVideoID := parseYoutubeLink(*videoID)
+
+	if (parsedVideoID == "") {
+		return errors.New("Invalid link")
+	}
+
+	video, videoError := getYoutubeVideoInfo(&parsedVideoID)
 	if videoError != nil {
 		return videoError
 	}
@@ -98,7 +135,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		User:    *user,
 		UserID:  *userID,
 		Date:    time.Now(),
-		VideoID: *videoID,
+		VideoID: parsedVideoID,
 		Length:  *duration,
 		Title:   video.Items[0].Snippet.Title}
 

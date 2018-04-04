@@ -30,7 +30,7 @@ func updateUserToUserIDFromChat(userID *string, user *string) {
 	if found == false || time.Now().Sub(date) < 60*time.Minute {
 		now := time.Now()
 		usernameCacheChatDates[*userID] = now
-		updateUserToUserID(user, userID, now)
+		updateUserToUserID(userID, user, now)
 	}
 }
 

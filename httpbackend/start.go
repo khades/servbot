@@ -88,7 +88,11 @@ func Start() {
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), corsEnabled(options))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests"),  withSessionAndChannel(songrequests))
+
 	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/skip/:videoID"),  withSessionAndChannel(songrequestsSkip))
+
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/events"),  withSessionAndChannel(songrequestsEvents))
 
 
