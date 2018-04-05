@@ -2,6 +2,7 @@ package httpbackend
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/khades/servbot/eventbus"
@@ -12,7 +13,7 @@ import (
 
 type songRequest struct {
 	*models.ChannelSongRequest
-	IsMod bool `json:"isMod"`
+	IsMod   bool `json:"isMod"`
 	IsOwner bool `json:"isOwner"`
 }
 
@@ -35,17 +36,17 @@ func songrequestsSkip(w http.ResponseWriter, r *http.Request, s *models.HTTPSess
 		return
 	}
 	repos.PullSongRequest(channelID, &id)
-	
-	value := repos.GetSongRequest(channelID)
-	
-	channelInfo, error := repos.GetChannelInfo(channelID)
-	if error != nil {
-		writeJSONError(w, "That channel is not defined", http.StatusForbidden)
+}
+
+func songrequestsBubbleUp(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	id := pat.Param(r, "videoID")
+	if id == "" {
+		writeJSONError(w, "song id is not defined", http.StatusNotFound)
 		return
 	}
-
-	result := songRequest{value, channelInfo.GetIfUserIsMod(&s.UserID), *channelID == s.UserID}
-	json.NewEncoder(w).Encode(&result)
+	found := repos.BubbleUpVideo(channelID, &id)
+	log.Println("IS SHIT FOUND?")
+	log.Println(found)
 }
 
 func songrequestsEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {

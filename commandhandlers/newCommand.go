@@ -50,7 +50,7 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 		if templateError == nil {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
-				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).CommandCyclingIsForbidden,
+				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).CommandCreationSuccess,
 				User:    chatMessage.User})
 		} else {
 			ircClient.SendPublic(&models.OutgoingMessage{

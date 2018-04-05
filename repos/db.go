@@ -38,6 +38,9 @@ func InitializeDB(dbName string) error {
 	db.C(subAlertCollection).EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
 
+	db.C(songRequestCollectionName).EnsureIndex(mgo.Index{
+		Key: []string{"channelid"}})
+		
 	db.C(gamesCollection).EnsureIndex(mgo.Index{
 		Key: []string{"gameid"}})
 

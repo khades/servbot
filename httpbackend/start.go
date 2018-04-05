@@ -33,7 +33,7 @@ func Start() {
 	// mux.HandleFunc(pat.Get("/api/channel/:channel/bits/search/:search"), withMod(bitsSearch))
 	// mux.HandleFunc(pat.Get("/api/channel/:channel/bits/:userID"), withMod(userbits))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"),  withSessionAndChannel(templates))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/templates"), withSessionAndChannel(templates))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/templates/:commandName"), withMod(template))
 	mux.HandleFunc(pat.Post("/api/channel/:channel/templates/:commandName"), withMod(putTemplate))
@@ -87,14 +87,14 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), withMod(subdayPullWinner))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), corsEnabled(options))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests"),  withSessionAndChannel(songrequests))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests"), withSessionAndChannel(songrequests))
 
 	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests"), corsEnabled(options))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/skip/:videoID"),  withSessionAndChannel(songrequestsSkip))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/skip/:videoID"), withSessionAndChannel(songrequestsSkip))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bubbleup/:videoID"), withSessionAndChannel(songrequestsBubbleUp))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/events"),  withSessionAndChannel(songrequestsEvents))
-
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/events"), withSessionAndChannel(songrequestsEvents))
 
 	http.ListenAndServe("localhost:8000", mux)
 }

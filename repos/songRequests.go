@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"log"
 	"strings"
 	"unicode/utf8"
 	//"time"
@@ -38,9 +39,11 @@ func parseYoutubeLink(input string) string {
 		return short(strings.Split(input, "youtube.com/v/")[1], 11)
 
 	}
+
 	if strings.Contains(input, "youtu.be/") {
 		return short(strings.Split(input, "youtu.be/")[1], 11)
 	}
+
 	return ""
 }
 
@@ -108,7 +111,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 
 	parsedVideoID := parseYoutubeLink(*videoID)
 
-	if (parsedVideoID == "") {
+	if parsedVideoID == "" {
 		return errors.New("Invalid link")
 	}
 
@@ -137,6 +140,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		Date:    time.Now(),
 		VideoID: parsedVideoID,
 		Length:  *duration,
+		Order:   len(songRequestInfo.Requests) + 1,
 		Title:   video.Items[0].Snippet.Title}
 
 	PushSongRequest(channelID, &songRequest)
@@ -148,19 +152,25 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 
 // PullSongRequest removes songrequest, specified by youtube video ID on specified channel
 func PullSongRequest(channelID *string, videoID *string) {
-	db.C(songRequestCollectionName).Update(
-		bson.M{
-			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests": bson.M{"videoid": *videoID}}})
-	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+	songRequestInfo := GetSongRequest(channelID)
+	if len(songRequestInfo.Requests) == 0 {
+		return
+	}
+	newRequests, pulledItem := songRequestInfo.Requests.PullOneRequest(videoID)
+
+	if pulledItem != nil {
+		putRequests(channelID, newRequests)
+		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+	}
 }
 
-// PullUserSongRequest removes specified user request, specified by youtube video ID on specified channel
-func PullUserSongRequest(channelID *string, videoID *string, userID *string) {
-	db.C(songRequestCollectionName).Update(
-		bson.M{
-			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests": bson.M{"userid:": *userID, "videoid": *videoID}}})
-	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
-}
+// // PullUserSongRequest removes specified user request, specified by youtube video ID on specified channel
+// func PullUserSongRequest(channelID *string, videoID *string, userID *string) {
+// 	db.C(songRequestCollectionName).Update(
+// 		bson.M{
+// 			"channelid": *channelID}, bson.M{"$pull": bson.M{"requests": bson.M{"userid:": *userID, "videoid": *videoID}}})
+// 	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+// }
 
 // PullLastUserSongRequest removes last specified user request on specified channel
 func PullLastUserSongRequest(channelID *string, userID *string) {
@@ -168,18 +178,32 @@ func PullLastUserSongRequest(channelID *string, userID *string) {
 	if len(songRequestInfo.Requests) == 0 {
 		return
 	}
-	id := ""
-	var date time.Time
-	for _, request := range songRequestInfo.Requests {
-		if request.UserID == *userID && request.Date.After(date) {
-			id = request.VideoID
-			date = request.Date
-		}
-	}
-	if id != "" {
-		PullUserSongRequest(channelID, &id, userID)
+	newRequests, pulledItem := songRequestInfo.Requests.PullUsersLastRequest(userID)
+
+	if pulledItem != nil {
+		putRequests(channelID, newRequests)
 		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
+}
+
+// BubbleUpVideo sets order of song to 1, and increases order of other songs
+func BubbleUpVideo(channelID *string, videoID *string) bool {
+	songRequestInfo := GetSongRequest(channelID)
+	if len(songRequestInfo.Requests) == 0 {
+		return false
+	}
+	log.Printf("%+v", songRequestInfo.Requests)
+	newRequests, changed := songRequestInfo.Requests.BubbleVideoUp(videoID)
+	if changed == true {
+		log.Printf("%+v", newRequests)
+		putRequests(channelID, newRequests)
+		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+	}
+	return changed
+}
+
+func putRequests(channelID *string, requests models.SongRequests) {
+	db.C(songRequestCollectionName).Update(bson.M{"channelid": *channelID}, bson.M{"$set": bson.M{"requests": requests}})
 }
 
 func getYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
