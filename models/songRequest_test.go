@@ -30,8 +30,7 @@ func TestSongRequests(t *testing.T) {
 
 }
 
-
-func TestSongRequests3(t *testing.T) {
+func TestSongRequests1(t *testing.T) {
 	videos := SongRequests{
 		SongRequest{
 			VideoID: "1",
@@ -57,7 +56,6 @@ func TestSongRequests3(t *testing.T) {
 
 }
 
-
 func TestSongRequests2(t *testing.T) {
 	videos := SongRequests{
 		SongRequest{
@@ -79,7 +77,31 @@ func TestSongRequests2(t *testing.T) {
 
 	videoID := "2"
 
+	sorted, _ := videos.BubbleVideoUp(&videoID, 1)
+	log.Printf("%+v", sorted)
+}
 
-	sorted, _ := videos.BubbleVideoUp(&videoID)
+func TestSongRequests3(t *testing.T) {
+	videos := SongRequests{
+		SongRequest{
+			VideoID: "1",
+			UserID:  "a",
+			Order:   1},
+		SongRequest{
+			VideoID: "2",
+			UserID:  "b",
+			Order:   2},
+		SongRequest{
+			VideoID: "3",
+			UserID:  "a",
+			Order:   3},
+		SongRequest{
+			VideoID: "4",
+			UserID:  "c",
+			Order:   4}}
+
+	videoID := "3"
+
+	sorted, _ := videos.BubbleVideoUp(&videoID, 2)
 	log.Printf("%+v", sorted)
 }

@@ -40,7 +40,10 @@ func InitializeDB(dbName string) error {
 
 	db.C(songRequestCollectionName).EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
-		
+
+	db.C(videolibraryCollection).EnsureIndex(mgo.Index{
+		Key: []string{"videoid"}})
+
 	db.C(gamesCollection).EnsureIndex(mgo.Index{
 		Key: []string{"gameid"}})
 

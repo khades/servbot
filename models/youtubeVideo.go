@@ -39,6 +39,8 @@ type YTContentDetails struct {
 // YTStatistics  describes parsed "statistics" value of youtube video
 type YTStatistics struct {
 	ViewCount string `json:"viewCount"`
+	Likes     string `json:"likeCount"`
+	Dislikes  string `json:"dislikeCount"`
 }
 
 // GetViewCount returns view count of one youtube video

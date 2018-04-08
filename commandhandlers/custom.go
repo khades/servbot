@@ -27,6 +27,7 @@ func short(s string, i int) string {
 type templateExtendedObject struct {
 	models.ChannelInfo
 	UserID                 string
+	User                   string
 	RandomInteger          int
 	RandomIntegerIsMinimal bool
 	RandomIntegerIsMaximal bool
@@ -36,6 +37,10 @@ type templateExtendedObject struct {
 	IsSub                  bool
 	CommandBody            string
 	CommandBodyIsEmpty     bool
+}
+type SongPullResult struct {
+	Success     bool
+	PulledVideo models.SongRequest
 }
 type FollowerDuration struct {
 	IsFollower       bool
@@ -52,6 +57,24 @@ func (channelInfo templateExtendedObject) FollowerInfo() FollowerDuration {
 	return FollowerDuration{false, ""}
 }
 
+func (channelInfo templateExtendedObject) CurrentSong() models.CurrentSong {
+	return repos.GetTopRequest(&channelInfo.ChannelID, channelInfo.Lang)
+}
+
+func (channelInfo templateExtendedObject) AddSongRequest() models.SongRequestAddResult  {
+	result := repos.AddSongRequest(&channelInfo.User, channelInfo.IsSub, &channelInfo.UserID, &channelInfo.ChannelID, &channelInfo.CommandBody)
+	if (result.Success == true) {
+		result.LengthStr = l10n.HumanizeDuration(result.Length, channelInfo.Lang)
+	}
+	return result
+}
+
+func (channelInfo templateExtendedObject) PullSongRequest() SongPullResult {
+	pulledVideo, pulled := repos.PullLastUserSongRequest(&channelInfo.ChannelID, &channelInfo.UserID)
+	return SongPullResult{
+		Success: pulled, PulledVideo: *pulledVideo}
+}
+
 // custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
 func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
 
@@ -59,8 +82,9 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 	templateObject.IsMod = chatMessage.IsMod
 	templateObject.IsSub = chatMessage.IsSub
 	templateObject.UserID = chatMessage.UserID
+	templateObject.User = chatMessage.User
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
-	user := chatMessage.User
+
 	if err != nil || template.Template == "" {
 		return
 	}
@@ -88,11 +112,11 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 			if chatMessage.IsMod == false {
 				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
-					Body:    fmt.Sprintf("/timeout %s %d ", user, templateObject.RandomInteger)})
+					Body:    fmt.Sprintf("/timeout %s %d ", templateObject.User, templateObject.RandomInteger)})
 			} else {
 				ircClient.SendPublic(&models.OutgoingMessage{
 					Channel: chatMessage.Channel,
-					User:    user,
+					User:    templateObject.User,
 					Body:    l10n.GetL10n(channelInfo.GetChannelLang()).CantMuteModerator})
 				return
 			}
@@ -136,7 +160,7 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 	if template.OnlyPrivate == true {
 		ircClient.SendPrivate(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
-			User:    user,
+			User:    templateObject.User,
 			Body:    html.UnescapeString(message)})
 		return
 	}
@@ -144,7 +168,7 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 	if template.PreventDebounce == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
-			User:    user,
+			User:    templateObject.User,
 			Body:    html.UnescapeString(message)})
 		return
 	}
@@ -152,7 +176,7 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 	ircClient.SendDebounced(models.OutgoingDebouncedMessage{
 		Message: models.OutgoingMessage{
 			Channel: chatMessage.Channel,
-			User:    user,
+			User:    templateObject.User,
 			Body:    html.UnescapeString(message)},
 		Command:    template.AliasTo,
 		RedirectTo: redirectTo})

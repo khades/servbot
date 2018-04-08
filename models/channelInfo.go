@@ -9,24 +9,28 @@ import (
 
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
-	Enabled         bool                   `json:"enabled"`
-	Lang            string                 `json:"lang"`
-	ChannelID       string                 `json:"channelId"`
-	Channel         string                 `json:"channel"`
-	StreamStatus    StreamStatus           `json:"streamStatus"`
-	TwitchDJ        TwitchDJ               `json:"twitchDJ"`
-	VkGroupInfo     VkGroupInfo            `json:"vkGroupInfo"`
-	Mods            []string               `json:"mods"`
-	OfflineCommands []string               `json:"offlinecommands"`
-	OnlineCommands  []string               `json:"onlinecommands"`
-	SubTrain        SubTrain               `json:"subTrain"`
-	SubdayIsActive  bool                   `json:"subdayIsActive"`
-	SongRequest     ChannelInfoSongRequest `json:"songRequest"`
+	Enabled         bool         `json:"enabled"`
+	Lang            string       `json:"lang"`
+	ChannelID       string       `json:"channelId"`
+	Channel         string       `json:"channel"`
+	StreamStatus    StreamStatus `json:"streamStatus"`
+	TwitchDJ        TwitchDJ     `json:"twitchDJ"`
+	VkGroupInfo     VkGroupInfo  `json:"vkGroupInfo"`
+	Mods            []string     `json:"mods"`
+	OfflineCommands []string     `json:"offlinecommands"`
+	OnlineCommands  []string     `json:"onlinecommands"`
+	SubTrain        SubTrain     `json:"subTrain"`
+	SubdayIsActive  bool         `json:"subdayIsActive"`
+	SongRequest     CurrentSong  `json:"songRequest"`
 }
 
-// ChannelInfoSongRequest struct describes current state of songrequest on channel
-type ChannelInfoSongRequest struct {
-	IsPlaying bool `json:"isPlaying"`
+// CurrentSong struct describes current state of songrequest on channel
+type CurrentSong struct {
+	IsPlaying bool   `json:"isPlaying"`
+	Title     string `json:"title"`
+	User      string `json:"user"`
+	Link      string `json:"link"`
+	Duration  string `json:"duration"`
 }
 
 // GetCommands Helper Command for mustashe

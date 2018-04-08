@@ -1,14 +1,17 @@
 package repos
 
 import (
-	"log"
+	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/khades/servbot/l10n"
 	//"time"
 	"encoding/json"
 	"errors"
 	"net/http"
-	"sort"
+	//"net/http/httputil"
+
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -32,8 +35,18 @@ func parseYoutubeLink(input string) string {
 		return input
 
 	}
-	if strings.Contains(input, "youtube.com/watch?v=") {
-		return short(strings.Split(input, "youtube.com/watch?v=")[1], 11)
+	if strings.Contains(input, "youtube.com/watch?") {
+		result := ""
+		params := strings.Split(input, "youtube.com/watch?")[1]
+		paramsSplit := strings.Split(params, "&")
+		for _, param := range paramsSplit {
+			paramSplit := strings.Split(param, "=")
+			if paramSplit[0] == "v" {
+				result = short(paramSplit[1], 11)
+				break
+			}
+		}
+		return result
 	}
 	if strings.Contains(input, "youtube.com/v/") {
 		return short(strings.Split(input, "youtube.com/v/")[1], 11)
@@ -49,7 +62,7 @@ func parseYoutubeLink(input string) string {
 
 // GetSongRequest gets full songrequest info for specified channel
 func GetSongRequest(channelID *string) *models.ChannelSongRequest {
-	songRequestInfo := models.ChannelSongRequest{Settings: models.ChannelSongRequestSettings{PlaylistLength: 30, MaxVideoLength: 300, MaxRequestsPerUser: 2}}
+	songRequestInfo := models.ChannelSongRequest{Settings: models.ChannelSongRequestSettings{PlaylistLength: 30, MaxVideoLength: 300, MaxRequestsPerUser: 2, MoreLikes: true}}
 	db.C(songRequestCollectionName).Find(
 		bson.M{
 			"channelid": *channelID}).One(&songRequestInfo)
@@ -72,6 +85,23 @@ func GetSongRequest(channelID *string) *models.ChannelSongRequest {
 	}
 	return &songRequestInfo
 }
+func GetTopRequest(channelID *string, lang string) models.CurrentSong {
+	songRequestInfo := GetSongRequest(channelID)
+
+	for _, request := range songRequestInfo.Requests {
+		if request.Order == 1 {
+			return models.CurrentSong{
+				IsPlaying: true,
+				Title:     request.Title,
+				User:      request.User,
+				Link:      "https://youtu.be/" + request.VideoID,
+				Duration:  l10n.HumanizeDuration(request.Length, lang)}
+			break
+		}
+	}
+	return models.CurrentSong{
+		IsPlaying: false}
+}
 
 // PushSongRequest pushes songrequest for specified channel
 func PushSongRequest(channelID *string, request *models.SongRequest) {
@@ -88,15 +118,28 @@ func PushSongRequestSettings(channelID *string, settings *models.ChannelSongRequ
 }
 
 // AddSongRequest processes youtube video link before pushing it to songrequest database
-func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *string, videoID *string) error {
-	songRequestInfo := GetSongRequest(channelID)
+func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *string, videoID *string) models.SongRequestAddResult {
 
+	songRequestInfo := GetSongRequest(channelID)
+	//channelInfo, channelInfoError := GetChannelInfo(channelID)
+
+	// if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfo.StreamStatus.Online == false) {
+	// 	return models.SongRequestAddResult{Offline: true}
+	// }
 	if len(songRequestInfo.Requests) >= songRequestInfo.Settings.PlaylistLength {
-		return errors.New("Playlist is full")
+		return models.SongRequestAddResult{PlaylistIsFull: true}
 	}
-	songIndex := sort.Search(len(songRequestInfo.Requests), func(i int) bool { return songRequestInfo.Requests[i].VideoID == *videoID })
-	if songIndex != len(songRequestInfo.Requests) {
-		return errors.New("Song is already in playlist")
+	parsedVideoID := parseYoutubeLink(*videoID)
+
+	isInPlaylist := false
+	for _, request := range songRequestInfo.Requests {
+		if request.VideoID == parsedVideoID {
+			isInPlaylist = true
+			break
+		}
+	}
+	if isInPlaylist == true {
+		return models.SongRequestAddResult{AlreadyInPlaylist: true}
 	}
 	userRequestsCount := 0
 	for _, request := range songRequestInfo.Requests {
@@ -106,48 +149,77 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	}
 
 	if userRequestsCount >= songRequestInfo.Settings.MaxRequestsPerUser {
-		return errors.New("Too many requests per user")
+		return models.SongRequestAddResult{TooManyRequests: true}
 	}
-
-	parsedVideoID := parseYoutubeLink(*videoID)
 
 	if parsedVideoID == "" {
-		return errors.New("Invalid link")
+		return models.SongRequestAddResult{InvalidLink: true}
+	}
+	var songRequest models.SongRequest
+	libraryItem, libraryError := getVideo(&parsedVideoID)
+	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
+		video, videoError := getYoutubeVideoInfo(&parsedVideoID)
+		if videoError != nil {
+			return models.SongRequestAddResult{InternalError: true}
+		}
+		if len(video.Items) == 0 {
+			return models.SongRequestAddResult{NothingFound: true}
+		}
+		duration, durationError := video.Items[0].ContentDetails.GetDuration()
+		if durationError != nil {
+			return models.SongRequestAddResult{InternalError: true}
+		}
+		likes, likesError := strconv.ParseInt(video.Items[0].Statistics.Likes, 10, 64)
+		if likesError != nil {
+			likes = 0
+		}
+		dislikes, dislikesError := strconv.ParseInt(video.Items[0].Statistics.Dislikes, 10, 64)
+		if dislikesError != nil {
+			dislikes = 0
+		}
+		addVideoToLibrary(&parsedVideoID, &video.Items[0].Snippet.Title, duration, video.Items[0].Statistics.GetViewCount(), likes, dislikes)
+		songRequest = models.SongRequest{
+			User:     *user,
+			UserID:   *userID,
+			Date:     time.Now(),
+			VideoID:  parsedVideoID,
+			Length:   *duration,
+			Order:    len(songRequestInfo.Requests) + 1,
+			Title:    video.Items[0].Snippet.Title,
+			Likes:    likes,
+			Dislikes: dislikes,
+			Views:    video.Items[0].Statistics.GetViewCount()}
+	} else {
+		songRequest = models.SongRequest{
+			User:     *user,
+			UserID:   *userID,
+			Date:     time.Now(),
+			VideoID:  parsedVideoID,
+			Length:   libraryItem.Length,
+			Order:    len(songRequestInfo.Requests) + 1,
+			Title:    libraryItem.Title,
+			Likes:    libraryItem.Likes,
+			Dislikes: libraryItem.Dislikes,
+			Views:    libraryItem.Views}
 	}
 
-	video, videoError := getYoutubeVideoInfo(&parsedVideoID)
-	if videoError != nil {
-		return videoError
-	}
-	if len(video.Items) == 0 {
-		return errors.New("Nothing found")
-	}
-	duration, durationError := video.Items[0].ContentDetails.GetDuration()
-	if durationError != nil {
-		return durationError
-	}
-	if duration.Seconds() > float64(songRequestInfo.Settings.MaxVideoLength) {
-		return errors.New("Video is too long")
+	if songRequest.Length.Seconds() > float64(songRequestInfo.Settings.MaxVideoLength) {
+		return models.SongRequestAddResult{TooLong: true, Title: songRequest.Title, Length: songRequest.Length}
 
 	}
-	if video.Items[0].Statistics.GetViewCount() < songRequestInfo.Settings.VideoViewLimit {
-		return errors.New("Too little views on video, got " + string(video.Items[0].Statistics.ViewCount))
+	if songRequest.Views < songRequestInfo.Settings.VideoViewLimit {
+		return models.SongRequestAddResult{TooLittleViews: true, Title: songRequest.Title, Length: songRequest.Length}
 
 	}
-	songRequest := models.SongRequest{
-		User:    *user,
-		UserID:  *userID,
-		Date:    time.Now(),
-		VideoID: parsedVideoID,
-		Length:  *duration,
-		Order:   len(songRequestInfo.Requests) + 1,
-		Title:   video.Items[0].Snippet.Title}
+	if songRequestInfo.Settings.MoreLikes == true && songRequest.Dislikes > songRequest.Likes {
+		return models.SongRequestAddResult{MoreDislikes: true, Title: songRequest.Title, Length: songRequest.Length}
+	}
 
 	PushSongRequest(channelID, &songRequest)
 
 	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 
-	return errors.New("Video " + video.Items[0].Snippet.Title + " , length: " + duration.String())
+	return models.SongRequestAddResult{Success: true, Title: songRequest.Title, Length: songRequest.Length}
 }
 
 // PullSongRequest removes songrequest, specified by youtube video ID on specified channel
@@ -173,17 +245,24 @@ func PullSongRequest(channelID *string, videoID *string) {
 // }
 
 // PullLastUserSongRequest removes last specified user request on specified channel
-func PullLastUserSongRequest(channelID *string, userID *string) {
+func PullLastUserSongRequest(channelID *string, userID *string) (*models.SongRequest, bool) {
 	songRequestInfo := GetSongRequest(channelID)
 	if len(songRequestInfo.Requests) == 0 {
-		return
+		return nil, false
 	}
 	newRequests, pulledItem := songRequestInfo.Requests.PullUsersLastRequest(userID)
 
 	if pulledItem != nil {
+		return pulledItem, true
 		putRequests(channelID, newRequests)
 		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
+	return nil, false
+
+}
+
+func PushSettings(channelID *string, settings *models.ChannelSongRequestSettings) {
+	db.C(songRequestCollectionName).Update(bson.M{"channelid": *channelID}, bson.M{"$set": bson.M{"settings": *settings}})
 }
 
 // BubbleUpVideo sets order of song to 1, and increases order of other songs
@@ -192,10 +271,22 @@ func BubbleUpVideo(channelID *string, videoID *string) bool {
 	if len(songRequestInfo.Requests) == 0 {
 		return false
 	}
-	log.Printf("%+v", songRequestInfo.Requests)
-	newRequests, changed := songRequestInfo.Requests.BubbleVideoUp(videoID)
+	newRequests, changed := songRequestInfo.Requests.BubbleVideoUp(videoID, 1)
 	if changed == true {
-		log.Printf("%+v", newRequests)
+		putRequests(channelID, newRequests)
+		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+	}
+	return changed
+}
+
+// BubbleUpVideoToSecond sets order of song to 2
+func BubbleUpVideoToSecond(channelID *string, videoID *string) bool {
+	songRequestInfo := GetSongRequest(channelID)
+	if len(songRequestInfo.Requests) == 0 {
+		return false
+	}
+	newRequests, changed := songRequestInfo.Requests.BubbleVideoUp(videoID, 2)
+	if changed == true {
 		putRequests(channelID, newRequests)
 		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
@@ -218,6 +309,7 @@ func getYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
 		defer resp.Body.Close()
 	}
 	var ytVideo models.YoutubeVideo
+
 	marshallError := json.NewDecoder(resp.Body).Decode(&ytVideo)
 	if marshallError != nil {
 		return nil, marshallError

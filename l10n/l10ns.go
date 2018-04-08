@@ -90,19 +90,24 @@ func HumanizeDuration(duration time.Duration, lang string) string {
 	days := math.Floor(duration.Hours()/24) - years*365
 	hours := math.Floor(duration.Hours()) - days*24 - years*365*24
 	minutes := float64(int(duration.Minutes() - math.Floor(duration.Minutes()/60)*60))
-
+	seconds := math.Floor(duration.Seconds() - math.Floor(duration.Minutes())*60)
 	if int64(years) > 0 {
-		if lang == "ru" {
-			switch int64(years - math.Floor(years/10)*10) {
-			case 1:
-				result = fmt.Sprintf("%d год", int64(years))
-				break
-			case 2, 3, 4:
 
-				result = fmt.Sprintf("%d года", int64(years))
-				break
-			default:
-				result = fmt.Sprintf("%d лет", int64(years))
+		if lang == "ru" {
+			if int64(years) > 10 && int(years) < 20 {
+				result = result + fmt.Sprintf(" %d лет", int64(years))
+			} else {
+				switch int64(years - math.Floor(years/10)*10) {
+				case 1:
+					result = fmt.Sprintf("%d год", int64(years))
+					break
+				case 2, 3, 4:
+
+					result = fmt.Sprintf("%d года", int64(years))
+					break
+				default:
+					result = fmt.Sprintf("%d лет", int64(years))
+				}
 			}
 		} else {
 			if int64(years) == 1 {
@@ -115,15 +120,19 @@ func HumanizeDuration(duration time.Duration, lang string) string {
 
 	if int(days) > 0 {
 		if lang == "ru" {
-			switch int(days - math.Floor(days/10)*10) {
-			case 1:
-				result = result + fmt.Sprintf(" %d день", int(days))
-				break
-			case 2, 3, 4:
-				result = result + fmt.Sprintf(" %d дня", int(days))
-				break
-			default:
+			if int(days) > 10 && int(days) < 20 {
 				result = result + fmt.Sprintf(" %d дней", int(days))
+			} else {
+				switch int(days - math.Floor(days/10)*10) {
+				case 1:
+					result = result + fmt.Sprintf(" %d день", int(days))
+					break
+				case 2, 3, 4:
+					result = result + fmt.Sprintf(" %d дня", int(days))
+					break
+				default:
+					result = result + fmt.Sprintf(" %d дней", int(days))
+				}
 			}
 		} else {
 			if int(days) == 1 {
@@ -136,18 +145,22 @@ func HumanizeDuration(duration time.Duration, lang string) string {
 
 	if int(hours) > 0 {
 		if lang == "ru" {
-			switch int(hours - math.Floor(hours/10)*10) {
-			case 1:
-				result = result + fmt.Sprintf(" %d час", int(hours))
-				break
-			case 2, 3, 4:
-				result = result + fmt.Sprintf(" %d часа", int(hours))
-				break
-			default:
+			if int(hours) > 10 && int(hours) < 20 {
 				result = result + fmt.Sprintf(" %d часов", int(hours))
+			} else {
+				switch int(hours - math.Floor(hours/10)*10) {
+				case 1:
+					result = result + fmt.Sprintf(" %d час", int(hours))
+					break
+				case 2, 3, 4:
+					result = result + fmt.Sprintf(" %d часа", int(hours))
+					break
+				default:
+					result = result + fmt.Sprintf(" %d часов", int(hours))
+				}
 			}
 		} else {
-			if int(days) == 1 {
+			if int(hours) == 1 {
 				result = result + " 1 hour"
 			} else {
 				result = result + fmt.Sprintf(" %s hours", int(hours))
@@ -157,23 +170,53 @@ func HumanizeDuration(duration time.Duration, lang string) string {
 
 	if int(minutes) > 0 {
 		if lang == "ru" {
-			switch int(minutes - math.Floor(minutes/10)*10) {
-			case 1:
-				result = result + fmt.Sprintf(" %d минуту", int(minutes))
-				break
-			case 2, 3, 4:
-				result = result + fmt.Sprintf(" %d минуты", int(minutes))
-				break
-			default:
+			if int(minutes) > 10 && int(minutes) < 20 {
 				result = result + fmt.Sprintf(" %d минут", int(minutes))
+			} else {
+				switch int(minutes - math.Floor(minutes/10)*10) {
+				case 1:
+					result = result + fmt.Sprintf(" %d минуту", int(minutes))
+					break
+				case 2, 3, 4:
+					result = result + fmt.Sprintf(" %d минуты", int(minutes))
+					break
+				default:
+					result = result + fmt.Sprintf(" %d минут", int(minutes))
+				}
 			}
 		} else {
-			if int(days) == 1 {
+			if int(minutes) == 1 {
 				result = result + " 1 minute"
 			} else {
 				result = result + fmt.Sprintf(" %s minutes", int(minutes))
 			}
 		}
 	}
+
+	if int(seconds) > 0 {
+		if lang == "ru" {
+			if int(seconds) > 10 && int(seconds) < 20 {
+				result = result + fmt.Sprintf(" %d секунд", int(seconds))
+			} else {
+				switch int(seconds - math.Floor(seconds/10)*10) {
+				case 1:
+					result = result + fmt.Sprintf(" %d секунду", int(seconds))
+					break
+				case 2, 3, 4:
+					result = result + fmt.Sprintf(" %d секунды", int(seconds))
+					break
+				default:
+					result = result + fmt.Sprintf(" %d секунд", int(seconds))
+				}
+			}
+		} else {
+			if int(seconds) == 1 {
+				result = result + " 1 second"
+			} else {
+				result = result + fmt.Sprintf(" %s seconds", int(seconds))
+			}
+		}
+	}
+
 	return strings.TrimSpace(result)
 }

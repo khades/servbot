@@ -7,13 +7,17 @@ import (
 
 // SongRequest struct descibes one song request
 type SongRequest struct {
-	User    string        `json:"user"`
-	UserID  string        `json:"userID"`
-	Date    time.Time     `json:"date"`
-	VideoID string        `json:"videoID"`
-	Length  time.Duration `json:"length"`
-	Title   string        `json:"title"`
-	Order   int           `json:"order"`
+	User     string        `json:"user"`
+	UserID   string        `json:"userID"`
+	Date     time.Time     `json:"date"`
+	VideoID  string        `json:"videoID"`
+	Length   time.Duration `json:"length"`
+	Title    string        `json:"title"`
+	Order    int           `json:"order"`
+	Tags     []string      `json:'tags"`
+	Views    int64         `json:'views'`
+	Likes    int64         `json:'likes'`
+	Dislikes int64         `json:'dislikes'`
 }
 
 // ChannelSongRequestSettings struct descibes current settings for songrequest on channel
@@ -23,6 +27,8 @@ type ChannelSongRequestSettings struct {
 	MaxVideoLength     int   `json:"maxVideoLength"`
 	MaxRequestsPerUser int   `json:"maxRequestsPerUser"`
 	VideoViewLimit     int64 `json:"videoViewLimit"`
+	MoreLikes          bool  `json:'moreLikes"`
+	AllowOffline       bool  `json:'allowOffline'`
 }
 
 // SongRequests is type alias to array of songrequests
@@ -62,13 +68,13 @@ func (requests SongRequests) PullOneRequest(videoID *string) (SongRequests, *Son
 	rejectedItem := requests[index]
 	requests = append(requests[:index], requests[index+1:]...)
 	for itemIndex := range requests {
-		if (order < requests[itemIndex].Order) {
+		if order < requests[itemIndex].Order {
 			requests[itemIndex].Order = requests[itemIndex].Order - 1
 
 		}
 	}
 
-	return requests, &rejectedItem 
+	return requests, &rejectedItem
 }
 
 // PullUsersLastRequest removes last video from user and returns new list
@@ -95,7 +101,7 @@ func (requests SongRequests) PullUsersLastRequest(userID *string) (SongRequests,
 }
 
 // BubbleVideoUp prioritises one video
-func (requests SongRequests) BubbleVideoUp(videoID *string) (SongRequests, bool) {
+func (requests SongRequests) BubbleVideoUp(videoID *string, position int) (SongRequests, bool) {
 
 	videoIndex := len(requests)
 
@@ -111,14 +117,24 @@ func (requests SongRequests) BubbleVideoUp(videoID *string) (SongRequests, bool)
 		return requests, false
 	}
 
+	if requests[videoIndex].Order == position {
+		return requests, false
+	}
+
 	for itemIndex := range requests {
-		if requests[itemIndex].Order < requests[videoIndex].Order {
+		// moving order2 request to order4, order 3 and 4 should be upped, its orders are greater than original order, but equals of less than needed order
+		if position >= requests[itemIndex].Order && requests[itemIndex].Order > requests[videoIndex].Order {
+			requests[itemIndex].Order = requests[itemIndex].Order - 1
+		}
+
+		// moving order4 request to order2, order 2 and 3 should be downed, its orders are lesser than original order, but equals of greater than needed order
+		if position <= requests[itemIndex].Order && requests[itemIndex].Order < requests[videoIndex].Order {
 			requests[itemIndex].Order = requests[itemIndex].Order + 1
 		}
 
 	}
 
-	requests[videoIndex].Order = 1
+	requests[videoIndex].Order = position
 
 	return requests, true
 }
@@ -128,4 +144,21 @@ type ChannelSongRequest struct {
 	ChannelID string                     `json:"channelID"`
 	Settings  ChannelSongRequestSettings `json:"settings"`
 	Requests  SongRequests               `json:"requests"`
+}
+
+type SongRequestAddResult struct {
+	Offline           bool
+	PlaylistIsFull    bool
+	AlreadyInPlaylist bool
+	TooManyRequests   bool
+	InvalidLink       bool
+	NothingFound      bool
+	InternalError     bool
+	TooLong           bool
+	TooLittleViews    bool
+	MoreDislikes      bool
+	Success           bool
+	Title             string
+	Length            time.Duration
+	LengthStr         string
 }

@@ -45,10 +45,30 @@ func songrequestsBubbleUp(w http.ResponseWriter, r *http.Request, s *models.HTTP
 		return
 	}
 	found := repos.BubbleUpVideo(channelID, &id)
-	log.Println("IS SHIT FOUND?")
+	log.Println(found)
+}
+
+func songrequestsBubbleUpToSecond(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	id := pat.Param(r, "videoID")
+	if id == "" {
+		writeJSONError(w, "song id is not defined", http.StatusNotFound)
+		return
+	}
+	found := repos.BubbleUpVideoToSecond(channelID, &id)
 	log.Println(found)
 }
 
 func songrequestsEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	websocketEventbusWriter(w, r, eventbus.Songrequest(channelID))
+}
+
+func songrequestsPushSettings(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) { 
+	decoder := json.NewDecoder(r.Body)
+	var request models.ChannelSongRequestSettings
+	err := decoder.Decode(&request)
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+	repos.PushSongRequestSettings(channelID, &request)
 }
