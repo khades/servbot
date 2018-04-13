@@ -43,8 +43,6 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 			return
 		}
 		templateBody := models.TemplateInfoBody{
-			ShowOffline: true,
-			ShowOnline:  true,
 			Template:    template}
 		templateError := repos.SetChannelTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &templateBody)
 		if templateError == nil {

@@ -17,8 +17,8 @@ type ChannelInfo struct {
 	TwitchDJ        TwitchDJ     `json:"twitchDJ"`
 	VkGroupInfo     VkGroupInfo  `json:"vkGroupInfo"`
 	Mods            []string     `json:"mods"`
-	OfflineCommands []string     `json:"offlinecommands"`
-	OnlineCommands  []string     `json:"onlinecommands"`
+	Commands []string     `json:"commands"`
+
 	SubTrain        SubTrain     `json:"subTrain"`
 	SubdayIsActive  bool         `json:"subdayIsActive"`
 	SongRequest     CurrentSong  `json:"songRequest"`
@@ -31,15 +31,12 @@ type CurrentSong struct {
 	User      string `json:"user"`
 	Link      string `json:"link"`
 	Duration  string `json:"duration"`
+	Volume    int `json:"volume"`
 }
 
 // GetCommands Helper Command for mustashe
 func (channelInfo ChannelInfo) GetCommands() string {
-	if channelInfo.StreamStatus.Online == true {
-		return "!" + strings.Join(channelInfo.OnlineCommands, ", !")
-
-	}
-	return "!" + strings.Join(channelInfo.OfflineCommands, ", !")
+	return "!" + strings.Join(channelInfo.Commands, ", !")
 }
 
 // GetIfUserIsMod checks if user exist in internal mod array

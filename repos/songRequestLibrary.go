@@ -3,7 +3,9 @@ package repos
 import (
 	"time"
 
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/models"
 )
 
@@ -24,9 +26,62 @@ func addVideoToLibrary(videoID *string, title *string, duration *time.Duration, 
 		"title":     *title}})
 }
 
-func AddTagToVideo(videoID *string, tag *string) {
-	db.C(videolibraryCollection).Upsert(bson.M{"videoid": *videoID}, bson.M{"$addToSet": bson.M{
-		"tags": *tag}})
-	db.C(songRequestCollectionName).UpdateAll(bson.M{"requests.videoid": *videoID},
-		bson.M{"$addToSet": bson.M{"streamstatus.videoid.$.tags": *tag}})
+func AddTagToVideo(videoID *string, tag string, userID string, user string) []models.TaggedVideoResult {
+	var channels []models.ChannelSongRequest
+	var tagResults []models.TaggedVideoResult
+	var track models.SongRequestLibraryItem
+	db.C(videolibraryCollection).Find(bson.M{"videoid": *videoID, "tags.tag": bson.M{"$ne": tag}}).Apply(mgo.Change{
+		Update: bson.M{"$push": bson.M{
+			"tags": models.TagRecord{User: user, UserID: userID, Tag: tag}}}}, &track)
+	error := db.C(songRequestCollectionName).Find(bson.M{"requests.videoid": *videoID}).All(&channels)
+	if error != nil {
+		return []models.TaggedVideoResult{}
+	}
+	for _, channel := range channels {
+		pull := false
+		if tag == "youtuberestricted" {
+			pull = true
+			tagResults = append(tagResults, models.TaggedVideoResult{
+				Title:                    track.Title,
+				ChannelID:                channel.ChannelID,
+				RemovedYoutubeRestricted: true})
+		}
+		if tag == "twitchrestricted" {
+			pull = true
+			tagResults = append(tagResults, models.TaggedVideoResult{
+				Title:                   track.Title,
+				ChannelID:               channel.ChannelID,
+				RemovedTwitchRestricted: true})
+		}
+		if tag == channel.ChannelID+"-restricted" {
+			pull = true
+			tagResults = append(tagResults, models.TaggedVideoResult{
+				Title:                    track.Title,
+				ChannelID:                channel.ChannelID,
+				RemovedChannelRestricted: true})
+		}
+		if channel.Settings.SkipIfTagged == true {
+			for _, channelTag := range channel.Settings.BannedTags {
+				if tag == channelTag && tag != channel.ChannelID+"-restricted" {
+					tagResults = append(tagResults, models.TaggedVideoResult{
+						Title:                track.Title,
+						ChannelID:            channel.ChannelID,
+						RemovedTagRestricted: true,
+						Tag:                  tag})
+					pull = true
+					break
+				}
+			}
+		}
+		if pull == false {
+			db.C(songRequestCollectionName).Update(bson.M{"channelid": channel.ChannelID, "requests.videoid": *videoID}, bson.M{"$push": bson.M{"requests.$.tags": models.TagRecord{User: user, UserID: userID, Tag: tag}}})
+		} else {
+			newRequests, _ := channel.Requests.PullOneRequest(videoID)
+			putRequests(&channel.ChannelID, newRequests)
+		}
+		eventbus.EventBus.Publish(eventbus.Songrequest(&channel.ChannelID), "update")
+
+	}
+
+	return tagResults
 }

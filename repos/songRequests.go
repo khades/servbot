@@ -95,12 +95,26 @@ func GetTopRequest(channelID *string, lang string) models.CurrentSong {
 				Title:     request.Title,
 				User:      request.User,
 				Link:      "https://youtu.be/" + request.VideoID,
-				Duration:  l10n.HumanizeDuration(request.Length, lang)}
+				Duration:  l10n.HumanizeDuration(request.Length, lang),
+				Volume:    songRequestInfo.Settings.Volume}
 			break
 		}
 	}
 	return models.CurrentSong{
 		IsPlaying: false}
+}
+
+func SetSongRequestVolume(channelID *string, volume int) {
+	db.C(songRequestCollectionName).Upsert(
+		bson.M{
+			"channelid": *channelID}, bson.M{"$set": bson.M{"settings.volume": volume}})
+	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "volume:"+strconv.Itoa(volume))
+}
+
+func SetSongRequestVolumeNoEvent(channelID *string, volume int) {
+	db.C(songRequestCollectionName).Upsert(
+		bson.M{
+			"channelid": *channelID}, bson.M{"$set": bson.M{"settings.volume": volume}})
 }
 
 // PushSongRequest pushes songrequest for specified channel
@@ -115,32 +129,34 @@ func PushSongRequestSettings(channelID *string, settings *models.ChannelSongRequ
 	db.C(songRequestCollectionName).Upsert(
 		bson.M{
 			"channelid": *channelID}, bson.M{"$set": bson.M{"settings": *settings}})
+
 }
 
 // AddSongRequest processes youtube video link before pushing it to songrequest database
 func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *string, videoID *string) models.SongRequestAddResult {
-
+	// logger := logrus.WithFields(logrus.Fields{
+	// 	"package": "repos",
+	// 	"feature": "songrequests",
+	// 	"action":  "AddSongRequest"})
 	songRequestInfo := GetSongRequest(channelID)
-	//channelInfo, channelInfoError := GetChannelInfo(channelID)
+	channelInfo, channelInfoError := GetChannelInfo(channelID)
 
-	// if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfo.StreamStatus.Online == false) {
-	// 	return models.SongRequestAddResult{Offline: true}
-	// }
+	if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfo.StreamStatus.Online == false) {
+		return models.SongRequestAddResult{Offline: true}
+	}
 	if len(songRequestInfo.Requests) >= songRequestInfo.Settings.PlaylistLength {
 		return models.SongRequestAddResult{PlaylistIsFull: true}
 	}
 	parsedVideoID := parseYoutubeLink(*videoID)
 
-	isInPlaylist := false
 	for _, request := range songRequestInfo.Requests {
 		if request.VideoID == parsedVideoID {
-			isInPlaylist = true
+			return models.SongRequestAddResult{AlreadyInPlaylist: true, Title: request.Title, Length: request.Length}
+
 			break
 		}
 	}
-	if isInPlaylist == true {
-		return models.SongRequestAddResult{AlreadyInPlaylist: true}
-	}
+
 	userRequestsCount := 0
 	for _, request := range songRequestInfo.Requests {
 		if request.UserID == *userID {
@@ -157,6 +173,46 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	}
 	var songRequest models.SongRequest
 	libraryItem, libraryError := getVideo(&parsedVideoID)
+	if libraryError == nil {
+		yTrestricted := false
+		twitchRestricted := false
+		channelRestricted := false
+		tagRestricted := false
+		bannedTag := ""
+		for _, tag := range libraryItem.Tags {
+			if tag.Tag == "youtuberestricted" {
+				yTrestricted = true
+				break
+			}
+			if tag.Tag == "twitchrestricted" {
+				twitchRestricted = true
+				break
+			}
+			if tag.Tag == *channelID+"-restricted" {
+				channelRestricted = true
+				break
+			}
+			for _, channelTag := range songRequestInfo.Settings.BannedTags {
+				if tag.Tag == channelTag && tag.Tag != *channelID+"-restricted" {
+					bannedTag = channelTag
+					tagRestricted = true
+					break
+				}
+			}
+		}
+		if yTrestricted == true {
+			return models.SongRequestAddResult{YoutubeRestricted: true, Title: libraryItem.Title}
+		}
+		if tagRestricted == true {
+			return models.SongRequestAddResult{TagRestricted: true, Title: libraryItem.Title, Tag: bannedTag}
+		}
+		if twitchRestricted == true {
+			return models.SongRequestAddResult{TwitchRestricted: true, Title: libraryItem.Title}
+		}
+		if channelRestricted == true {
+			return models.SongRequestAddResult{ChannelRestricted: true, Title: libraryItem.Title}
+		}
+	}
 	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
 		video, videoError := getYoutubeVideoInfo(&parsedVideoID)
 		if videoError != nil {
@@ -190,6 +246,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 			Dislikes: dislikes,
 			Views:    video.Items[0].Statistics.GetViewCount()}
 	} else {
+
 		songRequest = models.SongRequest{
 			User:     *user,
 			UserID:   *userID,
@@ -236,6 +293,10 @@ func PullSongRequest(channelID *string, videoID *string) {
 	}
 }
 
+// func SetSongRequestRestricted(channelID *string, videoID *string) {
+// 	AddTagToVideo(videoID, "youtuberestricted",)
+// 	PullSongRequest(channelID, videoID)
+// }
 // // PullUserSongRequest removes specified user request, specified by youtube video ID on specified channel
 // func PullUserSongRequest(channelID *string, videoID *string, userID *string) {
 // 	db.C(songRequestCollectionName).Update(
@@ -253,9 +314,10 @@ func PullLastUserSongRequest(channelID *string, userID *string) (*models.SongReq
 	newRequests, pulledItem := songRequestInfo.Requests.PullUsersLastRequest(userID)
 
 	if pulledItem != nil {
-		return pulledItem, true
+
 		putRequests(channelID, newRequests)
 		eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
+		return pulledItem, true
 	}
 	return nil, false
 

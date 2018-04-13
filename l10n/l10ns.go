@@ -2,7 +2,6 @@ package l10n
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strings"
 	"time"
@@ -10,62 +9,128 @@ import (
 
 // Item  stores all l10n strings used by bot
 type Item struct {
-	AliasCreationSuccess           string
-	CantMuteModerator              string
-	CommandCyclingIsForbidden      string
-	EmptyCommandNameIsForbidden    string
-	ReservedCommandNameIsForbidden string
-	CommandCreationSuccess         string
-	InvalidCommandTemplate         string
-	SubdayEndSuccess               string
-	SubdayEndNothingToClose        string
-	SubdayCreationSuccess          string
-	SubdayCreationGeneralError     string
-	SubdayCreationAlreadyExists    string
-	SubdayCreationPrefix           string
-	SubdayVoteNoActiveSubday       string
-	SubdayVoteYouReNotSub          string
-	GameHistoryActivePrefix        string
-	NotAFollower                   string
+	AliasCreationSuccess               string
+	CantMuteModerator                  string
+	CommandCyclingIsForbidden          string
+	EmptyCommandNameIsForbidden        string
+	ReservedCommandNameIsForbidden     string
+	CommandCreationSuccess             string
+	InvalidCommandTemplate             string
+	SubdayEndSuccess                   string
+	SubdayEndNothingToClose            string
+	SubdayCreationSuccess              string
+	SubdayCreationGeneralError         string
+	SubdayCreationAlreadyExists        string
+	SubdayCreationPrefix               string
+	SubdayVoteNoActiveSubday           string
+	SubdayVoteYouReNotSub              string
+	GameHistoryActivePrefix            string
+	NotAFollower                       string
+	InvalidValue                       string
+	VolumeChangeInvalidValue           string
+	VolumeChangeSuccess                string
+	SongRequestYoutubeRestricted       string
+	SongRequestTwitchRestricted        string
+	SongRequestChannelRestricted       string
+	SongRequestTagRestricted           string
+	SongRequestOffline                 string
+	SongRequestPlaylistIsFull          string
+	SongRequestAlreadyInPlaylist       string
+	SongRequestTooManyRequests         string
+	SongRequestInvalidLink             string
+	SongRequestNothingFound            string
+	SongRequestInternalError           string
+	SongRequestTooLong                 string
+	SongRequestTooLittleViews          string
+	SongRequestMoreDislikes            string
+	SongRequestSuccess                 string
+	SongRequestPulledYoutubeRestricted string
+	SongRequestPulledTwitchRestricted  string
+	SongRequestPulledChannelRestricted string
+	SongRequestPulledTagRestricted     string
 }
 
 var l10n = map[string]Item{
 	"en": Item{
-		AliasCreationSuccess:           "Alias creation: Success",
-		CantMuteModerator:              "Can't mute moderator",
-		CommandCyclingIsForbidden:      "Command creation: Command cycling is now allowed",
-		EmptyCommandNameIsForbidden:    "Command creation: Empty command name is now allowed",
-		ReservedCommandNameIsForbidden: "Command creation: Reserved command name usage is now allowed",
-		CommandCreationSuccess:         "Command creation: Success",
-		InvalidCommandTemplate:         "Command creation: Invalid Template",
-		SubdayEndSuccess:               "Subday end: Success",
-		SubdayEndNothingToClose:        "Subday end: Nothing to close",
-		SubdayCreationSuccess:          "Subday creation: Success",
-		SubdayCreationGeneralError:     "Subday creation: General error",
-		SubdayCreationAlreadyExists:    "Subday creation: Active subday already exists",
-		SubdayCreationPrefix:           "Subday, created at ",
-		SubdayVoteNoActiveSubday:       "Subday vote: No active subdays",
-		SubdayVoteYouReNotSub:          "Subday vote: You're not subscriber",
-		GameHistoryActivePrefix:        "NOW",
-		NotAFollower:                   "Not a follower"},
+		AliasCreationSuccess:               "Alias creation: Success",
+		CantMuteModerator:                  "Can't mute moderator",
+		CommandCyclingIsForbidden:          "Command creation: Command cycling is now allowed",
+		EmptyCommandNameIsForbidden:        "Command creation: Empty command name is now allowed",
+		ReservedCommandNameIsForbidden:     "Command creation: Reserved command name usage is now allowed",
+		CommandCreationSuccess:             "Command creation: Success",
+		InvalidCommandTemplate:             "Command creation: Invalid Template",
+		SubdayEndSuccess:                   "Subday end: Success",
+		SubdayEndNothingToClose:            "Subday end: Nothing to close",
+		SubdayCreationSuccess:              "Subday creation: Success",
+		SubdayCreationGeneralError:         "Subday creation: General error",
+		SubdayCreationAlreadyExists:        "Subday creation: Active subday already exists",
+		SubdayCreationPrefix:               "Subday, created at ",
+		SubdayVoteNoActiveSubday:           "Subday vote: No active subdays",
+		SubdayVoteYouReNotSub:              "Subday vote: You're not subscriber",
+		GameHistoryActivePrefix:            "NOW",
+		NotAFollower:                       "Not a follower",
+		InvalidValue:                       "Invalid Value",
+		VolumeChangeInvalidValue:           "Song Request Volume Change: Invalid volume",
+		VolumeChangeSuccess:                "Song Request Volume Change: Success",
+		SongRequestYoutubeRestricted:       "Song Request: Playback of track \"%s\" is restricted by YouTube",
+		SongRequestTwitchRestricted:        "Song Request: Playback of track \"%s\" is restricted by TOS of Twitch",
+		SongRequestChannelRestricted:       "Song Request: Playback of track \"%s\" is restricted on that channel",
+		SongRequestTagRestricted:           "Song Request: Playback of track \"%s\" is restricted on that channel due to tag \"%s\"",
+		SongRequestOffline:                 "Song Request: Stream is offline",
+		SongRequestPlaylistIsFull:          "Song Request: Playlist is full",
+		SongRequestAlreadyInPlaylist:       "Song Request: Track \"%s\" is already in the playlist",
+		SongRequestTooManyRequests:         "Song Request: You have too many requests",
+		SongRequestInvalidLink:             "Song Request: Invalid song request link",
+		SongRequestNothingFound:            "Song Request: Nothing found by that link",
+		SongRequestInternalError:           "Song Request: Internal error, try again later or contact Bot administrator",
+		SongRequestTooLong:                 "Song Request: Track \"%s\" is too long",
+		SongRequestTooLittleViews:          "Song Request: Track \"%s\" has not enough views",
+		SongRequestMoreDislikes:            "Song Request: Track \"%s\" has more dislikes than likes",
+		SongRequestSuccess:                 "Song Request: Track \"%s\", duration %s has been added to playlist",
+		SongRequestPulledTwitchRestricted:  "Song Request: Track \"%s\" was pulled from playlist due to Twitch TOS restrictions",
+		SongRequestPulledYoutubeRestricted: "Song Request: Track \"%s\" was pulled from playlist due to YouTube restrictions",
+		SongRequestPulledChannelRestricted: "Song Request: Track \"%s\" was pulled from playlist and restrictedon that channel",
+		SongRequestPulledTagRestricted:     "Song Request: Track \"%s\" was pulled from playlist due to adding restricted tag \"%s\""},
 	"ru": Item{
-		AliasCreationSuccess:           "Создание алиaса: Успешно",
-		CantMuteModerator:              "Модератора нельзя затаймаутить",
-		CommandCyclingIsForbidden:      "Создание команды: Запрещено зацикливать команды",
-		EmptyCommandNameIsForbidden:    "Создание команды: Запрещено создавать пустые команды",
-		ReservedCommandNameIsForbidden: "Создание команды: Запрещено создавать команды для зарезервированных слов",
-		CommandCreationSuccess:         "Создание команды: Успешно",
-		InvalidCommandTemplate:         "Создание команды: Невалидный шаблон для команды",
-		SubdayEndSuccess:               "Закрытие сабдея: Успешно",
-		SubdayEndNothingToClose:        "Закрытие сабдея: Нечего закрывать",
-		SubdayCreationSuccess:          "Создание сабдея: Успешно",
-		SubdayCreationGeneralError:     "Создание сабдея: Неизвестная ошибка",
-		SubdayCreationAlreadyExists:    "Создание сабдея: Существует незакрытый сабдей",
-		SubdayCreationPrefix:           "Сабдей, созданый ",
-		SubdayVoteNoActiveSubday:       "Голосование на сабдее: Нет открытых сабдеев",
-		SubdayVoteYouReNotSub:          "Голосование на сабдее: Вы не подписчик",
-		GameHistoryActivePrefix:        "CЕЙЧАС",
-		NotAFollower:                   "Не фолловер"}}
+		AliasCreationSuccess:               "Создание алиaса: Успешно",
+		CantMuteModerator:                  "Модератора нельзя затаймаутить",
+		CommandCyclingIsForbidden:          "Создание команды: Запрещено зацикливать команды",
+		EmptyCommandNameIsForbidden:        "Создание команды: Запрещено создавать пустые команды",
+		ReservedCommandNameIsForbidden:     "Создание команды: Запрещено создавать команды для зарезервированных слов",
+		CommandCreationSuccess:             "Создание команды: Успешно",
+		InvalidCommandTemplate:             "Создание команды: Невалидный шаблон для команды",
+		SubdayEndSuccess:                   "Закрытие сабдея: Успешно",
+		SubdayEndNothingToClose:            "Закрытие сабдея: Нечего закрывать",
+		SubdayCreationSuccess:              "Создание сабдея: Успешно",
+		SubdayCreationGeneralError:         "Создание сабдея: Неизвестная ошибка",
+		SubdayCreationAlreadyExists:        "Создание сабдея: Существует незакрытый сабдей",
+		SubdayCreationPrefix:               "Сабдей, созданый ",
+		SubdayVoteNoActiveSubday:           "Голосование на сабдее: Нет открытых сабдеев",
+		SubdayVoteYouReNotSub:              "Голосование на сабдее: Вы не подписчик",
+		GameHistoryActivePrefix:            "CЕЙЧАС",
+		NotAFollower:                       "Не фолловер",
+		InvalidValue:                       "Неверное значение",
+		VolumeChangeInvalidValue:           "Смена громкости заказа песен: Неверное значение",
+		VolumeChangeSuccess:                "Смена громкости заказа песен: Успешно",
+		SongRequestYoutubeRestricted:       "Заказ песен: Воспроизведение трека \"%s\" запрещено сервисом YouTube",
+		SongRequestTwitchRestricted:        "Заказ песен: Воспроизведение трека \"%s\" запрещено сервисом Twitch",
+		SongRequestChannelRestricted:       "Заказ песен: Воспроизведение трека  \"%s\" запрещено на этом канале",
+		SongRequestTagRestricted:           "Заказ песен: Воспроизведение трека  \"%s\" запрещено на этом канале изза тега \"%s\"",
+		SongRequestOffline:                 "Заказ песен: Трансляция не запущена",
+		SongRequestPlaylistIsFull:          "Заказ песен: Список заказов полон",
+		SongRequestAlreadyInPlaylist:       "Заказ песен: Трек \"%s\" уже в списке заказов",
+		SongRequestTooManyRequests:         "Заказ песен: Вы делаете слишком много заказов",
+		SongRequestInvalidLink:             "Заказ песен: Неверная ссылка",
+		SongRequestNothingFound:            "Заказ песен: По ссылке ничего не найдено",
+		SongRequestInternalError:           "Заказ песен: Внутренняя ошибка, попробуйте позже или свяжитесь с Администратором Бота",
+		SongRequestTooLong:                 "Заказ песен: Трек \"%s\" слишком длинный",
+		SongRequestTooLittleViews:          "Заказ песен: Трек \"%s\" не имеет достаточного количества просмотров",
+		SongRequestMoreDislikes:            "Заказ песен: Трек \"%s\" имеет больше дизлайков чем лайков",
+		SongRequestSuccess:                 "Заказ песен: Трек \"%s\" длительностью %s добавлен в список заказов",
+		SongRequestPulledTwitchRestricted:  "Заказ песен: Трек \"%s\" удалён из списка заказов изза ограничений сервиса Twitch",
+		SongRequestPulledYoutubeRestricted: "Заказ песен: Трек \"%s\" удалён из списка заказов изза ограничений сервиса YouTube",
+		SongRequestPulledChannelRestricted: "Заказ песен: Трек \"%s\" удалён из списка заказов и запрещён на этом канале",
+		SongRequestPulledTagRestricted:     "Заказ песен: Трек \"%s\" удалён из списка заказов изза добавления запрещённого тега \"%s\""}}
 
 // GetL10n returns l10n object for specified lang
 func GetL10n(lang string) *Item {
@@ -84,9 +149,7 @@ func HumanizeDuration(duration time.Duration, lang string) string {
 	result := ""
 
 	years := math.Floor(duration.Hours() / (24 * 365))
-	log.Println(math.Floor(duration.Hours() / (24 * 365)))
-	log.Println(years)
-	log.Println(years - math.Floor(years/10)*10)
+
 	days := math.Floor(duration.Hours()/24) - years*365
 	hours := math.Floor(duration.Hours()) - days*24 - years*365*24
 	minutes := float64(int(duration.Minutes() - math.Floor(duration.Minutes()/60)*60))

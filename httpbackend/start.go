@@ -99,5 +99,11 @@ func Start() {
 	mux.HandleFunc(pat.Post("/api/channel/:channel/songrequests/settings"), withMod(songrequestsPushSettings))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests/settings"), corsEnabled(options))
 
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/setvolume/:volume"), withMod(songrequestSetVolume))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests/setvolume/:volume"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/:videoID/settag/:tag"), withMod(songrequestSetTag))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests/:videoID/settag/:tag"), corsEnabled(options))
+
 	http.ListenAndServe("localhost:8000", mux)
 }

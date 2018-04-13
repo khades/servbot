@@ -26,11 +26,7 @@ func template(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 		return
 	}
 
-	result, error := repos.GetChannelTemplateWithHistory(channelID, &commandName)
-	if error != nil && error.Error() == "not found" {
-		result.ShowOffline = true
-		result.ShowOnline = true
-	}
+	result, _ := repos.GetChannelTemplateWithHistory(channelID, &commandName)
 
 	result.ChannelID = *channelID
 	result.CommandName = commandName

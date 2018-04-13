@@ -14,20 +14,24 @@ func Vote(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chat
 	if utf8.RuneCountInString(chatMessage.MessageBody) < 2 {
 		return
 	}
+
 	game := chatMessage.MessageBody[1:]
 	subday, subdayError := repos.GetLastActiveSubday(&chatMessage.ChannelID)
 	if subdayError != nil {
-		ircClient.SendPublic(&models.OutgoingMessage{
+
+		ircClient.SendDebounced(models.OutgoingDebouncedMessage{Message: models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayVoteNoActiveSubday,
-			User:    chatMessage.User})
+			User:    chatMessage.User},
+			Command: "%vote"})
 		return
 	}
 	if subday.SubsOnly == true && chatMessage.IsSub == false {
-		ircClient.SendPublic(&models.OutgoingMessage{
+		ircClient.SendDebounced(models.OutgoingDebouncedMessage{Message: models.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayVoteYouReNotSub,
-			User:    chatMessage.User})
+			User:    chatMessage.User},
+			Command: "%vote"})
 		return
 	}
 	repos.VoteForSubday(&chatMessage.User, &chatMessage.UserID, &subday.ID, &game)

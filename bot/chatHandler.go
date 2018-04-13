@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -141,7 +140,6 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		client.Write("CAP REQ twitch.tv/membership")
 		client.Write("CAP REQ twitch.tv/commands")
 		activeChannels, _ := repos.GetActiveChannels()
-		log.Println(activeChannels)
 		for _, value := range activeChannels {
 			client.Write("JOIN #" + value.Channel)
 		}

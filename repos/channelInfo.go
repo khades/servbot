@@ -233,32 +233,25 @@ func PushCommandsForChannel(channelID *string) {
 	var commandsList []string
 	channelInfo, channelError := GetChannelInfo(channelID)
 	dbCommands, commandsError := GetChannelActiveTemplates(channelID)
-	var offlineCommands []string
-	var onlineCommands []string
+
+
 	if commandsError == nil {
 		for _, value := range dbCommands {
-			if value.ShowOffline == true {
-				offlineCommands = append(offlineCommands, value.CommandName)
-			}
-			if value.ShowOnline == true {
-				onlineCommands = append(onlineCommands, value.CommandName)
-			}
+		
 			commandsList = append(commandsList, value.CommandName)
 		}
 	}
 	if channelError == nil {
-		channelInfo.OfflineCommands = offlineCommands
-		channelInfo.OnlineCommands = onlineCommands
+		channelInfo.Commands =  commandsList
 	} else {
 		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{
 			ChannelID:       *channelID,
-			OnlineCommands:  onlineCommands,
-			OfflineCommands: offlineCommands,
+			Commands:  commandsList,
+		
 		})
 	}
 	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{
-		"onlinecommands":  onlineCommands,
-		"offlinecommands": offlineCommands}})
+		"commands":  commandsList}})
 }
 
 func updateGamesByID(gameID *string, game *string) {

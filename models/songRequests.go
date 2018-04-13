@@ -14,21 +14,30 @@ type SongRequest struct {
 	Length   time.Duration `json:"length"`
 	Title    string        `json:"title"`
 	Order    int           `json:"order"`
-	Tags     []string      `json:'tags"`
-	Views    int64         `json:'views'`
-	Likes    int64         `json:'likes'`
-	Dislikes int64         `json:'dislikes'`
+	Tags     []TagRecord   `json:"tags"`
+	Views    int64         `json:"views"`
+	Likes    int64         `json:"likes"`
+	Dislikes int64         `json:"dislikes"`
 }
 
 // ChannelSongRequestSettings struct descibes current settings for songrequest on channel
 type ChannelSongRequestSettings struct {
-	OnlySubs           bool  `json:"onlySubs"`
-	PlaylistLength     int   `json:"playlistLength"`
-	MaxVideoLength     int   `json:"maxVideoLength"`
-	MaxRequestsPerUser int   `json:"maxRequestsPerUser"`
-	VideoViewLimit     int64 `json:"videoViewLimit"`
-	MoreLikes          bool  `json:'moreLikes"`
-	AllowOffline       bool  `json:'allowOffline'`
+	OnlySubs           bool     `json:"onlySubs"`
+	PlaylistLength     int      `json:"playlistLength"`
+	MaxVideoLength     int      `json:"maxVideoLength"`
+	MaxRequestsPerUser int      `json:"maxRequestsPerUser"`
+	VideoViewLimit     int64    `json:"videoViewLimit"`
+	MoreLikes          bool     `json:"moreLikes"`
+	AllowOffline       bool     `json:"allowOffline"`
+	Volume             int      `json:"volume"`
+	BannedTags         []string `json:"bannedTags"`
+	SkipIfTagged       bool     `json:"skipIfTagged"`
+}
+
+type TagRecord struct {
+	Tag    string `json:"tag"`
+	User   string `json:"user"`
+	UserID string `json:"userID"`
 }
 
 // SongRequests is type alias to array of songrequests
@@ -146,7 +155,23 @@ type ChannelSongRequest struct {
 	Requests  SongRequests               `json:"requests"`
 }
 
+type TaggedVideoResult struct {
+	User                     string
+	Length                   time.Duration
+	Title                    string
+	ChannelID                string
+	RemovedYoutubeRestricted bool
+	RemovedTwitchRestricted  bool
+	RemovedChannelRestricted bool
+	RemovedTagRestricted     bool
+	Tag                      string
+}
+
 type SongRequestAddResult struct {
+	YoutubeRestricted bool
+	TwitchRestricted  bool
+	ChannelRestricted bool
+	TagRestricted     bool
 	Offline           bool
 	PlaylistIsFull    bool
 	AlreadyInPlaylist bool
@@ -161,4 +186,5 @@ type SongRequestAddResult struct {
 	Title             string
 	Length            time.Duration
 	LengthStr         string
+	Tag               string
 }

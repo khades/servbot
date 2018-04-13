@@ -11,15 +11,13 @@ type TemplateInfo struct {
 
 // TemplateInfoBody describes template settings
 type TemplateInfoBody struct {
-	ShowOnline        bool                      `json:"showOnline"`
-	ShowOffline       bool                      `json:"showOffline"`
-	PreventDebounce   bool                      `json:"preventDebounce"`
-	PreventRedirect   bool                      `json:"preventRedirect"`
-	OnlyPrivate       bool                      `json:"onlyPrivate"`
+//	PreventDebounce   bool                      `json:"preventDebounce"`
+//	PreventRedirect   bool                      `json:"preventRedirect"`
+
 	AliasTo           string                    `json:"aliasTo"`
 	Template          string                    `json:"template"`
-	IntegerRandomizer TemplateIntegerRandomizer `json:"integerRandomizer"`
-	StringRandomizer  TemplateStringRandomizer  `json:"stringRandomizer"`
+//	IntegerRandomizer TemplateIntegerRandomizer `json:"integerRandomizer"`
+//	StringRandomizer  TemplateStringRandomizer  `json:"stringRandomizer"`
 }
 
 // TemplateIntegerRandomizer describes template integer randomizator settings
