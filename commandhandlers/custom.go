@@ -136,11 +136,15 @@ func (channelInfo *templateExtendedObject) AddSongRequest() string {
 }
 
 func (channelInfo *templateExtendedObject) SetSongRequestVolume() string {
-	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
+	if channelInfo.IsMod == false {
+		return l10n.GetL10n(channelInfo.Lang).SongRequestNotAModerator
+	}
+	channelInfo.PreventDebounce = true
+
 	volume, volumeError := strconv.ParseInt(channelInfo.CommandBody, 10, 23)
 	if volumeError != nil {
-		return volumeError.Error()
+		return l10n.GetL10n(channelInfo.Lang).VolumeChangeInvalidValue
 	}
 	if volume > 100 || volume < 0 {
 		return l10n.GetL10n(channelInfo.Lang).VolumeChangeInvalidValue
@@ -149,12 +153,15 @@ func (channelInfo *templateExtendedObject) SetSongRequestVolume() string {
 	return l10n.GetL10n(channelInfo.Lang).VolumeChangeSuccess
 }
 
-func (channelInfo *templateExtendedObject) PullSongRequest() SongPullResult {
+func (channelInfo *templateExtendedObject) PullSongRequest() string {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
+
 	pulledVideo, pulled := repos.PullLastUserSongRequest(&channelInfo.ChannelID, &channelInfo.UserID)
-	return SongPullResult{
-		Success: pulled, PulledVideo: *pulledVideo}
+	if pulled == true {
+		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulled, pulledVideo.Title)
+	}
+	return l10n.GetL10n(channelInfo.Lang).SongRequestNoRequests
 }
 
 // custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user

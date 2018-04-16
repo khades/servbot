@@ -48,6 +48,9 @@ type Item struct {
 	SongRequestPulledTwitchRestricted  string
 	SongRequestPulledChannelRestricted string
 	SongRequestPulledTagRestricted     string
+	SongRequestPulled                  string
+	SongRequestNoRequests              string
+	SongRequestNotAModerator           string
 }
 
 var l10n = map[string]Item{
@@ -90,7 +93,10 @@ var l10n = map[string]Item{
 		SongRequestPulledTwitchRestricted:  "Song Request: Track \"%s\" was pulled from playlist due to Twitch TOS restrictions",
 		SongRequestPulledYoutubeRestricted: "Song Request: Track \"%s\" was pulled from playlist due to YouTube restrictions",
 		SongRequestPulledChannelRestricted: "Song Request: Track \"%s\" was pulled from playlist and restrictedon that channel",
-		SongRequestPulledTagRestricted:     "Song Request: Track \"%s\" was pulled from playlist due to adding restricted tag \"%s\""},
+		SongRequestPulledTagRestricted:     "Song Request: Track \"%s\" was pulled from playlist due to adding restricted tag \"%s\"",
+		SongRequestPulled:                  "Song Request: Track \"%s\" was pulled from playlist",
+		SongRequestNoRequests:              "Song Request: Nothing to remove",
+		SongRequestNotAModerator:           "Song request: You're not a moderator"},
 	"ru": Item{
 		AliasCreationSuccess:               "Создание алиaса: Успешно",
 		CantMuteModerator:                  "Модератора нельзя затаймаутить",
@@ -130,7 +136,10 @@ var l10n = map[string]Item{
 		SongRequestPulledTwitchRestricted:  "Заказ песен: Трек \"%s\" удалён из списка заказов изза ограничений сервиса Twitch",
 		SongRequestPulledYoutubeRestricted: "Заказ песен: Трек \"%s\" удалён из списка заказов изза ограничений сервиса YouTube",
 		SongRequestPulledChannelRestricted: "Заказ песен: Трек \"%s\" удалён из списка заказов и запрещён на этом канале",
-		SongRequestPulledTagRestricted:     "Заказ песен: Трек \"%s\" удалён из списка заказов изза добавления запрещённого тега \"%s\""}}
+		SongRequestPulledTagRestricted:     "Заказ песен: Трек \"%s\" удалён из списка заказов изза добавления запрещённого тега \"%s\"",
+		SongRequestPulled:                  "Заказ песен: Трек \"%s\" удалён из списка заказов",
+		SongRequestNoRequests:              "Заказ песен: Нечего удалять",
+		SongRequestNotAModerator:           "Заказ песен: Вы не модератор"}}
 
 // GetL10n returns l10n object for specified lang
 func GetL10n(lang string) *Item {

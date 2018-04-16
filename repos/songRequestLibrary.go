@@ -27,15 +27,17 @@ func getBannedTracksCountForChannel(channelID *string) int {
 		count, _ := db.C(videolibraryCollection).Find(bson.M{"tags.tag": *channelID + "-restricted"}).Count()
 		videolibraryBannedCountPerChannel[*channelID] = count
 		return count
-	} else {
+	} 
 		return bannedVideos
-	}
+	
 }
+
 func getVideo(videoID *string) (*models.SongRequestLibraryItem, error) {
 	var result models.SongRequestLibraryItem
 	err := db.C(videolibraryCollection).Find(bson.M{"videoid": *videoID}).One(&result)
 	return &result, err
 }
+
 func addVideoToLibrary(videoID *string, title *string, duration *time.Duration, views int64, likes int64, dislikes int64) {
 
 	changeInfo, err := db.C(videolibraryCollection).Upsert(bson.M{"videoid": *videoID}, bson.M{"$set": bson.M{

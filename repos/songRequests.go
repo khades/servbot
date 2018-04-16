@@ -33,7 +33,6 @@ func parseYoutubeLink(input string) string {
 
 	if utf8.RuneCountInString(input) == 11 {
 		return input
-
 	}
 	if strings.Contains(input, "youtube.com/watch?") {
 		result := ""
@@ -96,7 +95,8 @@ func GetTopRequest(channelID *string, lang string) models.CurrentSong {
 				User:      request.User,
 				Link:      "https://youtu.be/" + request.VideoID,
 				Duration:  l10n.HumanizeDuration(request.Length, lang),
-				Volume:    songRequestInfo.Settings.Volume}
+				Volume:    songRequestInfo.Settings.Volume,
+				Count:     len(songRequestInfo.Requests)}
 			break
 		}
 	}
@@ -153,7 +153,6 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		if request.VideoID == parsedVideoID {
 			return models.SongRequestAddResult{AlreadyInPlaylist: true, Title: request.Title, Length: request.Length}
 
-			break
 		}
 	}
 
