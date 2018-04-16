@@ -2,6 +2,7 @@ package commandhandlers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -38,6 +39,7 @@ type templateExtendedObject struct {
 	CommandBody            string
 	CommandBodyIsEmpty     bool
 	PreventDebounce        bool
+	PreventRedirect        bool
 }
 type SongPullResult struct {
 	Success     bool
@@ -48,8 +50,9 @@ type FollowerDuration struct {
 	FollowerDuration string
 }
 
-func (channelInfo templateExtendedObject) FollowerInfo() FollowerDuration {
+func (channelInfo *templateExtendedObject) FollowerInfo() FollowerDuration {
 	channelInfo.PreventDebounce = true
+	channelInfo.PreventRedirect = true
 	isFollower, dur := repos.GetIfFollowerToChannel(&channelInfo.ChannelID, &channelInfo.UserID)
 	if isFollower == true {
 		return FollowerDuration{true, l10n.HumanizeDuration(time.Now().Sub(dur), channelInfo.Lang)}
@@ -62,9 +65,9 @@ func (channelInfo templateExtendedObject) CurrentSong() models.CurrentSong {
 	return repos.GetTopRequest(&channelInfo.ChannelID, channelInfo.Lang)
 }
 
-func (channelInfo templateExtendedObject) AddSongRequest() string {
+func (channelInfo *templateExtendedObject) AddSongRequest() string {
 	channelInfo.PreventDebounce = true
-
+	channelInfo.PreventRedirect = true
 	result := repos.AddSongRequest(&channelInfo.User, channelInfo.IsSub, &channelInfo.UserID, &channelInfo.ChannelID, &channelInfo.CommandBody)
 	if result.Success == true {
 		result.LengthStr = l10n.HumanizeDuration(result.Length, channelInfo.Lang)
@@ -85,7 +88,7 @@ func (channelInfo templateExtendedObject) AddSongRequest() string {
 	if result.TagRestricted == true {
 		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestTagRestricted, result.Title, result.Tag)
 	}
-	
+
 	if result.Offline == true {
 		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestOffline)
 	}
@@ -132,9 +135,9 @@ func (channelInfo templateExtendedObject) AddSongRequest() string {
 	return l10n.GetL10n(channelInfo.Lang).SongRequestInternalError
 }
 
-func (channelInfo templateExtendedObject) SetSongRequestVolume() string {
+func (channelInfo *templateExtendedObject) SetSongRequestVolume() string {
 	channelInfo.PreventDebounce = true
-
+	channelInfo.PreventRedirect = true
 	volume, volumeError := strconv.ParseInt(channelInfo.CommandBody, 10, 23)
 	if volumeError != nil {
 		return volumeError.Error()
@@ -146,9 +149,9 @@ func (channelInfo templateExtendedObject) SetSongRequestVolume() string {
 	return l10n.GetL10n(channelInfo.Lang).VolumeChangeSuccess
 }
 
-func (channelInfo templateExtendedObject) PullSongRequest() SongPullResult {
+func (channelInfo *templateExtendedObject) PullSongRequest() SongPullResult {
 	channelInfo.PreventDebounce = true
-
+	channelInfo.PreventRedirect = true
 	pulledVideo, pulled := repos.PullLastUserSongRequest(&channelInfo.ChannelID, &channelInfo.UserID)
 	return SongPullResult{
 		Success: pulled, PulledVideo: *pulledVideo}
@@ -219,8 +222,10 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 		return
 	}
 	redirectTo := chatMessage.User
+	log.Println(templateObject.PreventRedirect)
+	log.Println(templateObject.PreventDebounce)
 	//if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false {
-	if chatCommand.Body != "" {
+	if templateObject.PreventRedirect == false && chatCommand.Body != "" {
 		if strings.HasPrefix(chatCommand.Body, "@") {
 			redirectTo = chatCommand.Body[1:]
 		} else {

@@ -2,13 +2,8 @@ package httpbackend
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-
-	"github.com/khades/servbot/bot"
-	"github.com/khades/servbot/l10n"
 
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/models"
@@ -77,56 +72,6 @@ func songrequestsPushSettings(w http.ResponseWriter, r *http.Request, s *models.
 		return
 	}
 	repos.PushSongRequestSettings(channelID, &request)
-}
-func songrequestSetTag(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	videoID := pat.Param(r, "videoID")
-	if videoID == "" {
-		writeJSONError(w, "Invalid videoID", http.StatusUnprocessableEntity)
-		return
-	}
-	tag := pat.Param(r, "tag")
-	if tag == "" {
-		writeJSONError(w, "Invalid tag", http.StatusUnprocessableEntity)
-		return
-	}
-	if tag == "youtuberestricted" && *channelID != s.UserID {
-		writeJSONError(w, "That tag is restricted to channel owner", http.StatusUnprocessableEntity)
-		return
-	}
-
-	results := repos.AddTagToVideo(&videoID, tag, s.UserID, strings.ToLower(s.Username))
-
-	for _, result := range results {
-		if result.RemovedTwitchRestricted == true || result.RemovedYoutubeRestricted == true {
-			channelInfo, channelInfoError := repos.GetChannelInfo(&result.ChannelID)
-
-			if channelInfoError != nil {
-				continue
-			}
-			if result.RemovedYoutubeRestricted == true {
-				bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-					Channel: channelInfo.Channel,
-					Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledYoutubeRestricted, result.Title)})
-			}
-			if result.RemovedTwitchRestricted == true {
-				bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-					Channel: channelInfo.Channel,
-					Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledTwitchRestricted, result.Title)})
-			}
-			if result.RemovedChannelRestricted == true {
-				bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-					Channel: channelInfo.Channel,
-					Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledChannelRestricted, result.Title)})
-			}
-			if result.RemovedTagRestricted == true {
-				bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-					Channel: channelInfo.Channel,
-					Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledTagRestricted, result.Title, result.Tag)})
-			}
-		}
-
-	}
-
 }
 
 func songrequestSetVolume(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {

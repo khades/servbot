@@ -44,6 +44,12 @@ func InitializeDB(dbName string) error {
 	db.C(videolibraryCollection).EnsureIndex(mgo.Index{
 		Key: []string{"videoid"}})
 
+	db.C(videolibraryCollection).EnsureIndex(mgo.Index{
+		Key: []string{"-_id"}})
+
+	db.C(videolibraryCollection).EnsureIndex(mgo.Index{
+		Key: []string{"tags.tag"}})
+		
 	db.C(gamesCollection).EnsureIndex(mgo.Index{
 		Key: []string{"gameid"}})
 

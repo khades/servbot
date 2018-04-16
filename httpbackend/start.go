@@ -105,5 +105,11 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/:videoID/settag/:tag"), withMod(songrequestSetTag))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests/:videoID/settag/:tag"), corsEnabled(options))
 
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/:videoID/unban"), withMod(songrequestsUnban))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests/:videoID/unban"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/library/get"), withMod(songrequestGetLibrary))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bannedtracks"), withMod(songrequestGetBannedTracks))
+
 	http.ListenAndServe("localhost:8000", mux)
 }

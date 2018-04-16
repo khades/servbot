@@ -6,7 +6,7 @@ import "time"
 type SongRequestLibraryItem struct {
 	VideoID    string        `json:"videoID"`
 	Tags       []TagRecord   `json:"tags"`
-	Length     time.Duration `json:"Length"`
+	Length     time.Duration `json:"length"`
 	Title      string        `json:"title"`
 	ReviewedOn []string      `json:"reviewedOn"`
 	LastCheck  time.Time     `json:"lastCheck"`
