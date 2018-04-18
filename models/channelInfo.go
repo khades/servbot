@@ -9,19 +9,19 @@ import (
 
 // ChannelInfo describes all information about channel
 type ChannelInfo struct {
-	Enabled         bool         `json:"enabled"`
-	Lang            string       `json:"lang"`
-	ChannelID       string       `json:"channelId"`
-	Channel         string       `json:"channel"`
-	StreamStatus    StreamStatus `json:"streamStatus"`
-	TwitchDJ        TwitchDJ     `json:"twitchDJ"`
-	VkGroupInfo     VkGroupInfo  `json:"vkGroupInfo"`
-	Mods            []string     `json:"mods"`
-	Commands []string     `json:"commands"`
-
-	SubTrain        SubTrain     `json:"subTrain"`
-	SubdayIsActive  bool         `json:"subdayIsActive"`
-	SongRequest     CurrentSong  `json:"songRequest"`
+	Enabled             bool         `json:"enabled"`
+	Lang                string       `json:"lang"`
+	ChannelID           string       `json:"channelId"`
+	Channel             string       `json:"channel"`
+	StreamStatus        StreamStatus `json:"streamStatus"`
+	TwitchDJ            TwitchDJ     `json:"twitchDJ"`
+	VkGroupInfo         VkGroupInfo  `json:"vkGroupInfo"`
+	Mods                []string     `json:"mods"`
+	Commands            []string     `json:"commands"`
+	ExtendedBansLogging bool         `json:"extendedBansLogging"`
+	SubTrain            SubTrain     `json:"subTrain"`
+	SubdayIsActive      bool         `json:"subdayIsActive"`
+	SongRequest         CurrentSong  `json:"songRequest"`
 }
 
 // CurrentSong struct describes current state of songrequest on channel
@@ -31,8 +31,8 @@ type CurrentSong struct {
 	User      string `json:"user"`
 	Link      string `json:"link"`
 	Duration  string `json:"duration"`
-	Volume    int `json:"volume"`
-	Count int `json:"count"`
+	Volume    int    `json:"volume"`
+	Count     int    `json:"count"`
 }
 
 // GetCommands Helper Command for mustashe

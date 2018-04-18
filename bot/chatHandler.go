@@ -8,6 +8,7 @@ import (
 	"github.com/khades/servbot/commandhandlers"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/pubsub"
 	"github.com/khades/servbot/repos"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/irc.v2"
@@ -53,33 +54,39 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 	}
 
 	if message.Command == "CLEARCHAT" {
-
-		banDuration, banDurationFound := message.Tags.GetTag("ban-duration")
-		intBanDuration := 0
-		if banDurationFound {
-			parsedValue, parseError := strconv.Atoi(banDuration)
-			if parseError == nil {
-				intBanDuration = parsedValue
+		channelID := message.Tags["room-id"].Encode()
+		channelInfo, _ := repos.GetChannelInfo(&channelID)
+		if pubsub.IsWorking == false || channelInfo.ExtendedBansLogging == false {
+			banDuration, banDurationFound := message.Tags.GetTag("ban-duration")
+			intBanDuration := 0
+			if banDurationFound {
+				parsedValue, parseError := strconv.Atoi(banDuration)
+				if parseError == nil {
+					intBanDuration = parsedValue
+				}
 			}
+			banReason, _ := message.Tags.GetTag("ban-reason")
+			user := message.Params[1]
+			channel := message.Params[0]
+			messageType := "timeout"
+			if intBanDuration == 0 {
+				messageType = "ban"
+			}
+			formedMessage := models.ChatMessage{
+				MessageStruct: models.MessageStruct{
+					Date:        time.Now(),
+					MessageType: messageType,
+					BanLength:   intBanDuration,
+					BanReason:   banReason},
+				Channel:   channel,
+				ChannelID: message.Tags["room-id"].Encode(),
+				User:      user,
+				UserID:    message.Tags["target-user-id"].Encode()}
+			repos.LogMessage(&formedMessage)
+		} else {
+			logger.Debug("Not logging")
+
 		}
-		banReason, _ := message.Tags.GetTag("ban-reason")
-		user := message.Params[1]
-		channel := message.Params[0]
-		messageType := "timeout"
-		if intBanDuration == 0 {
-			messageType = "ban"
-		}
-		formedMessage := models.ChatMessage{
-			MessageStruct: models.MessageStruct{
-				Date:        time.Now(),
-				MessageType: messageType,
-				BanLength:   intBanDuration,
-				BanReason:   banReason},
-			Channel:   channel,
-			ChannelID: message.Tags["room-id"].Encode(),
-			User:      user,
-			UserID:    message.Tags["target-user-id"].Encode()}
-		repos.LogMessage(&formedMessage)
 	}
 	if message.Command == "PRIVMSG" {
 		logger.Debug("Got PRIVMSG, parsing")

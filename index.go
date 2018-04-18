@@ -8,6 +8,7 @@ import (
 
 	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/pubsub"
 	"github.com/sirupsen/logrus"
 
 	"github.com/khades/servbot/eventbus"
@@ -93,6 +94,14 @@ func main() {
 		}
 	}(&wg)
 
+	go func(wg *sync.WaitGroup) {
+		for {
+			wg.Add(1)
+			pubsub.TwitchClient()
+			wg.Done()
+
+		}
+	}(&wg)
 	gamesCheckerTicker := time.NewTicker(time.Second * 30)
 	go func(wg *sync.WaitGroup) {
 		for {

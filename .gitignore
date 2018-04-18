@@ -24,3 +24,4 @@ _testmain.go
 *.prof
 config.json
 vendor
+debug

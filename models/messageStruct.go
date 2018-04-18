@@ -10,4 +10,6 @@ type MessageStruct struct {
 	MessageType string    `json:"messageType"`
 	BanLength   int       `json:"banLength"`
 	BanReason   string    `json:"banReason"`
+	BanIssuer   string    `json:"banIssuer"`
+	BanIssuerID string    `json:"banIssuerID"`
 }

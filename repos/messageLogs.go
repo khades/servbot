@@ -57,7 +57,9 @@ func LogMessage(message *models.ChatMessage) {
 					"$each":  []models.BanInfo{banInfo},
 					"$sort":  bson.M{"date": -1},
 					"$slice": 10}}}
-		LogChannelBan(&message.UserID, &message.User, &message.ChannelID, &message.BanLength)
+		if message.MessageType == "timeout" || message.MessageType == "ban" {
+			LogChannelBan(&message.UserID, &message.User, &message.ChannelID, &message.BanLength)
+		}
 	}
 	db.C(messageLogsCollection).Upsert(
 		bson.M{"channelid": message.ChannelID, "userid": message.UserID},
