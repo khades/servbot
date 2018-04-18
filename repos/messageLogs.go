@@ -30,7 +30,7 @@ func LogMessage(message *models.ChatMessage) {
 	if message.UserID != "" && message.UserID != "" {
 		updateUserToUserIDFromChat(&message.UserID, &message.User)
 	}
-	
+
 	query := bson.M{
 		"$set":      bson.M{"user": message.User, "channel": message.Channel},
 		"$addToSet": bson.M{"knownnicknames": message.User},
@@ -38,11 +38,14 @@ func LogMessage(message *models.ChatMessage) {
 			"$each":  []models.MessageStruct{message.MessageStruct},
 			"$sort":  bson.M{"date": -1},
 			"$slice": 50}}}
-	if message.MessageType == "timeout" || message.MessageType == "ban" {
+	if message.MessageType == "timeout" || message.MessageType == "ban" || message.MessageType == "unban" || message.MessageType == "untimeout" {
 		banInfo := models.BanInfo{User: message.User,
-			Duration: message.BanLength,
-			Type:     message.MessageType,
-			Date:     time.Now()}
+			Duration:    message.BanLength,
+			Type:        message.MessageType,
+			Reason:      message.BanReason,
+			BanIssuer:   message.BanIssuer,
+			BanIssuerID: message.BanIssuerID,
+			Date:        time.Now()}
 		query = bson.M{
 			"$set":      bson.M{"user": message.User, "channel": message.Channel},
 			"$addToSet": bson.M{"knownnicknames": message.User},

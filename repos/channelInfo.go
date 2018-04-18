@@ -48,6 +48,12 @@ func DisableChannel(channelID *string) {
 	db.C(channelInfoCollection).Upsert(bson.M{"channelid": *channelID}, bson.M{"$set": bson.M{"enabled": false}})
 }
 
+func GetChannelsWithExtendedLogging() ([]models.ChannelInfo, error) {
+	var results []models.ChannelInfo
+	error := db.C(channelInfoCollection).Find(bson.M{"enabled": true, "extendedbanslogging":true}).All(&results)
+	return results, error
+}
+
 //GetActiveChannels returns enabled channels on that chatbot instance
 func GetActiveChannels() ([]models.ChannelInfo, error) {
 	var results []models.ChannelInfo
