@@ -11,7 +11,7 @@ import (
 var gamesCollection = "games"
 var gamesToProcess = []string{}
 
-// getGameByID returns game by its game id,
+// GetGameByID returns game by its game id,
 func getGameByID(gameID *string) (string, bool) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",

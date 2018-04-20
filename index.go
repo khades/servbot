@@ -81,7 +81,7 @@ func main() {
 
 	gob.Register(&models.HTTPSession{})
 	logger.Info("Starting...")
-	services.CheckChannelsFollowers()
+	//services.CheckChannelsFollowers()
 	ircClientTicker := time.NewTicker(time.Second * 3)
 
 	go func(wg *sync.WaitGroup) {
@@ -97,7 +97,7 @@ func main() {
 	go func(wg *sync.WaitGroup) {
 		for {
 			wg.Add(1)
-			pubsub.TwitchClient()
+			pubsub.RunPubSub()
 			wg.Done()
 
 		}
@@ -176,7 +176,7 @@ func main() {
 		for {
 			<-minuteTicker.C
 			wg.Add(1)
-			//services.CheckStreamStatus()
+			services.CheckStreamStatuses()
 			wg.Done()
 		}
 	}(&wg)

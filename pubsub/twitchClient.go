@@ -2,7 +2,7 @@ package pubsub
 
 import (
 	"encoding/json"
-	"log"
+
 	"net"
 	"net/http"
 	"net/url"
@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 )
 
 var IsWorking = false
@@ -47,31 +48,42 @@ type moderationActionData struct {
 	RecipientID     string   `json:"target_user_id"`
 }
 
-func TwitchClient() {
-	var timerDur time.Duration = 0
+func RunPubSub() {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "pubsub",
+		"feature": "pubsub",
+		"action":  "RunPubSub"})
+	var timerDur time.Duration
 	channels, channelError := repos.GetChannelsWithExtendedLogging()
 	if channelError != nil && len(channels) == 0 {
 		return
 	}
-	var topics []string
-	for _, channel := range channels {
-		topics = append(topics, "chat_moderator_actions."+repos.Config.BotUserID+"."+channel.ChannelID)
-	}
-	for {
-		log.Println("Starting timer")
 
+	for {
+		channels, channelError := repos.GetChannelsWithExtendedLogging()
+		if channelError != nil && len(channels) == 0 {
+			return
+		}
+		var topics []string
+		for _, channel := range channels {
+			topics = append(topics, "chat_moderator_actions."+repos.Config.BotUserID+"."+channel.ChannelID)
+		}
+		logger.Info("Starting Pubsub client")
 		timer := time.NewTimer(timerDur * time.Second)
 		<-timer.C
-		log.Println("Starting ws")
-
-		twitchClient(topics)
+		twitchPubSubClient(topics)
+		logger.Info("Pubsub client died")
 		timerDur = timerDur + 5
 	}
 }
 
-func twitchClient(topics []string) {
+func twitchPubSubClient(topics []string) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "pubsub",
+		"feature": "pubsub",
+		"action":  "twitchPubSubClient"})
 	u := url.URL{Scheme: "wss", Host: "pubsub-edge.twitch.tv"}
-	log.Printf("connecting to %s", u.String())
+	logger.Debugf("Connecting to %s", u.String())
 	pongAfterWait := 5 * time.Minute
 
 	netDialer := net.Dialer{
@@ -86,24 +98,22 @@ func twitchClient(topics []string) {
 	conn, _, err := dialer.Dial(u.String(), nil)
 
 	if err != nil {
-		log.Fatal("dial:", err)
+		logger.Infof("Dialing failed: %s", err.Error())
+		return
 	}
 	pongWait := 12 * time.Second
 
-	conn.SetReadDeadline(time.Now().Add(pongWait))
-
 	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(repos.Config.OauthKey, "oauth:", "", 1), Topics: []string{"chat_moderator_actions." + repos.Config.BotUserID + ".40635840"}}})
 	if writeErr1 != nil {
-		log.Fatal("dial:", writeErr1)
+		logger.Info("Initial message error:", writeErr1.Error())
 		return
 	}
 
-	writeErr2 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "PING"})
-	if writeErr2 != nil {
-		log.Fatal("dial:", writeErr2)
-		return
-
-	}
+	// writeErr2 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "PING"})
+	// if writeErr2 != nil {
+	// 	logger.Info("Initial ping error:", writeErr2.Error())
+	// 	return
+	// }
 
 	IsWorking = true
 
@@ -117,17 +127,28 @@ func twitchClient(topics []string) {
 		for {
 			messageType, message, err := conn.ReadMessage()
 			if err != nil {
-				log.Println("read err:", err)
+				logger.Infof("Read error: %s", err.Error())
 				break
 			}
-			log.Printf("recv: %s", message)
+
+			logger.Debugf("Incoming message body: %s", message)
 
 			if messageType == websocket.TextMessage {
 				messageObj := wsMessage{}
 				errm := json.Unmarshal(message, &messageObj)
 				if errm != nil {
-					log.Println("Unmarshalling error:", errm)
+					logger.Infof("Read error: %s", errm.Error())
 					return
+				}
+				if messageObj.Type == "RESPONSE" {
+					err := conn.WriteJSON(twitchWSOutgoingMessage{Type: "PING"})
+					if err != nil {
+						logger.Infof("Ping write error: %s", err.Error())
+
+						return
+					}
+					conn.SetReadDeadline(time.Now().Add(pongWait))
+
 				}
 				if messageObj.Type == "PONG" {
 					conn.SetReadDeadline(time.Now().Add(pongAfterWait))
@@ -166,20 +187,20 @@ func twitchClient(topics []string) {
 			}
 
 		}
-		log.Println("Ended")
+		logger.Infof("Websocket connection closed")
+
 		done <- "wsended"
 	}()
 
 Loop:
 	for {
 		select {
-		case reason := <-done:
-			log.Println(reason)
+		case <-done:
 			break Loop
 		case <-ticker.C:
 			err := conn.WriteJSON(twitchWSOutgoingMessage{Type: "PING"})
 			if err != nil {
-				log.Println("Ping error:", err)
+				logger.Infof("Ping write error: %s", err.Error())
 				break Loop
 			}
 

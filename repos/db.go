@@ -49,7 +49,7 @@ func InitializeDB(dbName string) error {
 
 	db.C(videolibraryCollection).EnsureIndex(mgo.Index{
 		Key: []string{"tags.tag"}})
-		
+
 	db.C(gamesCollection).EnsureIndex(mgo.Index{
 		Key: []string{"gameid"}})
 
@@ -67,6 +67,9 @@ func InitializeDB(dbName string) error {
 
 	db.C(followersListСollectionName).EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "userid"}})
+
+	db.C("webhooklibrary").EnsureIndex(mgo.Index{
+		Key: []string{"channelid", "topic"}})
 
 	db.C(messageLogsCollection).EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "userid"}})

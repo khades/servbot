@@ -50,7 +50,7 @@ func DisableChannel(channelID *string) {
 
 func GetChannelsWithExtendedLogging() ([]models.ChannelInfo, error) {
 	var results []models.ChannelInfo
-	error := db.C(channelInfoCollection).Find(bson.M{"enabled": true, "extendedbanslogging":true}).All(&results)
+	error := db.C(channelInfoCollection).Find(bson.M{"enabled": true, "extendedbanslogging": true}).All(&results)
 	return results, error
 }
 
@@ -127,17 +127,19 @@ func PreprocessChannels() error {
 }
 
 // PushStreamStatus updates stream status (start of stream, topic of stream)
-func pushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
+func PushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 	channelInfo, _ := GetChannelInfo(channelID)
 	prevStatus := models.StreamStatus{}
 	currentStatus := models.StreamStatus{}
 	if channelInfo != nil {
 		prevStatus = channelInfo.StreamStatus
 	}
+	game, _ :=  getGameByID(&streamStatus.GameID)
+
 	if prevStatus.Online == false && streamStatus.Online == true {
 
 		currentStatus = models.StreamStatus{Online: true,
-			Game:           streamStatus.Game,
+			Game:           game,
 			GameID:         streamStatus.GameID,
 			Title:          streamStatus.Title,
 			Start:          streamStatus.Start,
@@ -145,14 +147,14 @@ func pushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 			Viewers:        streamStatus.Viewers,
 			GamesHistory: []models.StreamStatusGameHistory{
 				models.StreamStatusGameHistory{
-					Game:   streamStatus.Game,
+					Game:   game,
 					GameID: streamStatus.GameID,
 					Start:  streamStatus.Start}}}
 	}
 	if prevStatus.Online == true && streamStatus.Online == true {
 		if prevStatus.GameID == streamStatus.GameID {
 			currentStatus = models.StreamStatus{Online: true,
-				Game:           streamStatus.Game,
+				Game:           game,
 				GameID:         streamStatus.GameID,
 				Title:          streamStatus.Title,
 				Start:          prevStatus.Start,
@@ -161,14 +163,14 @@ func pushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 				GamesHistory:   prevStatus.GamesHistory}
 		} else {
 			currentStatus = models.StreamStatus{Online: true,
-				Game:           streamStatus.Game,
+				Game:           game,
 				GameID:         streamStatus.GameID,
 				Title:          streamStatus.Title,
 				Start:          prevStatus.Start,
 				LastOnlineTime: time.Now(),
 				Viewers:        streamStatus.Viewers,
 				GamesHistory: append(prevStatus.GamesHistory, models.StreamStatusGameHistory{
-					Game:   streamStatus.Game,
+					Game:   game,
 					GameID: streamStatus.GameID,
 					Start:  time.Now()})}
 		}
@@ -177,7 +179,7 @@ func pushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 	if streamStatus.Online == false {
 		if prevStatus.Online == true && time.Since(prevStatus.LastOnlineTime).Seconds() < 120 {
 			currentStatus = models.StreamStatus{Online: true,
-				Game:           prevStatus.Game,
+				Game:           game,
 				GameID:         prevStatus.GameID,
 				Title:          prevStatus.Title,
 				Start:          prevStatus.Start,
@@ -240,24 +242,22 @@ func PushCommandsForChannel(channelID *string) {
 	channelInfo, channelError := GetChannelInfo(channelID)
 	dbCommands, commandsError := GetChannelActiveTemplates(channelID)
 
-
 	if commandsError == nil {
 		for _, value := range dbCommands {
-		
+
 			commandsList = append(commandsList, value.CommandName)
 		}
 	}
 	if channelError == nil {
-		channelInfo.Commands =  commandsList
+		channelInfo.Commands = commandsList
 	} else {
 		channelInfoRepositoryObject.forceCreateObject(*channelID, &models.ChannelInfo{
-			ChannelID:       *channelID,
+			ChannelID: *channelID,
 			Commands:  commandsList,
-		
 		})
 	}
 	db.C(channelInfoCollection).Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{
-		"commands":  commandsList}})
+		"commands": commandsList}})
 }
 
 func updateGamesByID(gameID *string, game *string) {
@@ -302,18 +302,16 @@ func UpdateStreamStatuses() error {
 	}
 
 	for _, status := range streamstatuses {
-		game, _ := getGameByID(&status.GameID)
 		streams[status.UserID] = models.StreamStatus{
 			Online:  true,
 			GameID:  status.GameID,
-			Game:    game,
 			Title:   status.Title,
 			Start:   status.CreatedAt,
 			Viewers: status.ViewerCount}
 
 	}
 	for channel, status := range streams {
-		pushStreamStatus(&channel, &status)
+		PushStreamStatus(&channel, &status)
 	}
 	return nil
 }

@@ -111,5 +111,13 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/library/get"), withMod(songrequestGetLibrary))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bannedtracks"), withMod(songrequestGetBannedTracks))
 
+	mux.HandleFunc(pat.Get("/api/webhook/streams"), corsEnabled(webhookVerify))
+	mux.HandleFunc(pat.Post("/api/webhook/streams"), corsEnabled(webhookStream))
+	mux.HandleFunc(pat.Options("/api/webhook/streams"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/webhook/follows"), corsEnabled(webhookVerify))
+	mux.HandleFunc(pat.Post("/api/webhook/follows"), corsEnabled(webhookFollows))
+	mux.HandleFunc(pat.Options("/api/webhook/follows"), corsEnabled(options))
+
 	http.ListenAndServe("localhost:8000", mux)
 }
