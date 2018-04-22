@@ -1,6 +1,8 @@
 package repos
 
 import (
+	"strings"
+
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"
 	"gopkg.in/mgo.v2/bson"
@@ -9,24 +11,27 @@ import (
 var templateCollection = "templates"
 
 func SetChannelTemplateAlias(user *string, userID *string, channelID *string, commandName *string, aliasTo *string) {
-	result, error := GetChannelTemplate(channelID, aliasTo)
+	aliasStripped := strings.ToLower(strings.Join(strings.Fields(*aliasTo), ""))
+	commandNameStripped := strings.ToLower(strings.Join(strings.Fields(*commandName), ""))
+	result, error := GetChannelTemplate(channelID, &aliasStripped)
 	aliasTemplate := models.TemplateInfoBody{}
 	if error == nil {
 		aliasTemplate = result.TemplateInfoBody
 	}
 
-	putChannelTemplate(user, userID, channelID, commandName, &aliasTemplate)
+	putChannelTemplate(user, userID, channelID, &commandNameStripped, &aliasTemplate)
 	PushCommandsForChannel(channelID)
 
 }
 func SetChannelTemplate(user *string, userID *string, channelID *string, commandName *string, template *models.TemplateInfoBody) error {
+	commandNameStripped := strings.ToLower(strings.Join(strings.Fields(*commandName), ""))
 	if template.Template == "" {
 		_, templateError := mustache.ParseString(template.Template)
 		if templateError != nil {
 			return templateError
 		}
 	}
-	putChannelTemplate(user, userID, channelID, commandName, template)
+	putChannelTemplate(user, userID, channelID, &commandNameStripped, template)
 	PushCommandsForChannel(channelID)
 	return nil
 }
