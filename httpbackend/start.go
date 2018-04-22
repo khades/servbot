@@ -75,6 +75,9 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays"), withMod(subdayList))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays"), corsEnabled(options))
 
+	mux.HandleFunc(pat.Post("/api/channel/:channel/subdays/new"), withMod(subdayCreate))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/new"), corsEnabled(options))
+
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID"), withSessionAndChannel(subdayByID))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID"), corsEnabled(options))
 

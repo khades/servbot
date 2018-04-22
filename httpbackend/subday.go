@@ -23,6 +23,9 @@ type subdayCreateStruct struct {
 	Name         string `json:"name"`
 	AllowNonSubs bool   `json:"allowNonSubs"`
 }
+type subdayCreateResp struct {
+	ID string `json:"id"`
+}
 
 func subdayCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	decoder := json.NewDecoder(r.Body)
@@ -32,11 +35,13 @@ func subdayCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession,
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	created := repos.CreateNewSubday(channelID, request.AllowNonSubs, &request.Name)
+	created, id := repos.CreateNewSubday(channelID, request.AllowNonSubs, &request.Name)
 	if created == false {
 		writeJSONError(w, "Subday already exists", http.StatusNotAcceptable)
 		return
 	}
+	json.NewEncoder(w).Encode(subdayCreateResp{id.Hex()})
+
 }
 
 func subdayList(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -61,7 +66,7 @@ func subdayByID(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, c
 	}
 	if channelInfo.GetIfUserIsMod(&s.UserID) == true {
 		var result *models.Subday
-		if (id != "last") {
+		if id != "last" {
 			result, error = repos.GetSubdayByIDMod(&id)
 			if error != nil {
 				writeJSONError(w, error.Error(), http.StatusInternalServerError)
@@ -75,14 +80,14 @@ func subdayByID(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, c
 				return
 			}
 		}
-		
+
 		object := subdayWithMod{result, true}
 
 		json.NewEncoder(w).Encode(object)
 
 	} else {
 		var result *models.SubdayNoWinners
-		if (id != "last") {
+		if id != "last" {
 			result, error = repos.GetSubdayByID(&id)
 			if error != nil {
 				writeJSONError(w, error.Error(), http.StatusInternalServerError)
@@ -115,7 +120,7 @@ func subdayRandomize(w http.ResponseWriter, r *http.Request, s *models.HTTPSessi
 	}
 
 }
-func subdayPullWinner (w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+func subdayPullWinner(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	id := pat.Param(r, "subdayID")
 	if id == "" {
 		writeJSONError(w, "subday id is not found", http.StatusNotFound)

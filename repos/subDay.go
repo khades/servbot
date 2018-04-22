@@ -4,9 +4,9 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
-	"github.com/globalsign/mgo/bson"
 )
 
 var subdayCollection = "subdays"
@@ -172,13 +172,19 @@ func VoteForSubday(user *string, userID *string, id *bson.ObjectId, game *string
 }
 
 // CreateNewSubday creates new subday IF there's no active subdays
-func CreateNewSubday(channelID *string, subsOnly bool, name *string) bool {
+func CreateNewSubday(channelID *string, subsOnly bool, name *string) (bool, *bson.ObjectId) {
 	_, subdayError := GetLastActiveSubday(channelID)
 	if subdayError == nil {
-		return false
+		return false, nil
 	}
-	object := models.Subday{Name: *name, SubsOnly: subsOnly, IsActive: true, Date: time.Now(), ChannelID: *channelID}
-	db.C(subdayCollection).Insert(object)
+	id := bson.NewObjectId()
+
+	object := models.Subday{ID: id, Name: *name, SubsOnly: subsOnly, IsActive: true, Date: time.Now(), ChannelID: *channelID}
+	err := db.C(subdayCollection).Insert(object)
+	if err != nil {
+		return false, nil
+	}
 	SetSubdayIsActive(channelID, true)
-	return true
+
+	return true, &id
 }

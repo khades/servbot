@@ -36,7 +36,7 @@ func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage,
 	if subdayName == "" {
 		subdayName =  l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
 	}
-	created := repos.CreateNewSubday(&chatMessage.ChannelID, subsOnly, &subdayName)
+	created, _ := repos.CreateNewSubday(&chatMessage.ChannelID, subsOnly, &subdayName)
 	if created == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
 			Channel: chatMessage.Channel,
