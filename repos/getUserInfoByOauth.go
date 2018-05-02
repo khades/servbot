@@ -34,7 +34,7 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 
 	_, error := db.C(httpsessionCollection).Find(bson.M{"key": *oauthKey}).Apply(change, &result)
 
-	if error != nil {
+	if error == nil {
 		logger.Debug("User found in database")
 		return &result.HTTPSession, nil
 	}
