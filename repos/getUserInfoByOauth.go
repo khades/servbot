@@ -41,6 +41,7 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 		logger.Debug("User found in database")
 		return &result.HTTPSession, nil
 	}
+	logger.Debug("Key is %s", *oauthKey)
 
 	nameResp, err := twitchHelixOauth("GET", "users", nil, *oauthKey)
 	if err != nil {
