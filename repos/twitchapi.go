@@ -2,11 +2,9 @@ package repos
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"net/http/httputil"
+
 	"strings"
 	"time"
 
@@ -86,14 +84,6 @@ func getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, er
 	if resp != nil {
 		defer resp.Body.Close()
 	}
-	// htmlData, _ := ioutil.ReadAll(resp.Body)
-	// logger.Debugf("Response body is %s", htmlData)
-	dump, err := httputil.DumpResponse(resp, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%q", dump)
 
 	var twitchResponseStruct twitchFollowerResponse
 	marshallError := json.NewDecoder(resp.Body).Decode(&twitchResponseStruct)
