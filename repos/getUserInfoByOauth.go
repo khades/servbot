@@ -3,6 +3,9 @@ package repos
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
+	"net/http/httputil"
 	"strings"
 	"time"
 
@@ -45,6 +48,12 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 
 		return nil, err
 	}
+	dump, err := httputil.DumpResponse(nameResp, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%q", dump)
 	if nameResp != nil {
 		defer nameResp.Body.Close()
 	}

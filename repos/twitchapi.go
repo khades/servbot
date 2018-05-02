@@ -59,6 +59,7 @@ func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) 
 	req, error := http.NewRequest(method, "https://api.twitch.tv/helix/"+urlStr, body)
 	req.Header.Add("Authorization", "Bearer "+key)
 	req.Header.Add("Client-ID", Config.ClientID)
+	
 	if error != nil {
 		return nil, error
 	}
