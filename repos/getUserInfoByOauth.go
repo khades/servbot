@@ -41,7 +41,6 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 		logger.Debug("User found in database")
 		return &result.HTTPSession, nil
 	}
-	logger.Debug("Key is %s", *oauthKey)
 
 	nameResp, err := twitchHelixOauth("GET", "users", nil, *oauthKey)
 	if err != nil {
@@ -66,7 +65,7 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 	}
 	var usernameStruct = twitchUserRepsonse{}
 
-	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(usernameStruct)
+	nameMarshallError := json.NewDecoder(nameResp.Body).Decode(&usernameStruct)
 	if nameMarshallError != nil {
 		logger.Debug("Twitch Error, Cant marshall username: " + nameMarshallError.Error())
 
