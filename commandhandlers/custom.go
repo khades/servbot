@@ -147,7 +147,7 @@ func (channelInfo *templateExtendedObject) Pick() string {
 		return strings.TrimSpace(commandValues[0])
 	}
 	if len(commandValues) != 0 {
-		return strings.TrimSpace(commandValues[rand.Intn(len(commandValues)-1)])
+		return strings.TrimSpace(commandValues[rand.Intn(len(commandValues))])
 
 	}
 
@@ -180,7 +180,7 @@ func (channelInfo *templateExtendedObject) Ask() string {
 		"По моим данным — «нет»",
 		"Перспективы не очень хорошие",
 		"Весьма сомнительно SMOrc"}
-	return strings.TrimSpace(variants[rand.Intn(len(variants)-1)])
+	return strings.TrimSpace(variants[rand.Intn(len(variants))])
 }
 
 func (channelInfo *templateExtendedObject) AddSongRequest() string {
