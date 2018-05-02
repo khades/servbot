@@ -59,7 +59,7 @@ func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) 
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
 	req, error := http.NewRequest(method, "https://api.twitch.tv/helix/"+urlStr, body)
-	req.Header.Add("Authorization", "Bearer "+key)
+	req.Header.Add("Authorization", "Bearer "+strings.Replace(key, "oauth:", "", 1))
 	req.Header.Add("Client-ID", Config.ClientID)
 
 	if error != nil {
