@@ -103,7 +103,7 @@ func twitchPubSubClient(topics []string) {
 	}
 	pongWait := 12 * time.Second
 
-	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(repos.Config.OauthKey, "oauth:", "", 1), Topics: []string{"chat_moderator_actions." + repos.Config.BotUserID + ".40635840"}}})
+	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(repos.Config.OauthKey, "oauth:", "", 1), Topics: topics}})
 	if writeErr1 != nil {
 		logger.Info("Initial message error:", writeErr1.Error())
 		return
