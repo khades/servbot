@@ -26,11 +26,6 @@ func main() {
 	convertConfig := flag.Bool("convertconfig", false, "forces importing config file to database")
 	dbName := flag.String("db", "servbot", "mongo database name")
 	logger.Infof("Database name: %s", *dbName)
-	// Initializing database
-	dbErr := repos.InitializeDB(*dbName)
-	if dbErr != nil {
-		logger.Fatal("Database Conenction Error: " + dbErr.Error())
-	}
 	if *convertConfig == true {
 		logrus.SetLevel(logrus.DebugLevel)
 
@@ -53,6 +48,12 @@ func main() {
 
 		return
 	}
+	// Initializing database
+	dbErr := repos.InitializeDB(*dbName)
+	if dbErr != nil {
+		logger.Fatal("Database Conenction Error: " + dbErr.Error())
+	}
+
 
 	// Database initialisation and preprocessing
 
