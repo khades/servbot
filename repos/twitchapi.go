@@ -3,7 +3,9 @@ package repos
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
+	"net/http/httputil"
 
 	"strings"
 	"time"
@@ -59,7 +61,7 @@ func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) 
 	req, error := http.NewRequest(method, "https://api.twitch.tv/helix/"+urlStr, body)
 	req.Header.Add("Authorization", "Bearer "+key)
 	req.Header.Add("Client-ID", Config.ClientID)
-	
+
 	if error != nil {
 		return nil, error
 	}
@@ -85,6 +87,12 @@ func getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, er
 	if resp != nil {
 		defer resp.Body.Close()
 	}
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	logger.Debugf("Repsonse is %q", dump)
 
 	var twitchResponseStruct twitchFollowerResponse
 	marshallError := json.NewDecoder(resp.Body).Decode(&twitchResponseStruct)

@@ -35,7 +35,7 @@ func GetIfFollowerToChannel(channelID *string, userID *string) (bool, time.Time)
 		return false, followerResult.Date
 	}
 	found, date := getUserFollowDate(channelID, userID)
-	logger.Debugf("Result for user %s on channel %s : %s - %s", userID, channelID, found, date.String())
+	logger.Debugf("Result for user %s on channel %s : %s - %s", &userID, &channelID, found, date.String())
 	AddFollowerToList(channelID, userID, date, found)
 
 	return found, date
