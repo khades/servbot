@@ -2,7 +2,7 @@ package repos
 
 import (
 	"time"
-
+	"strings"
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/models"
 	"github.com/globalsign/mgo/bson"
@@ -12,26 +12,31 @@ var templateCollection = "templates"
 
 // SetChannelTemplateAlias sets alias for a command by copying its template body and setting reference to another command for next updates
 func SetChannelTemplateAlias(user *string, userID *string, channelID *string, commandName *string, aliasTo *string) {
-	result, error := GetChannelTemplate(channelID, aliasTo)
+	commandNameFixed:=strings.ToLower(strings.Join(strings.Fields(*commandName), ""))
+	aliasFixed:=strings.ToLower(strings.Join(strings.Fields(*aliasTo), ""))
+
+	result, error := GetChannelTemplate(channelID, &aliasFixed)
 	aliasTemplate := models.TemplateInfoBody{}
 	if error == nil {
 		aliasTemplate = result.TemplateInfoBody
 	}
 
-	putChannelTemplate(user, userID, channelID, commandName, &aliasTemplate)
+	putChannelTemplate(user, userID, channelID, &commandNameFixed, &aliasTemplate)
 	PushCommandsForChannel(channelID)
 
 }
 
 // SetChannelTemplate sets command template on channel
 func SetChannelTemplate(user *string, userID *string, channelID *string, commandName *string, template *models.TemplateInfoBody) error {
+	commandNameFixed:=strings.ToLower(strings.Join(strings.Fields(*commandName), ""))
+
 	if template.Template == "" {
 		_, templateError := mustache.ParseString(template.Template)
 		if templateError != nil {
 			return templateError
 		}
 	}
-	putChannelTemplate(user, userID, channelID, commandName, template)
+	putChannelTemplate(user, userID, channelID, &commandNameFixed, template)
 	PushCommandsForChannel(channelID)
 	return nil
 }

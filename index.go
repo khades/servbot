@@ -185,16 +185,16 @@ func main() {
 		httpbackend.Start()
 		wg.Done()
 	}(&wg)
-	// followerTicker := time.NewTicker(time.Second * 30)
+	followerTicker := time.NewTicker(time.Second * 30)
 
-	// go func(wg *sync.WaitGroup) {
-	// 	for {
-	// 		<-followerTicker.C
-	// 		wg.Add(1)
-	// 		services.CheckChannelsFollowers()
-	// 		wg.Done()
-	// 	}
-	// }(&wg)
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-followerTicker.C
+			wg.Add(1)
+			services.CheckChannelsFollowers()
+			wg.Done()
+		}
+	}(&wg)
 	go func(wg *sync.WaitGroup) {
 		bot.Start()
 		wg.Done()

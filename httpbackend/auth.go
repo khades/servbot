@@ -38,7 +38,7 @@ func auth(next sessionHandlerFunc) sessionHandlerFunc {
 		}
 		authLogger.Debugf("Current request count for user %s is %d", s.UserID, requestsCounter[s.Key].Count)
 
-		if requestsCounter[s.Key].Count > 50 {
+		if requestsCounter[s.Key].Count > 200 {
 			authLogger.Debugf("Rejecting user api request for userID %s ", s.UserID)
 
 			writeJSONError(w, "Too Many Requests", http.StatusTooManyRequests)

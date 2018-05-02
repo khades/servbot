@@ -141,7 +141,7 @@ func subdayClose(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 		writeJSONError(w, "subday id is not found", http.StatusNotFound)
 		return
 	}
-	repos.CloseSubday(channelID, &id)
+	repos.CloseSubday(channelID, &id, &s.Username, &s.UserID)
 	json.NewEncoder(w).Encode(optionResponse{"OK"})
 
 }

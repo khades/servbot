@@ -3,6 +3,7 @@ package commandhandlers
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -27,42 +28,159 @@ func short(s string, i int) string {
 
 type templateExtendedObject struct {
 	models.ChannelInfo
-	UserID                 string
-	User                   string
-	RandomInteger          int
-	RandomIntegerIsMinimal bool
-	RandomIntegerIsMaximal bool
-	RandomIngegerIsZero    bool
-	RandomString           string
-	IsMod                  bool
-	IsSub                  bool
-	CommandBody            string
-	CommandBodyIsEmpty     bool
-	PreventDebounce        bool
-	PreventRedirect        bool
+	UserID string
+	User   string
+	// RandomInteger          int
+	// RandomIntegerIsMinimal bool
+	// RandomIntegerIsMaximal bool
+	// RandomIngegerIsZero    bool
+	// RandomString           string
+	IsMod              bool
+	IsSub              bool
+	CommandBody        string
+	CommandBodyIsEmpty bool
+	PreventDebounce    bool
+	PreventRedirect    bool
+	IrcClient          *ircClient.IrcClient
 }
-type SongPullResult struct {
+type songPullResult struct {
 	Success     bool
 	PulledVideo models.SongRequest
 }
-type FollowerDuration struct {
+type followerDuration struct {
 	IsFollower       bool
 	FollowerDuration string
 }
+type banmeResult struct {
+	Banned      bool
+	Moderator   bool
+	BanDuration int
+}
 
-func (channelInfo *templateExtendedObject) FollowerInfo() FollowerDuration {
+func (channelInfo *templateExtendedObject) FollowerInfo() followerDuration {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
 	isFollower, dur := repos.GetIfFollowerToChannel(&channelInfo.ChannelID, &channelInfo.UserID)
 	if isFollower == true {
-		return FollowerDuration{true, l10n.HumanizeDuration(time.Now().Sub(dur), channelInfo.Lang)}
+		return followerDuration{true, l10n.HumanizeDuration(time.Now().Sub(dur), channelInfo.Lang)}
 
 	}
-	return FollowerDuration{false, ""}
+	return followerDuration{false, ""}
 }
 
 func (channelInfo templateExtendedObject) CurrentSong() models.CurrentSong {
 	return repos.GetTopRequest(&channelInfo.ChannelID, channelInfo.Lang)
+}
+
+func (channelInfo *templateExtendedObject) Random() string {
+	lowerLimit := 0
+	upperLimit := 100
+	channelInfo.PreventDebounce = true
+	channelInfo.PreventRedirect = true
+	if channelInfo.IsMod == false && channelInfo.StreamStatus.Online == true {
+		return ""
+	}
+	return strconv.Itoa(lowerLimit + rand.Intn(upperLimit-lowerLimit))
+}
+
+func (channelInfo *templateExtendedObject) Banme30() banmeResult {
+	return channelInfo.Banme(30)
+}
+
+func (channelInfo *templateExtendedObject) Banme60() banmeResult {
+	return channelInfo.Banme(60)
+}
+
+func (channelInfo *templateExtendedObject) Banme300() banmeResult {
+	return channelInfo.Banme(300)
+}
+
+func (channelInfo *templateExtendedObject) Banme600() banmeResult {
+	return channelInfo.Banme(600)
+}
+
+func (channelInfo *templateExtendedObject) SubdayEnd() string {
+	channelInfo.PreventDebounce = true
+	channelInfo.PreventRedirect = true
+	if channelInfo.IsMod == false {
+		return ""
+	}
+	if channelInfo.SubdayIsActive == true {
+		repos.CloseActiveSubday(&channelInfo.ChannelID, &channelInfo.User, &channelInfo.UserID)
+		return l10n.GetL10n(channelInfo.GetChannelLang()).SubdayEndSuccess
+	}
+
+	return l10n.GetL10n(channelInfo.GetChannelLang()).SubdayEndNothingToClose
+}
+
+func (channelInfo *templateExtendedObject) Banme(length int) banmeResult {
+	channelInfo.PreventDebounce = true
+	channelInfo.PreventRedirect = true
+	if channelInfo.IsMod == true {
+		return banmeResult{
+			Banned:    false,
+			Moderator: true}
+	}
+	banDuration := rand.Intn(length)
+	if banDuration == 0 {
+		return banmeResult{
+			Banned: false}
+	}
+
+	channelInfo.IrcClient.SendPublic(&models.OutgoingMessage{
+		Channel: channelInfo.Channel,
+		Body:    fmt.Sprintf("/timeout %s %d ", channelInfo.User, banDuration)})
+
+	return banmeResult{
+		Banned:      true,
+		BanDuration: banDuration}
+}
+
+func (channelInfo *templateExtendedObject) Pick() string {
+	if channelInfo.IsMod == false && channelInfo.StreamStatus.Online == true {
+		return ""
+	}
+	channelInfo.PreventDebounce = true
+	channelInfo.PreventRedirect = true
+	commandValues := strings.Split(channelInfo.CommandBody, ",")
+	if len(commandValues) == 1 {
+		return strings.TrimSpace(commandValues[0])
+	}
+	if len(commandValues) != 0 {
+		return strings.TrimSpace(commandValues[rand.Intn(len(commandValues)-1)])
+
+	}
+
+	return "SMOrc"
+}
+func (channelInfo *templateExtendedObject) Ask() string {
+	if channelInfo.IsMod == false && channelInfo.StreamStatus.Online == true {
+		return ""
+	}
+	channelInfo.PreventDebounce = true
+	channelInfo.PreventRedirect = true
+	variants := []string{
+		"Бесспорно",
+		"Предрешено",
+		"Никаких сомнений MingLee",
+		"Определённо да VoHiYo",
+		"Можешь быть уверен в этом Keepo",
+		"Мне кажется — «да»",
+		"Вероятнее всего",
+		"Хорошие перспективы Keepo",
+		"Знаки говорят — «да»",
+		"Да",
+		"Пока не ясно, попробуй снова",
+		"Спроси позже ResidentSleeper",
+		"Лучше не рассказывать 4Head",
+		"Сейчас нельзя предсказать ResidentSleeper",
+		"Сконцентрируйся и спроси опять",
+		"Даже не думай WutFace",
+		"Мой ответ — «нет» SMOrc",
+		"По моим данным — «нет»",
+		"Перспективы не очень хорошие",
+		"Весьма сомнительно SMOrc"}
+	return strings.TrimSpace(variants[rand.Intn(len(variants)-1)])
 }
 
 func (channelInfo *templateExtendedObject) AddSongRequest() string {
@@ -172,6 +290,7 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 	templateObject.IsSub = chatMessage.IsSub
 	templateObject.UserID = chatMessage.UserID
 	templateObject.User = chatMessage.User
+	templateObject.IrcClient = ircClient
 	template, err := repos.GetChannelTemplate(&chatMessage.ChannelID, &chatCommand.Command)
 
 	if err != nil || template.Template == "" {

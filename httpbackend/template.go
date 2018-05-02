@@ -42,7 +42,8 @@ func putTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	commandName := strings.ToLower(pat.Param(r, "commandName"))
+
+	commandName := strings.ToLower(strings.Join(strings.Fields(pat.Param(r, "commandName")), ""))
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
@@ -70,13 +71,13 @@ func aliasTemplate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession
 		return
 	}
 
-	commandName := strings.ToLower(strings.TrimSpace(pat.Param(r, "commandName")))
+	commandName := strings.ToLower(strings.Join(strings.Fields(pat.Param(r, "commandName")), ""))
 
 	if commandName == "" {
 		writeJSONError(w, "URL is not valid", http.StatusBadRequest)
 		return
 	}
-	lcaseAlias := strings.ToLower(request.AliasTo)
+	lcaseAlias := strings.ToLower(strings.Join(strings.Fields(strings.ToLower(request.AliasTo)), ""))
 	repos.SetChannelTemplateAlias(&s.Username, &s.UserID, channelID, &commandName, &lcaseAlias)
 
 	json.NewEncoder(w).Encode(optionResponse{"OK"})

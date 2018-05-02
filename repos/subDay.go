@@ -64,21 +64,21 @@ func GetSubdays(channelID *string) ([]models.SubdayList, error) {
 }
 
 // CloseActiveSubday closes any active subday on specified channel
-func CloseActiveSubday(channelID *string) {
+func CloseActiveSubday(channelID *string, user *string, userID *string) {
 	db.C(subdayCollection).UpdateAll(bson.M{
 		"channelid": *channelID,
 		"isactive":  true},
-		bson.M{"$set": bson.M{"isactive": false}})
+		bson.M{"$set": bson.M{"isactive": false, "closer": *user, "closerid": *userID}})
 	SetSubdayIsActive(channelID, false)
 
 }
 
 // CloseSubday closes specified subday on specified channel
-func CloseSubday(channelID *string, id *string) {
+func CloseSubday(channelID *string, id *string, user *string, userID *string) {
 	db.C(subdayCollection).UpdateAll(bson.M{
 		"channelid": *channelID,
 		"_id":       bson.ObjectIdHex(*id)},
-		bson.M{"$set": bson.M{"isactive": false}})
+		bson.M{"$set": bson.M{"isactive": false, "closer": *user, "closerid": *userID}})
 	SetSubdayIsActive(channelID, false)
 
 }

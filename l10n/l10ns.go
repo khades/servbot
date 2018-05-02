@@ -113,6 +113,7 @@ var l10n = map[string]Item{
 		SubdayCreationPrefix:               "Сабдей, созданый ",
 		SubdayVoteNoActiveSubday:           "Голосование на сабдее: Нет открытых сабдеев",
 		SubdayVoteYouReNotSub:              "Голосование на сабдее: Вы не подписчик",
+
 		GameHistoryActivePrefix:            "CЕЙЧАС",
 		NotAFollower:                       "Не фолловер",
 		InvalidValue:                       "Неверное значение",

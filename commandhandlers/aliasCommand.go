@@ -16,12 +16,11 @@ func aliasCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessa
 		aliasTo := ""
 		separator := strings.Index(chatCommand.Body, "=")
 		if separator != -1 {
-			commandName = strings.ToLower(strings.TrimSpace(chatCommand.Body[:separator]))
-			aliasTo = strings.ToLower(strings.TrimSpace(chatCommand.Body[separator+1:]))
-
+			commandName = strings.ToLower(strings.Join(strings.Fields(chatCommand.Body[:separator]), ""))
+			aliasTo = strings.ToLower(strings.Join(strings.Fields(chatCommand.Body[separator+1:]), ""))
 		} else {
-			commandName = chatCommand.Body
-			aliasTo = chatCommand.Body
+			commandName =  strings.ToLower(strings.Join(strings.Fields(chatCommand.Body), ""))
+			aliasTo =  strings.ToLower(strings.Join(strings.Fields(chatCommand.Body), ""))
 		}
 		repos.SetChannelTemplateAlias(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &aliasTo)
 

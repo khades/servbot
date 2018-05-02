@@ -16,10 +16,11 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 		template := ""
 		separator := strings.Index(chatCommand.Body, "=")
 		if separator != -1 {
-			commandName = strings.ToLower(strings.TrimSpace(chatCommand.Body[:separator]))
+
+			commandName = strings.ToLower(strings.Join(strings.Fields(chatCommand.Body[:separator]), ""))
 			template = strings.TrimSpace(chatCommand.Body[separator+1:])
 		} else {
-			commandName = chatCommand.Body
+			commandName = strings.ToLower(strings.Join(strings.Fields(chatCommand.Body), ""))
 		}
 		if strings.HasPrefix(template, "!") || strings.HasPrefix(template, ".") || strings.HasPrefix(template, "/") {
 			ircClient.SendPublic(&models.OutgoingMessage{
@@ -35,7 +36,7 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 				User:    chatMessage.User})
 			return
 		}
-		if (commandName == "new" || commandName == "alias") {
+		if commandName == "new" || commandName == "alias" {
 			ircClient.SendPublic(&models.OutgoingMessage{
 				Channel: chatMessage.Channel,
 				Body:    l10n.GetL10n(channelInfo.GetChannelLang()).ReservedCommandNameIsForbidden,
@@ -43,7 +44,7 @@ func newCommand(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage
 			return
 		}
 		templateBody := models.TemplateInfoBody{
-			Template:    template}
+			Template: template}
 		templateError := repos.SetChannelTemplate(&chatMessage.User, &chatMessage.UserID, &chatMessage.ChannelID, &commandName, &templateBody)
 		if templateError == nil {
 			ircClient.SendPublic(&models.OutgoingMessage{
