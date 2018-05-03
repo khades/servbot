@@ -13,17 +13,18 @@ func PutChallengeForWebHookTopic(channelID *string, topic *string, challenge *st
 	db.C(channelInfoCollection).Update(bson.M{"channelid": *channelID, "topic": *topic}, bson.M{"$set": bson.M{"challenge": *challenge}})
 }
 
+func PutSecretForWebHookTopic(channelID *string, topic *string, secret *string) {
+	db.C(channelInfoCollection).Update(bson.M{"channelid": *channelID, "topic": *topic}, bson.M{"$set": bson.M{"secret": *secret}})
+}
+
 func putTimeoutForWebHookTopic(channelID *string, topic *string, expiresAt time.Time) {
 	db.C(channelInfoCollection).Update(bson.M{"channelid": *channelID, "topic": *topic}, bson.M{"$set": bson.M{"expiresat": expiresAt}})
 }
 
-func GetChallengeForWebHookTopic(channelID *string, topic *string) (string, bool) {
+func GetWebHookTopic(channelID *string, topic *string) (*models.WebHookInfo, error) {
 	var result models.WebHookInfo
 	err := db.C(channelInfoCollection).Find(bson.M{"channelid": *channelID, "topic": *topic}).One(&result)
-	if err != nil {
-		return "", false
-	}
-	return result.Challenge, true
+	return &result, err
 }
 
 func getHooksForChannel(channelID *string) (*models.WebHookInfo, error) {

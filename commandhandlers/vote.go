@@ -23,7 +23,8 @@ func Vote(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chat
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayVoteNoActiveSubday,
 			User:    chatMessage.User},
-			Command: "%vote"})
+			RedirectTo: chatMessage.User,
+			Command:    "%vote"})
 		return
 	}
 	if subday.SubsOnly == true && chatMessage.IsSub == false {
@@ -31,7 +32,8 @@ func Vote(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chat
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayVoteYouReNotSub,
 			User:    chatMessage.User},
-			Command: "%vote"})
+			RedirectTo: chatMessage.User,
+			Command:    "%vote"})
 		return
 	}
 	repos.VoteForSubday(&chatMessage.User, &chatMessage.UserID, &subday.ID, &game)

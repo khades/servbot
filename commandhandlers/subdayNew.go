@@ -1,7 +1,6 @@
 package commandhandlers
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -12,7 +11,6 @@ import (
 )
 
 func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	log.Println("CREATING SUBDAY")
 
 	if chatMessage.IsMod == false {
 		// ircClient.SendPublic(&models.OutgoingMessage{
