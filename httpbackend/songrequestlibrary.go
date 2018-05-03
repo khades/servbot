@@ -3,7 +3,6 @@ package httpbackend
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -24,7 +23,6 @@ type videolibraryResponse struct {
 func songrequestGetLibrary(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
 	pageInt := 1
-	log.Println(r.FormValue("page"))
 	if r.FormValue("page") != "" {
 		pageInt, _ = strconv.Atoi(r.FormValue("page"))
 		if pageInt < 0 {
@@ -104,7 +102,6 @@ func songrequestSetTag(w http.ResponseWriter, r *http.Request, s *models.HTTPSes
 func songrequestGetBannedTracks(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
 	pageInt := 1
-	log.Println(r.FormValue("page"))
 	if r.FormValue("page") != "" {
 		pageInt, _ = strconv.Atoi(r.FormValue("page"))
 		if pageInt < 0 {

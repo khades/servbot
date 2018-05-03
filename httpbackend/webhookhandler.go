@@ -3,13 +3,13 @@ package httpbackend
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 )
 
 type twitchPubSubFollows struct {
@@ -33,10 +33,14 @@ type twitchPubSubStream struct {
 }
 
 func webhookStream(w http.ResponseWriter, r *http.Request) {
-	r.Header.Get("X-Hub-Signature")
-	if r.FormValue("channelID") == "" {
-		log.Println("NO CHANNELID")
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "httpbackend",
+		"feature": "webhook",
+		"action":  "webhookStream"})
+	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
 
+	if r.FormValue("channelID") == "" {
+		logger.Debugf("No channel set")
 		return
 	}
 	channelID := r.FormValue("channelID")
@@ -45,7 +49,7 @@ func webhookStream(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&streams)
 	if err != nil {
-		log.Println("PARSING ERROR")
+		logger.Debugf("JSON decode error: %s", err.Error())
 
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
@@ -61,46 +65,48 @@ func webhookStream(w http.ResponseWriter, r *http.Request) {
 		status.Viewers = singleStatus.Viewers
 		status.Start = singleStatus.Start
 	}
-	log.Printf("%+v", status)
+
+	logger.Debugf("New status for channel %s : %+v", channelID, status)
 
 	repos.PushStreamStatus(&channelID, status)
 }
 
 func webhookFollows(w http.ResponseWriter, r *http.Request) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "httpbackend",
+		"feature": "webhook",
+		"action":  "webhookFollows"})
 	followers := twitchPubSubFollows{}
 	decoder := json.NewDecoder(r.Body)
 
 	err := decoder.Decode(&followers)
 	if err != nil {
-		log.Println("PARSING ERROR")
+		logger.Debugf("JSON decode error: %s", err.Error())
 
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	log.Printf("%+v", followers)
-	// for _, follower := range followers.Data {
-	// 	alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.ChannelID, &follower.UserID)
-	// 	if alreadyGreeted == false {
-	// 		repos.AddFollowerToList(&follower.ChannelID, &follower.UserID, follower.Date, true)
-	// 	}
-	// }
+	logger.Debugf("JSON decode error: %s", err.Error())
+
+	logger.Debugf("Incoming followers: %+v", followers)
+	for _, follower := range followers.Data {
+		logger.Debugf("User %s follows channel %s", follower.UserID, follower.ChannelID)
+
+		alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.ChannelID, &follower.UserID)
+		if alreadyGreeted == false {
+			repos.AddFollowerToList(&follower.ChannelID, &follower.UserID, follower.Date, true)
+		}
+	}
 }
 
 func webhookVerify(w http.ResponseWriter, r *http.Request) {
-	log.Println("WE ARE THERE")
-
 	if r.FormValue("hub.topic") == "" || r.FormValue("hub.challenge") == "" {
 		io.WriteString(w, "Error")
-
 	}
 	parsedURLparts := strings.Split(strings.Replace(r.FormValue("hub.topic"), "https://api.twitch.tv/helix/", "", 1), "?")
 	topic := parsedURLparts[0]
 	channelID := strings.Split(parsedURLparts[1], "=")[1]
 	challenge := r.FormValue("hub.challenge")
-	log.Println(channelID)
-	log.Println(topic)
-	log.Println(challenge)
 	repos.PutChallengeForWebHookTopic(&channelID, &topic, &challenge)
 	io.WriteString(w, challenge)
-
 }

@@ -20,8 +20,8 @@ type subdayWithModNoWinners struct {
 	IsMod bool `json:"isMod"`
 }
 type subdayCreateStruct struct {
-	Name         string `json:"name"`
-	AllowNonSubs bool   `json:"allowNonSubs"`
+	Name     string `json:"name"`
+	SubsOnly bool   `json:"subsOnly"`
 }
 type subdayCreateResp struct {
 	ID string `json:"id"`
@@ -35,7 +35,7 @@ func subdayCreate(w http.ResponseWriter, r *http.Request, s *models.HTTPSession,
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	created, id := repos.CreateNewSubday(channelID, request.AllowNonSubs, &request.Name)
+	created, id := repos.CreateNewSubday(channelID, request.SubsOnly, &request.Name)
 	if created == false {
 		writeJSONError(w, "Subday already exists", http.StatusNotAcceptable)
 		return

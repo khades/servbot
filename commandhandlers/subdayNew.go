@@ -1,19 +1,19 @@
 package commandhandlers
 
 import (
-
+	"log"
 	"strings"
 	"time"
 
-	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/ircClient"
+	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
 
 func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chatCommand models.ChatCommand, ircClient *ircClient.IrcClient) {
-	
-	
+	log.Println("CREATING SUBDAY")
+
 	if chatMessage.IsMod == false {
 		// ircClient.SendPublic(&models.OutgoingMessage{
 		// 	Channel: chatMessage.Channel,
@@ -34,7 +34,7 @@ func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage,
 		subsOnly = false
 	}
 	if subdayName == "" {
-		subdayName =  l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
+		subdayName = l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
 	}
 	created, _ := repos.CreateNewSubday(&chatMessage.ChannelID, subsOnly, &subdayName)
 	if created == true {

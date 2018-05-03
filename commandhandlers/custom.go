@@ -2,7 +2,7 @@ package commandhandlers
 
 import (
 	"fmt"
-	"log"
+
 	"math/rand"
 	"strconv"
 	"strings"
@@ -80,7 +80,7 @@ func (channelInfo *templateExtendedObject) Random() string {
 	if channelInfo.IsMod == false && channelInfo.StreamStatus.Online == true {
 		return ""
 	}
-	return strconv.Itoa(lowerLimit + rand.Intn(upperLimit-lowerLimit))
+	return strconv.Itoa(lowerLimit + rand.Intn(upperLimit-lowerLimit+1))
 }
 
 func (channelInfo *templateExtendedObject) Banme30() banmeResult {
@@ -121,7 +121,7 @@ func (channelInfo *templateExtendedObject) Banme(length int) banmeResult {
 			Banned:    false,
 			Moderator: true}
 	}
-	banDuration := rand.Intn(length)
+	banDuration := rand.Intn(length + 1)
 	if banDuration == 0 {
 		return banmeResult{
 			Banned: false}
@@ -348,8 +348,7 @@ func custom(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, ch
 		return
 	}
 	redirectTo := chatMessage.User
-	log.Println(templateObject.PreventRedirect)
-	log.Println(templateObject.PreventDebounce)
+
 	//if chatCommand.Body != "" && !(template.StringRandomizer.Enabled == true && len(template.StringRandomizer.Strings) == 0) && template.PreventRedirect == false {
 	if templateObject.PreventRedirect == false && chatCommand.Body != "" {
 		if strings.HasPrefix(chatCommand.Body, "@") {

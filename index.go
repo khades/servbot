@@ -172,7 +172,7 @@ func main() {
 			services.CheckVK()
 		}
 	}()
-	minuteTicker := time.NewTicker(2* time.Minute)
+	minuteTicker := time.NewTicker(5* time.Minute)
 
 	go func(wg *sync.WaitGroup) {
 		for {
