@@ -21,7 +21,7 @@ func GetChannelUsers(channelID *string, pattern *string) ([]models.ChannelUser, 
 		"channelid": *channelID,
 		"knownnicknames": bson.M{
 			"$regex":   *pattern,
-			"$options": "i"}}).Sort("messages.date").Limit(100).All(&channelUsers)
+			"$options": "i"}}).Sort("-lastupdate").Limit(100).All(&channelUsers)
 	return channelUsers, error
 }
 
@@ -32,7 +32,7 @@ func LogMessage(message *models.ChatMessage) {
 	}
 
 	query := bson.M{
-		"$set":      bson.M{"user": message.User, "channel": message.Channel},
+		"$set":      bson.M{"user": message.User, "channel": message.Channel, "lastupdate": time.Now()},
 		"$addToSet": bson.M{"knownnicknames": message.User},
 		"$push": bson.M{"messages": bson.M{
 			"$each":  []models.MessageStruct{message.MessageStruct},
@@ -47,7 +47,7 @@ func LogMessage(message *models.ChatMessage) {
 			BanIssuerID: message.BanIssuerID,
 			Date:        time.Now()}
 		query = bson.M{
-			"$set":      bson.M{"user": message.User, "channel": message.Channel},
+			"$set":      bson.M{"user": message.User, "channel": message.Channel, "lastupdate": time.Now()},
 			"$addToSet": bson.M{"knownnicknames": message.User},
 			"$push": bson.M{"messages": bson.M{
 				"$each":  []models.MessageStruct{message.MessageStruct},
