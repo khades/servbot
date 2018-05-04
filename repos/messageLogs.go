@@ -13,7 +13,7 @@ var messageLogsCollection = "messageLogs"
 func GetChannelUsers(channelID *string, pattern *string) ([]models.ChannelUser, error) {
 	var channelUsers []models.ChannelUser
 	if *pattern == "" {
-		error := db.C(messageLogsCollection).Find(models.ChannelSelector{ChannelID: *channelID}).Sort("messages.date").Limit(100).All(&channelUsers)
+		error := db.C(messageLogsCollection).Find(models.ChannelSelector{ChannelID: *channelID}).Sort("-lastupdate").Limit(100).All(&channelUsers)
 		return channelUsers, error
 
 	}
