@@ -55,6 +55,18 @@ type twitchFollowerResponse struct {
 	Followers  twitchFollowers                  `json:"data"`
 }
 
+func twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
+	var timeout = 5 * time.Second
+	var client = http.Client{Timeout: timeout}
+	req, error := http.NewRequest("POST", "https://api.twitch.tv/helix/"+urlStr, body)
+	req.Header.Add("Authorization", "Bearer "+strings.Replace(Config.OauthKey, "oauth:", "", 1))
+	req.Header.Add("Client-ID", Config.ClientID)
+	req.Header.Add("Content-Type", "application/json")
+	if error != nil {
+		return nil, error
+	}
+	return client.Do(req)
+}
 func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) (*http.Response, error) {
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}

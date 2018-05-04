@@ -58,7 +58,6 @@ type banmeResult struct {
 }
 
 func (channelInfo *templateExtendedObject) FollowerInfo() followerDuration {
-	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
 	isFollower, dur := repos.GetIfFollowerToChannel(&channelInfo.ChannelID, &channelInfo.UserID)
 	if isFollower == true {
