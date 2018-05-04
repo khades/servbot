@@ -1,7 +1,6 @@
 package repos
 
 import (
-	"net/url"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -15,11 +14,11 @@ var webhooklibrary = "webhooklibrary"
 // }
 
 type hub struct {
-	Mode string `json:"hub.mode"`
-	Topic string `json:"hub.topic"`
-	Callback string `json:"hub.callback"`
+	Mode         string `json:"hub.mode"`
+	Topic        string `json:"hub.topic"`
+	Callback     string `json:"hub.callback"`
 	LeaseSeconds string `json:"hub.lease_seconds"`
-	Secret string `json:"hub.secret"`
+	Secret       string `json:"hub.secret"`
 }
 
 func upsateWebHookTopic(channelID *string, topic *string, secret *string, expiresAt time.Time) {
