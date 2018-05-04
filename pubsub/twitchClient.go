@@ -174,14 +174,17 @@ func twitchPubSubClient(topics []string) {
 
 					if moderAction.Data.ModeratorAction == "ban" {
 						result.MessageStruct.BanReason = moderAction.Data.Args[1]
+						repos.LogMessage(&result)
+
 					}
 
 					if moderAction.Data.ModeratorAction == "timeout" {
 						length, _ := strconv.Atoi(moderAction.Data.Args[1])
 						result.MessageStruct.BanLength = length
+						repos.LogMessage(&result)
+
 					}
 
-					repos.LogMessage(&result)
 
 				}
 			}
