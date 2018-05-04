@@ -16,13 +16,13 @@ type channelInfoResponseStruct struct {
 
 func channel(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 
-	channelInfo, error := repos.GetChannelInfo(channelID)
-	if error != nil {
-		writeJSONError(w, error.Error(), http.StatusInternalServerError)
-		return
-	}
+	channelInfo, _ := repos.GetChannelInfo(channelID)
+		// if error != nil {
+		// 	writeJSONError(w, error.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
 
-	modChannels, _ := repos.GetModChannels(&s.UserID)
+		modChannels, _ := repos.GetModChannels(&s.UserID)
 
 	channelInfoResponse := channelInfoResponseStruct{
 		Channel:     *channelName,
