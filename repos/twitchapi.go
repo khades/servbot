@@ -211,7 +211,7 @@ type twitchStreamResponse struct {
 func getStreamStatusesPaged(channels []string) ([]models.TwitchStreamStatus, error) {
 	var twitchResult twitchStreamResponse
 
-	streamsString := "streams?user_id=" + strings.Join(channels, ",user_id=")
+	streamsString := "streams?user_id=" + strings.Join(channels, "&user_id=")
 	resp, error := twitchHelix("GET", streamsString, nil)
 	if error != nil {
 		return nil, error
