@@ -255,7 +255,7 @@ type twitchGameStructResponse struct {
 func getGamesByIDPaged(gamesIDS []string) ([]twitchGameStruct, error) {
 	var twitchResult twitchGameStructResponse
 
-	gamesString := "games?id=" + strings.Join(gamesIDS, ",id=")
+	gamesString := "games?id=" + strings.Join(gamesIDS, "&id=")
 	resp, error := twitchHelix("GET", gamesString, nil)
 	if error != nil {
 		return nil, error
