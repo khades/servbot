@@ -28,24 +28,24 @@ type hub struct {
 }
 
 func upsateWebHookTopic(channelID *string, topic string, secret *string, expiresAt time.Time) {
-	db.C(channelInfoCollection).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
+	db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
 }
 
 func GetWebHookTopic(channelID *string, topic string) (*models.WebHookInfo, error) {
 	var result models.WebHookInfo
-	err := db.C(channelInfoCollection).Find(bson.M{"channelid": *channelID, "topic": topic}).One(&result)
+	err := db.C(webhooklibrary).Find(bson.M{"channelid": *channelID, "topic": topic}).One(&result)
 	return &result, err
 }
 
 func getHooksForChannel(channelID *string) ([]models.WebHookInfo, error) {
 	var result []models.WebHookInfo
-	err := db.C(channelInfoCollection).Find(bson.M{"channelid": *channelID}).All(&result)
+	err := db.C(webhooklibrary).Find(bson.M{"channelid": *channelID}).All(&result)
 	return result, err
 }
 
 func getNonExpiredHooks(pollDuration time.Duration) ([]models.WebHookInfo, error) {
 	var result []models.WebHookInfo
-	err := db.C(channelInfoCollection).Find(bson.M{"expiresat": bson.M{"$lte": time.Now().Add(-pollDuration)}}).All(&result)
+	err := db.C(webhooklibrary).Find(bson.M{"expiresat": bson.M{"$lte": time.Now().Add(-pollDuration)}}).All(&result)
 	return result, err
 }
 
