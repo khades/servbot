@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"time"
 
 	"github.com/khades/servbot/models"
@@ -76,7 +77,10 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		"action":  "webhookFollows"})
 	followers := twitchPubSubFollows{}
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
-
+	dump, dumpErr := httputil.DumpRequest(r, true)
+	if dumpErr == nil {
+		logger.Debugf("Repsonse is %q", dump)
+	}
 	decoder := json.NewDecoder(r.Body)
 	// topic := "follows"
 	// topicItem, topicError := repos.GetWebHookTopic(&channelID, &topic )
