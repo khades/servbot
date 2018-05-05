@@ -36,13 +36,13 @@ func updateUserToUserIDFromChat(userID *string, user *string) {
 
 func getUsersByIDFromDB(users []string) ([]usernameCache, error) {
 	var result = []usernameCache{}
-	error := db.C(usernameCacheCollection).Find(bson.M{"user": bson.M{"$in": users}}).All(&result)
+	error := db.C(usernameCacheCollection).Find(bson.M{"userid": bson.M{"$in": users}}).All(&result)
 	return result, error
 }
 
 func getUsersByUsernameFromDB(userIDs []string) ([]usernameCache, error) {
 	var result = []usernameCache{}
-	error := db.C(usernameCacheCollection).Find(bson.M{"userid": bson.M{"$in": userIDs}}).All(&result)
+	error := db.C(usernameCacheCollection).Find(bson.M{"user": bson.M{"$in": userIDs}}).All(&result)
 	return result, error
 }
 
