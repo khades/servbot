@@ -61,7 +61,7 @@ func twitchHelixPost(urlStr string, body io.Reader) {
 		"feature": "twitchapi",
 		"action":  "twitchHelixPost"})
 // (*http.Response, error) {
-	var timeout = 5 * time.Second
+	//var timeout = 5 * time.Second
 	//var client = http.Client{Timeout: timeout}
 	req, _ := http.NewRequest("POST", "https://api.twitch.tv/helix/"+urlStr, body)
 	req.Header.Add("Authorization", "Bearer "+strings.Replace(Config.OauthKey, "oauth:", "", 1))
