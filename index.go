@@ -164,15 +164,15 @@ func main() {
 		}
 	}()
 
-	// webhookTimer := time.NewTicker(time.Second * 300)
-	// repos.CheckAndSubscribeToWebhooks(time.Second * 300)
-	repos.SubChannelToFollowerHooks("40635840")
+	// webhookTimer := time.NewTicker(time.Minute * 15)
+	// repos.CheckAndSubscribeToWebhooks(time.Minute * 15)
 	// go func() {
 	// 	for {
 	// 		<-webhookTimer.C
-	// 		repos.CheckAndSubscribeToWebhooks(time.Second * 300)
+	// 		repos.CheckAndSubscribeToWebhooks(time.Minute * 15)
 	// 	}
 	// }()
+
 	vkTimer := time.NewTicker(time.Second * 60)
 
 	go func() {
@@ -196,16 +196,17 @@ func main() {
 		httpbackend.Start()
 		wg.Done()
 	}(&wg)
-	// followerTicker := time.NewTicker(time.Second * 30)
 
-	// go func(wg *sync.WaitGroup) {
-	// 	for {
-	// 		<-followerTicker.C
-	// 		wg.Add(1)
-	// 		services.CheckChannelsFollowers()
-	// 		wg.Done()
-	// 	}
-	// }(&wg)
+	followerTicker := time.NewTicker(time.Second * 20)
+
+	go func(wg *sync.WaitGroup) {
+		for {
+			<-followerTicker.C
+			wg.Add(1)
+			services.AnnounceFollowers()
+			wg.Done()
+		}
+	}(&wg)
 	go func(wg *sync.WaitGroup) {
 		bot.Start()
 		wg.Done()

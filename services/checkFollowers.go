@@ -6,21 +6,49 @@ import (
 	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
+	"github.com/sirupsen/logrus"
 )
 
-// CheckChannelsFollowers process followers of all channels on that instance of bot, that code will be deprecated after webhooks will be done
-func CheckChannelsFollowers() {
-	channelFollowers, error := repos.CheckFollowers()
+// AnnounceFollowers announces all new followers on channels
+func AnnounceFollowers() {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "services",
+		"feature": "followers",
+		"action":  "AnnounceFollowers"})
+	channelFollowers, error := repos.GetFollowersToGreet()
 	if error != nil {
+		logger.Debug("Nothing to process")
 		return
 	}
-	for _, channel := range channelFollowers{
+	for _, channel := range channelFollowers {
+		logger.Debugf("Processing channel %s", channel.ChannelID)
 		alertInfo, alertError := repos.GetSubAlert(&channel.ChannelID)
+		if alertError != nil {
+			logger.Debugf("No alert for channel %s", channel.ChannelID)
 
-		if alertError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+			continue
+		}
+		channelInfo, channelInfoError := repos.GetChannelInfo(&channel.ChannelID)
+		if channelInfoError != nil {
+			logger.Debugf("No channelInfo for channel %s", channel.ChannelID)
+
+			continue
+		}
+		followers := []string{}
+		followersMap, followersError := repos.GetUsernames(channel.Followers)
+		if followersError != nil {
+			logger.Debugf("Followers resolve failed for channel %s", channel.ChannelID)
+
+			continue
+		}
+		for _, follower := range *followersMap {
+			followers = append(followers, follower)
+		}
+		if channelInfoError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
 			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-				Channel: channel.Channel,
-				Body:    "@" + strings.Join(channel.Followers, " @") + " " + alertInfo.FollowerMessage})
+				Channel: channelInfo.Channel,
+				Body:    "@" + strings.Join(followers, " @") + " " + alertInfo.FollowerMessage})
+			repos.ResetFollowersToGreetOnChannel(&channel.ChannelID)
 		}
 	}
 

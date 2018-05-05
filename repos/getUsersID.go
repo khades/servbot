@@ -74,7 +74,7 @@ func GetChannelNameByID(channelID *string) (*string, error) {
 	return &userName, nil
 }
 
-// GetUsersID fetches usernames from twitch for specified users, and caches them for 6 hours
+// GetUsersID fetches usernames from twitch for specified users, and caches them for 6 hours, resolving username->id
 func GetUsersID(users []string) (*map[string]string, error) {
 	// Cache every username -> userid pair for month
 	logger := logrus.WithFields(logrus.Fields{
@@ -106,7 +106,7 @@ func GetUsersID(users []string) (*map[string]string, error) {
 			//	if time.Now().Sub(user.CreatedAt) < 60*time.Minute {
 			// logger.Debugf("User found in database: %s", user.User)
 
-			result[user.UserID] = user.User
+			result[user.User] = user.UserID
 			index := sort.SearchStrings(users, user.User)
 			if index < len(users) {
 				users = remove(users, index)
@@ -117,6 +117,7 @@ func GetUsersID(users []string) (*map[string]string, error) {
 
 	if len(users) == 0 {
 		logger.Debugf("All users found")
+		logger.Debugf("Result: %+v", result)
 		return &result, nil
 	}
 
@@ -150,6 +151,75 @@ func GetUsersID(users []string) (*map[string]string, error) {
 	logger.Debugf("Not found users: %s", strings.Join(users, ", "))
 
 	logger.Debugf("Returning %d users", len(result))
+	logger.Debugf("Result: %+v", result)
+
+	return &result, nil
+}
+
+// GetUsernames fetches userID from twitch for specified users, and caches them for 6 hours
+func GetUsernames(userIDs []string) (*map[string]string, error) {
+	// Cache every username -> userid pair for month
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "GetUsersID",
+		"action":  "GetUsernames"})
+	logger.Debugf("Function is called")
+
+	result := make(map[string]string)
+	logger.Debugf("Input users length: %d", len(userIDs))
+	logger.Debugf("Users: %s", strings.Join(userIDs, ", "))
+
+	usernamesDB, error := getUsersByIDFromDB(userIDs)
+
+	if error == nil {
+		logger.Debugf("Users found: %+v", usernamesDB)
+
+		for _, user := range usernamesDB {
+			//	if time.Now().Sub(user.CreatedAt) < 60*time.Minute {
+			// logger.Debugf("User found in database: %s", user.User)
+
+			result[user.UserID] = user.User
+			index := sort.SearchStrings(userIDs, user.UserID)
+			if index < len(userIDs) {
+				userIDs = remove(userIDs, index)
+			}
+			//	}
+		}
+	}
+
+	if len(userIDs) == 0 {
+		logger.Debugf("All users found")
+		logger.Debugf("Result: %+v", result)
+
+		return &result, nil
+	}
+
+	logger.Debugf("Total found users: %d", len(result))
+	logger.Debugf("Total not found users: %d", len(userIDs))
+
+	twitchUsers, usersError := getTwitchUsersByID(userIDs)
+
+	if usersError != nil {
+		logger.Debugf("External function error encountered: %s", usersError.Error())
+		return nil, usersError
+
+	}
+
+	for _, user := range twitchUsers {
+		username := strings.ToLower(user.DisplayName)
+		logger.Debugf("Found user %s with id %s", user.DisplayName, user.ID)
+
+		result[user.ID] = username
+		updateUserToUserID(&user.ID, &username, time.Now())
+	
+	}
+
+
+
+	logger.Debugf("Not found users: %s", strings.Join(userIDs, ", "))
+
+	logger.Debugf("Returning %d users", len(result))
+	logger.Debugf("Result: %+v", result)
 
 	return &result, nil
 }

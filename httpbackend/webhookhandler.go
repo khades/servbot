@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 	"time"
 
@@ -43,14 +44,37 @@ func webhookStream(w http.ResponseWriter, r *http.Request) {
 		"feature": "webhook",
 		"action":  "webhookStream"})
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
+	dump, dumpErr := httputil.DumpRequest(r, true)
+	if dumpErr == nil {
+		logger.Debugf("Repsonse is %q", dump)
+	}
 	if r.FormValue("channelID") == "" {
 		logger.Debugf("No channel set")
 		return
 	}
 	channelID := r.FormValue("channelID")
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
 
+	topicItem, topicError := repos.GetWebHookTopic(&channelID, "streams")
+	if topicError != nil {
+		logger.Debugf("Topic doesnt exists, exiting")
+		writeJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
+		return
+	}
+
+	mac := hmac.New(sha256.New, []byte(topicItem.Secret))
+	mac.Write(bodyBytes)
+
+	logger.Debugf("calculated signature is %s", hex.EncodeToString(mac.Sum(nil)))
+	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
+
+	if strings.Replace(r.Header.Get("X-Hub-Signature"), "sha256=", "", 1) != hex.EncodeToString(mac.Sum(nil)) {
+		logger.Debugf("Hexes are not equal, exiting")
+		writeJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
+		return
+	}
 	streams := twitchPubSubStreams{}
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(ioutil.NopCloser(bytes.NewBuffer(bodyBytes)))
 	err := decoder.Decode(&streams)
 	if err != nil {
 		logger.Debugf("JSON decode error: %s", err.Error())
@@ -98,7 +122,7 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 	}
 
 	topicItem, topicError := repos.GetWebHookTopic(&follower.Data.ChannelID, "follows")
-	if (topicError != nil) {
+	if topicError != nil {
 		logger.Debugf("Topic doesnt exists, exiting")
 		writeJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
 		return
@@ -122,6 +146,8 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 	alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.Data.ChannelID, &follower.Data.UserID)
 	if alreadyGreeted == false {
 		repos.AddFollowerToList(&follower.Data.ChannelID, &follower.Data.UserID, follower.Timestamp, true)
+		repos.GetUsersID
+		repos.AddFollowerToGreetOnChannel(&follower.Data.ChannelID, follower.Data.UserID)
 	}
 
 }

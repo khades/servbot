@@ -3,6 +3,7 @@ package repos
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	"net/http/httputil"
 	"time"
 
@@ -99,8 +100,11 @@ func SubChannelToFollowerHooks(channelID string) {
 	if err == nil {
 		logger.Debugf("Repsonse is %q", dump)
 	}
-	upsateWebHookTopic(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
+	if resp.StatusCode == http.StatusAccepted {
+		upsateWebHookTopic(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
+	}
 }
+
 func getExpiredTopics(nonExpiredTopics []models.WebHookInfo, channelID string) (bool, bool) {
 	if len(nonExpiredTopics) == 0 {
 		return false, false
