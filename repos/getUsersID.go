@@ -47,7 +47,7 @@ func getUsersByUsernameFromDB(userIDs []string) ([]usernameCache, error) {
 }
 
 func updateUserToUserID(userID *string, user *string, createdAt time.Time) {
-	db.C(usernameCacheCollection).Upsert(bson.M{"userid": *userID}, bson.M{"$set": usernameCache{*userID, *user, createdAt}})
+	db.C(usernameCacheCollection).Upsert(bson.M{"userid": *userID}, usernameCache{*userID, *user, createdAt})
 }
 
 // GetChannelNameByID tries to fetch channelname for specified channelid from cache, falling back to channelInfo database
@@ -87,15 +87,15 @@ func GetUsersID(users []string) (*map[string]string, error) {
 	logger.Debugf("Input users length: %d", len(users))
 	logger.Debugf("Users: %s", strings.Join(users, ", "))
 
-	for user, userRejectionDate := range usernameCacheRejectDates {
-		if time.Now().Sub(userRejectionDate) < 20*time.Minute {
-			index := sort.SearchStrings(users, user)
-			if index < len(users) {
-				users = remove(users, index)
-			}
-		}
-	}
-	logger.Debugf("Users after rejection: %s", strings.Join(users, ", "))
+	// for user, userRejectionDate := range usernameCacheRejectDates {
+	// 	if time.Now().Sub(userRejectionDate) < 20*time.Minute {
+	// 		index := sort.SearchStrings(users, user)
+	// 		if index < len(users) {
+	// 			users = remove(users, index)
+	// 		}
+	// 	}
+	// }
+	// logger.Debugf("Users after rejection: %s", strings.Join(users, ", "))
 
 	usernamesDB, error := getUsersByUsernameFromDB(users)
 
@@ -108,8 +108,12 @@ func GetUsersID(users []string) (*map[string]string, error) {
 
 			result[user.User] = user.UserID
 			index := sort.SearchStrings(users, user.User)
+
 			if index < len(users) {
+				logger.Debugf("User %s found in db, rejecting from further search", user.User)
+				logger.Debugf("Users before rejection: %s", strings.Join(users, ", "))
 				users = remove(users, index)
+				logger.Debugf("Users After rejection: %s", strings.Join(users, ", "))
 			}
 			//	}
 		}
@@ -136,7 +140,7 @@ func GetUsersID(users []string) (*map[string]string, error) {
 
 	for _, user := range twitchUsers {
 		username := strings.ToLower(user.DisplayName)
-		logger.Debugf("Found user %s with id %s", user.DisplayName, user.ID)
+		logger.Debugf("Found user %s with id %s", username, user.ID)
 
 		result[username] = user.ID
 		updateUserToUserID(&user.ID, &username, time.Now())
@@ -146,11 +150,11 @@ func GetUsersID(users []string) (*map[string]string, error) {
 		}
 	}
 
-	for _, user := range users {
-		usernameCacheRejectDates[user] = time.Now()
-	}
+	// for _, user := range users {
+	// 	usernameCacheRejectDates[user] = time.Now()
+	// }
 
-	logger.Debugf("Not found users: %s", strings.Join(users, ", "))
+	//logger.Debugf("Not found users: %s", strings.Join(users, ", "))
 
 	logger.Debugf("Returning %d users", len(result))
 	logger.Debugf("Result: %+v", result)
@@ -213,10 +217,8 @@ func GetUsernames(userIDs []string) (*map[string]string, error) {
 
 		result[user.ID] = username
 		updateUserToUserID(&user.ID, &username, time.Now())
-	
+
 	}
-
-
 
 	logger.Debugf("Not found users: %s", strings.Join(userIDs, ", "))
 

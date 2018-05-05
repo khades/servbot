@@ -73,8 +73,10 @@ func InitializeDB(dbName string) error {
 
 	db.C(messageLogsCollection).EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "userid"}})
+		
 	db.C(messageLogsCollection).EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "-lastupdate"}})
+
 	db.C(messageLogsCollection).EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "$text:knownnicknames"}})
 
