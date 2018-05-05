@@ -54,8 +54,12 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 		"package": "repos",
 		"feature": "webhook",
 		"action":  "CheckAndSubscribeToWebhooks"})
+		logger.Debugf("Starting")
+
 	channels, error := GetActiveChannels()
 	if error != nil {
+		logger.Debugf("Error %s", error.Error())
+
 		return
 	}
 	nonExpiredHooks, _ := getNonExpiredHooks(pollDuration)
