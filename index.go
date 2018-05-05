@@ -164,14 +164,14 @@ func main() {
 		}
 	}()
 
-	// webhookTimer := time.NewTicker(time.Minute * 15)
-	// repos.CheckAndSubscribeToWebhooks(time.Minute * 15)
-	// go func() {
-	// 	for {
-	// 		<-webhookTimer.C
-	// 		repos.CheckAndSubscribeToWebhooks(time.Minute * 15)
-	// 	}
-	// }()
+	webhookTimer := time.NewTicker(time.Minute * 15)
+	repos.CheckAndSubscribeToWebhooks(time.Minute * 15)
+	go func() {
+		for {
+			<-webhookTimer.C
+			repos.CheckAndSubscribeToWebhooks(time.Minute * 15)
+		}
+	}()
 
 	vkTimer := time.NewTicker(time.Second * 60)
 
