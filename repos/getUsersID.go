@@ -110,7 +110,7 @@ func GetUsersID(users []string) (*map[string]string, error) {
 			index := sort.SearchStrings(users, user.User)
 
 			if index < len(users) {
-				logger.Debugf("User %s found in db, rejecting from further search", user.User)
+				logger.Debugf("User %s found in db, rejecting from further search, its index is %d", user.User, index)
 				logger.Debugf("Users before rejection: %s", strings.Join(users, ", "))
 				users = remove(users, index)
 				logger.Debugf("Users After rejection: %s", strings.Join(users, ", "))
