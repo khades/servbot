@@ -6,7 +6,7 @@ import (
 	"net/http/httputil"
 	"time"
 
-	"github.com/desertbit/glue/utils"
+	"github.com/khades/servbot/utils"
 	"github.com/sirupsen/logrus"
 
 	"github.com/globalsign/mgo/bson"
