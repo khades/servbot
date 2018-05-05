@@ -75,7 +75,7 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		"package": "httpbackend",
 		"feature": "webhook",
 		"action":  "webhookFollows"})
-	followers := twitchPubSubFollows{}
+	follower := twitchPubSubFollows{}
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
 	dump, dumpErr := httputil.DumpRequest(r, true)
 	if dumpErr == nil {
@@ -84,7 +84,7 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	// topic := "follows"
 	// topicItem, topicError := repos.GetWebHookTopic(&channelID, &topic )
-	err := decoder.Decode(&followers)
+	err := decoder.Decode(&follower)
 	if err != nil {
 		logger.Debugf("JSON decode error: %s", err.Error())
 
@@ -93,15 +93,15 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Debugf("JSON decode error: %s", err.Error())
 
-	logger.Debugf("Incoming followers: %+v", followers)
-	for _, follower := range followers.Data {
-		logger.Debugf("User %s follows channel %s", follower.UserID, follower.ChannelID)
+	logger.Debugf("Incoming followers: %+v", follower)
 
-		alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.ChannelID, &follower.UserID)
-		if alreadyGreeted == false {
-			repos.AddFollowerToList(&follower.ChannelID, &follower.UserID, follower.Date, true)
-		}
+	logger.Debugf("User %s follows channel %s", follower.Data.UserID, follower.Data.ChannelID)
+
+	alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.Data.ChannelID, &follower.Data.UserID)
+	if alreadyGreeted == false {
+		repos.AddFollowerToList(&follower.Data.ChannelID, &follower.Data.UserID, follower.Data.Date, true)
 	}
+
 }
 
 func webhookVerify(w http.ResponseWriter, r *http.Request) {
