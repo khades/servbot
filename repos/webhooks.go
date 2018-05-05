@@ -66,10 +66,10 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 
 	nonExpiredHooks, _ := getNonExpiredHooks(pollDuration)
 	for _, channel := range channels {
-		logger.Debugf("Processing channel %s", len(channel.ChannelID))
+		logger.Debugf("Processing channel %s", channel.ChannelID)
 
 		followsFound, _ := getExpiredTopics(nonExpiredHooks, channel.ChannelID)
-		if followsFound == true {
+		if followsFound == false {
 			logger.Debugf("Channel %s had no follower pubsub", channel.ChannelID)
 			secret := utils.RandomString(10)
 			form := hub{
