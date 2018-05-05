@@ -24,7 +24,16 @@ type usernameCache struct {
 
 var usernameCacheChatDates = make(map[string]time.Time)
 var usernameCacheRejectDates = make(map[string]time.Time)
-
+func findString(array []string, string string) int {
+	result := len(array)
+	for index, item := range array {
+		if item == string {
+			result = index
+			break
+		}
+	}
+	return result
+}
 func updateUserToUserIDFromChat(userID *string, user *string) {
 	date, found := usernameCacheChatDates[*userID]
 	if found == false || time.Now().Sub(date) < 60*time.Minute {
@@ -87,15 +96,15 @@ func GetUsersID(users []string) (*map[string]string, error) {
 	logger.Debugf("Input users length: %d", len(users))
 	logger.Debugf("Users: %s", strings.Join(users, ", "))
 
-	// for user, userRejectionDate := range usernameCacheRejectDates {
-	// 	if time.Now().Sub(userRejectionDate) < 20*time.Minute {
-	// 		index := sort.SearchStrings(users, user)
-	// 		if index < len(users) {
-	// 			users = remove(users, index)
-	// 		}
-	// 	}
-	// }
-	// logger.Debugf("Users after rejection: %s", strings.Join(users, ", "))
+	for user, userRejectionDate := range usernameCacheRejectDates {
+		if time.Now().Sub(userRejectionDate) < 20*time.Minute {
+			index := sort.SearchStrings(users, user)
+			if index < len(users) {
+				users = remove(users, index)
+			}
+		}
+	}
+	logger.Debugf("Users after rejection: %s", strings.Join(users, ", "))
 
 	usernamesDB, error := getUsersByUsernameFromDB(users)
 
@@ -107,7 +116,7 @@ func GetUsersID(users []string) (*map[string]string, error) {
 			// logger.Debugf("User found in database: %s", user.User)
 
 			result[user.User] = user.UserID
-			index := sort.SearchStrings(users, user.User)
+			index := findString(users, user.User)
 
 			if index < len(users) {
 				logger.Debugf("User %s found in db, rejecting from further search, its index is %d", user.User, index)
@@ -144,17 +153,17 @@ func GetUsersID(users []string) (*map[string]string, error) {
 
 		result[username] = user.ID
 		updateUserToUserID(&user.ID, &username, time.Now())
-		index := sort.SearchStrings(users, username)
+		index := findString(users, username)
 		if index < len(users) {
 			users = remove(users, index)
 		}
 	}
 
-	// for _, user := range users {
-	// 	usernameCacheRejectDates[user] = time.Now()
-	// }
+	for _, user := range users {
+		usernameCacheRejectDates[user] = time.Now()
+	}
 
-	//logger.Debugf("Not found users: %s", strings.Join(users, ", "))
+	logger.Debugf("Not found users and rejected: %s", strings.Join(users, ", "))
 
 	logger.Debugf("Returning %d users", len(result))
 	logger.Debugf("Result: %+v", result)
@@ -185,7 +194,7 @@ func GetUsernames(userIDs []string) (*map[string]string, error) {
 			// logger.Debugf("User found in database: %s", user.User)
 
 			result[user.UserID] = user.User
-			index := sort.SearchStrings(userIDs, user.UserID)
+			index := findString(userIDs, user.UserID)
 			if index < len(userIDs) {
 				userIDs = remove(userIDs, index)
 			}
