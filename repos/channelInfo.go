@@ -68,7 +68,7 @@ func GetChannelInfo(channelID *string) (*models.ChannelInfo, error) {
 		"feature": "channelInfo",
 		"action":  "GetChannelInfo"})
 	timesCalled = timesCalled + 1
-	logger.Debugf("Function was called %d times", timesCalled)
+	//	logger.Debugf("Function was called %d times", timesCalled)
 	item, found := channelInfoRepositoryObject.dataArray[*channelID]
 	if found {
 		return item, nil
@@ -134,7 +134,7 @@ func PushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 	if channelInfo != nil {
 		prevStatus = channelInfo.StreamStatus
 	}
-	game, _ :=  getGameByID(&streamStatus.GameID)
+	game, _ := getGameByID(&streamStatus.GameID)
 
 	if prevStatus.Online == false && streamStatus.Online == true {
 

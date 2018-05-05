@@ -89,7 +89,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		}
 	}
 	if message.Command == "PRIVMSG" {
-		logger.Debug("Got PRIVMSG, parsing")
+	//	logger.Debug("Got PRIVMSG, parsing")
 
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
@@ -104,7 +104,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			IsMod:     message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
 			IsSub:     message.Tags["subscriber"] == "1",
 			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
-		logger.Debug("Logging PRIVMSG")
+	//	logger.Debug("Logging PRIVMSG")
 		repos.LogMessage(&formedMessage)
 		channelInfo, _ := repos.GetChannelInfo(&formedMessage.ChannelID)
 		repos.DecrementAutoMessages(channelInfo)

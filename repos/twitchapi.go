@@ -91,7 +91,7 @@ func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) 
 func getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"feature": "followers",
+		"feature": "twitchapi",
 		"action":  "getFollowers"})
 	url := "users/follows?to_id=" + *channelID
 	if noCursor == true {
@@ -129,7 +129,7 @@ func twitchHelix(method string, urlStr string, body io.Reader) (*http.Response, 
 func getUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"feature": "followers",
+		"feature": "twitchapi",
 		"action":  "getUserFollowDate"})
 	url := "users/follows?from_id=" + *userID + "&to_id=" + *channelID
 
@@ -160,7 +160,7 @@ func getUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 func getUsersByParameterPaged(idSlice []string, idType string) ([]models.TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"feature": "followers",
+		"feature": "twitchapi",
 		"action":  "getUsersByParameterPaged"})
 	var delimiter = "&" + idType + "="
 
@@ -184,7 +184,7 @@ func getUsersByParameterPaged(idSlice []string, idType string) ([]models.TwitchU
 func getUsersByParameter(idList []string, idType string) ([]models.TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"feature": "followers",
+		"feature": "twitchapi",
 		"action":  "getUsersByParameter"})
 	logger.Debugf("Fetching users: %s", strings.Join(idList, ", "))
 	var result []models.TwitchUserInfo
