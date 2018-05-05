@@ -71,29 +71,36 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 		followsFound, _ := getExpiredTopics(nonExpiredHooks, channel.ChannelID)
 		if followsFound == false {
 			logger.Debugf("Channel %s had no follower pubsub", channel.ChannelID)
-			secret := utils.RandomString(10)
-			form := hub{
-				Mode:         "subscribe",
-				Topic:        "https://api.twitch.tv/helix/users/follows?to_id=" + channel.ChannelID,
-				Callback:     "https://servbot.khades.org/api/webhook/follows",
-				LeaseSeconds: "864000",
-				Secret:       secret}
 
-			upsateWebHookTopic(&channel.ChannelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
-			body, _ := json.Marshal(form)
-
-			resp, _ := twitchHelixPost("webhooks/hub", bytes.NewReader(body))
-			if resp != nil {
-				defer resp.Body.Close()
-			}
-			dump, err := httputil.DumpResponse(resp, true)
-			if err == nil {
-				logger.Debugf("Repsonse is %q", dump)
-			}
 		}
 	}
 }
 
+func SubChannelToFollowerHooks(channelID string) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "webhook",
+		"action":  "SubChannelToFollowerHooks"})
+	secret := utils.RandomString(10)
+	form := hub{
+		Mode:         "subscribe",
+		Topic:        "https://api.twitch.tv/helix/users/follows?to_id=" + channelID,
+		Callback:     "https://servbot.khades.org/api/webhook/follows",
+		LeaseSeconds: "864000",
+		Secret:       secret}
+
+	body, _ := json.Marshal(form)
+
+	resp, _ := twitchHelixPost("webhooks/hub", bytes.NewReader(body))
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	dump, err := httputil.DumpResponse(resp, true)
+	if err == nil {
+		logger.Debugf("Repsonse is %q", dump)
+	}
+	upsateWebHookTopic(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
+}
 func getExpiredTopics(nonExpiredTopics []models.WebHookInfo, channelID string) (bool, bool) {
 	if len(nonExpiredTopics) == 0 {
 		return false, false
