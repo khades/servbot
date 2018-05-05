@@ -23,7 +23,7 @@ func getGameByID(gameID *string) (string, bool) {
 			"date": bson.M{"$gte": time.Now().Add(-14 * 24 * time.Hour)}}).One(&result)
 	if error != nil || result.Game == "" {
 		gamesToProcess = append(gamesToProcess, *gameID)
-		logger.Debugf("Can't find game in Database: %s", error.Error())
+		logger.Debugf("Can't find game %s in Database: %s", *gameID, error.Error())
 		return "", false
 	}
 	return result.Game, true
