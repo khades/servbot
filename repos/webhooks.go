@@ -72,7 +72,7 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 		followsFound, _ := getExpiredTopics(nonExpiredHooks, channel.ChannelID)
 		if followsFound == false {
 			logger.Debugf("Channel %s had no follower pubsub", channel.ChannelID)
-
+			SubChannelToFollowerHooks(channel.ChannelID)
 		}
 	}
 }
