@@ -166,7 +166,7 @@ func main() {
 
 	// webhookTimer := time.NewTicker(time.Second * 300)
 	// repos.CheckAndSubscribeToWebhooks(time.Second * 300)
-	repos.SubChannelToFollowerHooks("40635840")
+	//repos.SubChannelToFollowerHooks("40635840")
 	// go func() {
 	// 	for {
 	// 		<-webhookTimer.C

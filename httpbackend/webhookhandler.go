@@ -13,7 +13,7 @@ import (
 )
 
 type twitchPubSubFollows struct {
-	Data []twitchPubSubFollower `json:"data"`
+	Data twitchPubSubFollower `json:"data"`
 }
 type twitchPubSubFollower struct {
 	ChannelID string    `json:"to_id"`
