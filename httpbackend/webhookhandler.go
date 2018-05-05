@@ -43,7 +43,6 @@ func webhookStream(w http.ResponseWriter, r *http.Request) {
 	}
 	channelID := r.FormValue("channelID")
 
-
 	streams := twitchPubSubStreams{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&streams)
@@ -76,6 +75,8 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		"feature": "webhook",
 		"action":  "webhookFollows"})
 	followers := twitchPubSubFollows{}
+	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
+
 	decoder := json.NewDecoder(r.Body)
 	// topic := "follows"
 	// topicItem, topicError := repos.GetWebHookTopic(&channelID, &topic )
