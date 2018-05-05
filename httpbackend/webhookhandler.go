@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
+	"strings"
 	"time"
 
 	"github.com/khades/servbot/models"
@@ -81,19 +81,14 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		"feature": "webhook",
 		"action":  "webhookFollows"})
 	follower := twitchPubSubFollows{}
-	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
-	mac := hmac.New(sha256.New, []byte("mGKWmSox5S"))
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 
-	mac.Write(bodyBytes)
-	logger.Debugf("calculated signature is %s", hex.EncodeToString(mac.Sum(nil)))
-	dump, dumpErr := httputil.DumpRequest(r, true)
-	if dumpErr == nil {
-		logger.Debugf("Repsonse is %q", dump)
-	}
+	// dump, dumpErr := httputil.DumpRequest(r, true)
+	// if dumpErr == nil {
+	// 	logger.Debugf("Repsonse is %q", dump)
+	// }
 	decoder := json.NewDecoder(ioutil.NopCloser(bytes.NewBuffer(bodyBytes)))
-	// topic := "follows"
-	// topicItem, topicError := repos.GetWebHookTopic(&channelID, &topic )
+
 	err := decoder.Decode(&follower)
 	if err != nil {
 		logger.Debugf("JSON decode error: %s", err.Error())
@@ -102,7 +97,25 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Debugf("Incoming followers: %+v", follower)
+	topicItem, topicError := repos.GetWebHookTopic(&follower.Data.ChannelID, "follows")
+	if (topicError != nil) {
+		logger.Debugf("Topic doesnt exists, exiting")
+		writeJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
+		return
+	}
+
+	mac := hmac.New(sha256.New, []byte(topicItem.Secret))
+	mac.Write(bodyBytes)
+
+	logger.Debugf("calculated signature is %s", hex.EncodeToString(mac.Sum(nil)))
+	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
+
+	if strings.Replace(r.Header.Get("X-Hub-Signature"), "sha256=", "", 1) != hex.EncodeToString(mac.Sum(nil)) {
+		logger.Debugf("Hexes are not equal, exiting")
+		writeJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
+		return
+	}
+	logger.Debugf("Hexes are equal, proceeding")
 
 	logger.Debugf("User %s follows channel %s", follower.Data.UserID, follower.Data.ChannelID)
 
