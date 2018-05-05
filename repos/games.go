@@ -3,9 +3,9 @@ package repos
 import (
 	"time"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
-	"github.com/globalsign/mgo/bson"
 )
 
 var gamesCollection = "games"
@@ -13,6 +13,9 @@ var gamesToProcess = []string{}
 
 // GetGameByID returns game by its game id,
 func getGameByID(gameID *string) (string, bool) {
+	if *gameID == "" {
+		return "", false
+	}
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "game",
@@ -34,7 +37,6 @@ func setGameByID(gameID *string, game *string) {
 		bson.M{"gameid": *gameID},
 		bson.M{"$set": bson.M{"game": *game, "date": time.Now()}})
 }
-
 
 // FetchGamesFromTwitch processes games that were not found in database previously
 func FetchGamesFromTwitch() error {

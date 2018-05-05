@@ -134,7 +134,11 @@ func PushStreamStatus(channelID *string, streamStatus *models.StreamStatus) {
 	if channelInfo != nil {
 		prevStatus = channelInfo.StreamStatus
 	}
-	game, _ := getGameByID(&streamStatus.GameID)
+	game := ""
+	if streamStatus.Online == false {
+		game, _ = getGameByID(&streamStatus.GameID)
+
+	}
 
 	if prevStatus.Online == false && streamStatus.Online == true {
 
