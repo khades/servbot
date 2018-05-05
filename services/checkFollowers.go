@@ -21,35 +21,7 @@ func AnnounceFollowers() {
 		return
 	}
 	for _, channel := range channelFollowers {
-		logger.Debugf("Processing channel %s", channel.ChannelID)
-		alertInfo, alertError := repos.GetSubAlert(&channel.ChannelID)
-		if alertError != nil {
-			logger.Debugf("No alert for channel %s", channel.ChannelID)
-
-			continue
-		}
-		channelInfo, channelInfoError := repos.GetChannelInfo(&channel.ChannelID)
-		if channelInfoError != nil {
-			logger.Debugf("No channelInfo for channel %s", channel.ChannelID)
-
-			continue
-		}
-		followers := []string{}
-		followersMap, followersError := repos.GetUsernames(channel.Followers)
-		if followersError != nil {
-			logger.Debugf("Followers resolve failed for channel %s", channel.ChannelID)
-
-			continue
-		}
-		for _, follower := range *followersMap {
-			followers = append(followers, follower)
-		}
-		if channelInfoError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
-			bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
-				Channel: channelInfo.Channel,
-				Body:    "@" + strings.Join(followers, " @") + " " + alertInfo.FollowerMessage})
-			repos.ResetFollowersToGreetOnChannel(&channel.ChannelID)
-		}
+		processOneChannel(channel)
 	}
 
 }
