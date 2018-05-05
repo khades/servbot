@@ -36,7 +36,7 @@ func Start() {
 
 	clientError := chatClient.Run()
 	logger.Info(clientError)
-	logger.Info("Bot died")
+	logger.Fatal("Bot died")
 	IrcClientInstance = &ircClient.IrcClient{Ready: false, MessageQueue: []string{}}
 	conn.Close()
 }
