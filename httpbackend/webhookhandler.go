@@ -146,7 +146,7 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 	alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.Data.ChannelID, &follower.Data.UserID)
 	if alreadyGreeted == false {
 		repos.AddFollowerToList(&follower.Data.ChannelID, &follower.Data.UserID, follower.Timestamp, true)
-		repos.GetUsersID
+
 		repos.AddFollowerToGreetOnChannel(&follower.Data.ChannelID, follower.Data.UserID)
 	}
 
