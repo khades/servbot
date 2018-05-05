@@ -3,6 +3,7 @@ package repos
 import (
 	"bytes"
 	"encoding/json"
+	"net/http/httputil"
 	"time"
 
 	"github.com/khades/servbot/utils"
@@ -72,7 +73,7 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 			logger.Debugf("Channel %s had no follower pubsub", channel.ChannelID)
 			secret := utils.RandomString(10)
 			form := hub{
-				Mode:         "subscibe",
+				Mode:         "subscribe",
 				Topic:        "https://api.twitch.tv/helix/users/follows?to_id=" + channel.ChannelID,
 				Callback:     "https://servbot.khades.org/api/webhook/follows",
 				LeaseSeconds: "864000",
@@ -81,15 +82,14 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 			upsateWebHookTopic(&channel.ChannelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
 			body, _ := json.Marshal(form)
 
-			//resp, _ :=
-			twitchHelixPost("webhooks/hub", bytes.NewReader(body))
-			// if resp != nil {
-			// 	defer resp.Body.Close()
-			// }
-			// dump, err := httputil.DumpResponse(resp, true)
-			// if err == nil {
-			// 	logger.Debugf("Repsonse is %q", dump)
-			// }
+			resp, _ := twitchHelixPost("webhooks/hub", bytes.NewReader(body))
+			if resp != nil {
+				defer resp.Body.Close()
+			}
+			dump, err := httputil.DumpResponse(resp, true)
+			if err == nil {
+				logger.Debugf("Repsonse is %q", dump)
+			}
 		}
 	}
 }
