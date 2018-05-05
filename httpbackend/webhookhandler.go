@@ -1,8 +1,13 @@
 package httpbackend
 
 import (
+	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"time"
@@ -77,11 +82,16 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		"action":  "webhookFollows"})
 	follower := twitchPubSubFollows{}
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
+	mac := hmac.New(sha256.New, []byte("mGKWmSox5S"))
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
+
+	mac.Write(bodyBytes)
+	logger.Debugf("calculated signature is %s", hex.EncodeToString(mac.Sum(nil)))
 	dump, dumpErr := httputil.DumpRequest(r, true)
 	if dumpErr == nil {
 		logger.Debugf("Repsonse is %q", dump)
 	}
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(ioutil.NopCloser(bytes.NewBuffer(bodyBytes)))
 	// topic := "follows"
 	// topicItem, topicError := repos.GetWebHookTopic(&channelID, &topic )
 	err := decoder.Decode(&follower)
