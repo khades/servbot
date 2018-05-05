@@ -13,12 +13,12 @@ import (
 )
 
 type twitchPubSubFollows struct {
-	Data twitchPubSubFollower `json:"data"`
+	Data      twitchPubSubFollower `json:"data"`
+	Timestamp time.Time            `json:"timestamp"`
 }
 type twitchPubSubFollower struct {
-	ChannelID string    `json:"to_id"`
-	UserID    string    `json:"from_id"`
-	Date      time.Time `json:"followed_at"`
+	ChannelID string `json:"to_id"`
+	UserID    string `json:"from_id"`
 }
 
 type twitchPubSubStreams struct {
@@ -98,7 +98,7 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 
 	alreadyGreeted, _ := repos.CheckIfFollowerGreeted(&follower.Data.ChannelID, &follower.Data.UserID)
 	if alreadyGreeted == false {
-		repos.AddFollowerToList(&follower.Data.ChannelID, &follower.Data.UserID, follower.Data.Date, true)
+		repos.AddFollowerToList(&follower.Data.ChannelID, &follower.Data.UserID, follower.Timestamp, true)
 	}
 
 }
