@@ -113,8 +113,10 @@ func GetUsersID(users []string) (*map[string]string, error) {
 			}
 			//	}
 		}
-	}
+	} else {
+		logger.Debugf("DB error: %+v", error.Error())
 
+	}
 	if len(users) == 0 {
 		logger.Debugf("All users found")
 		logger.Debugf("Result: %+v", result)
