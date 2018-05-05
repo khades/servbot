@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -13,7 +14,7 @@ var gamesToProcess = []string{}
 
 // GetGameByID returns game by its game id,
 func getGameByID(gameID *string) (string, bool) {
-	if *gameID == "" {
+	if strings.TrimSpace(*gameID) == "" {
 		return "", false
 	}
 	logger := logrus.WithFields(logrus.Fields{
