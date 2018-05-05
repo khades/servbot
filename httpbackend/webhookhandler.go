@@ -91,7 +91,6 @@ func webhookFollows(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	logger.Debugf("JSON decode error: %s", err.Error())
 
 	logger.Debugf("Incoming followers: %+v", follower)
 
