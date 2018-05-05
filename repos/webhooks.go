@@ -3,7 +3,6 @@ package repos
 import (
 	"bytes"
 	"encoding/json"
-	"net/http/httputil"
 	"time"
 
 	"github.com/khades/servbot/utils"
@@ -82,14 +81,15 @@ func CheckAndSubscribeToWebhooks(pollDuration time.Duration) {
 			upsateWebHookTopic(&channel.ChannelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
 			body, _ := json.Marshal(form)
 
-			resp, _ := twitchHelixPost("webhooks/hub", bytes.NewReader(body))
-			if resp != nil {
-				defer resp.Body.Close()
-			}
-			dump, err := httputil.DumpResponse(resp, true)
-			if err == nil {
-				logger.Debugf("Repsonse is %q", dump)
-			}
+			//resp, _ :=
+			twitchHelixPost("webhooks/hub", bytes.NewReader(body))
+			// if resp != nil {
+			// 	defer resp.Body.Close()
+			// }
+			// dump, err := httputil.DumpResponse(resp, true)
+			// if err == nil {
+			// 	logger.Debugf("Repsonse is %q", dump)
+			// }
 		}
 	}
 }

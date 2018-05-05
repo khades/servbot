@@ -165,7 +165,7 @@ func main() {
 	}()
 
 	// webhookTimer := time.NewTicker(time.Second * 300)
-	// repos.CheckAndSubscribeToWebhooks(time.Second * 300)
+	 repos.CheckAndSubscribeToWebhooks(time.Second * 300)
 	// go func() {
 	// 	for {
 	// 		<-webhookTimer.C
