@@ -1,7 +1,6 @@
 package repos
 
 import (
-	"strings"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
