@@ -55,7 +55,7 @@ func processOneChannel(channel models.FollowersToGreet) {
 	for _, follower := range *followersMap {
 		followers = append(followers, follower)
 	}
-	if channelInfoError == nil && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+	if channelInfoError == nil && channelInfo.Enabled == true && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
 		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
 			Channel: channelInfo.Channel,
 			Body:    "@" + strings.Join(followers, " @") + " " + alertInfo.FollowerMessage})
