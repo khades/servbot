@@ -13,9 +13,9 @@ var gamesToProcess = []string{}
 
 // GetGameByID returns game by its game id,
 func getGameByID(gameID *string) (string, bool) {
-	// if strings.TrimSpace(*gameID) == "" {
-	// 	return "", false
-	// }
+	if strings.TrimSpace(*gameID) == "" {
+		return "", false
+	}
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "game",
