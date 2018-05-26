@@ -31,7 +31,9 @@ func oauth(w http.ResponseWriter, r *http.Request) {
 		"grant_type":    {"authorization_code"},
 		"redirect_uri":  {repos.Config.AppOauthURL},
 		"code":          {code}}
-	resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", postValues)
+
+	// https://id.twitch.tv/oauth2/token
+	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
 
 	if err != nil {
 		logger.Infof("Twitch Error: %s", err.Error())
