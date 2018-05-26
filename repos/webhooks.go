@@ -32,6 +32,7 @@ type hub struct {
 func updateWebHookTopic(channelID *string, topic string, secret *string, expiresAt time.Time) {
 	changeInfo, err := db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
 	log.Printf("Found %d records to update for webhook", changeInfo.Matched)
+	log.Printf(" %d records updated for webhook", changeInfo.Updated)
 	if err != nil {
 		log.Printf("Webhook update Error: %s", err.Error())
 	}
