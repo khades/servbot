@@ -28,7 +28,7 @@ type hub struct {
 	Secret       string `json:"hub.secret"`
 }
 
-func upsateWebHookTopic(channelID *string, topic string, secret *string, expiresAt time.Time) {
+func updateWebHookTopic(channelID *string, topic string, secret *string, expiresAt time.Time) {
 	db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
 }
 
@@ -100,8 +100,9 @@ func SubChannelToFollowerHooks(channelID string) {
 	if err == nil {
 		logger.Debugf("Repsonse is %q", dump)
 	}
+	logger.Debugf("Status is %d", resp.StatusCode)
 	if resp.StatusCode == http.StatusAccepted {
-		upsateWebHookTopic(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
+		updateWebHookTopic(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
 	}
 }
 
