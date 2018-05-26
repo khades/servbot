@@ -3,6 +3,7 @@ package repos
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"time"
@@ -29,8 +30,9 @@ type hub struct {
 }
 
 func updateWebHookTopic(channelID *string, topic string, secret *string, expiresAt time.Time) {
-	_, err := db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
-	if (err != nil) {
+	changeInfo, err := db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
+	log.Printf("Found %d records to update for webhook", changeInfo.Matched)
+	if err != nil {
 		log.Printf("Webhook update Error: %s", err.Error())
 	}
 }
