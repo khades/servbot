@@ -29,7 +29,10 @@ type hub struct {
 }
 
 func updateWebHookTopic(channelID *string, topic string, secret *string, expiresAt time.Time) {
-	db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
+	_, err := db.C(webhooklibrary).Upsert(bson.M{"channelid": *channelID, "topic": topic}, bson.M{"$set": bson.M{"secret": *secret, "expiresat": expiresAt}})
+	if (err != nil) {
+		log.Printf("Webhook update Error: %s", err.Error())
+	}
 }
 
 func GetWebHookTopic(channelID *string, topic string) (*models.WebHookInfo, error) {
