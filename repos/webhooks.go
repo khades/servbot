@@ -102,6 +102,7 @@ func SubChannelToFollowerHooks(channelID string) {
 	}
 	logger.Debugf("Status is %d", resp.StatusCode)
 	if resp.StatusCode == http.StatusAccepted {
+		logger.Debugf("Doing update for channel %s", channelID)
 		updateWebHookTopic(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
 	}
 }
