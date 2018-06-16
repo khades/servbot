@@ -216,8 +216,8 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
 		video, videoError := getYoutubeVideoInfo(&parsedVideoID)
 		if videoError != nil {
-			return models.SongRequestAddResult{InternalError: true}
 			logger.Infof("Youtube error: %s", videoError.Error())
+			return models.SongRequestAddResult{InternalError: true}
 		}
 		if len(video.Items) == 0 {
 			return models.SongRequestAddResult{NothingFound: true}
