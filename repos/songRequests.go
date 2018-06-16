@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/khades/servbot/l10n"
+	"github.com/sirupsen/logrus"
 	//"time"
 	"encoding/json"
 	"errors"
@@ -134,10 +135,10 @@ func PushSongRequestSettings(channelID *string, settings *models.ChannelSongRequ
 
 // AddSongRequest processes youtube video link before pushing it to songrequest database
 func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *string, videoID *string) models.SongRequestAddResult {
-	// logger := logrus.WithFields(logrus.Fields{
-	// 	"package": "repos",
-	// 	"feature": "songrequests",
-	// 	"action":  "AddSongRequest"})
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "songrequests",
+		"action":  "AddSongRequest"})
 	songRequestInfo := GetSongRequest(channelID)
 	channelInfo, channelInfoError := GetChannelInfo(channelID)
 
@@ -216,12 +217,14 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		video, videoError := getYoutubeVideoInfo(&parsedVideoID)
 		if videoError != nil {
 			return models.SongRequestAddResult{InternalError: true}
+			logger.Infof("Youtube error: %s", videoError.Error())
 		}
 		if len(video.Items) == 0 {
 			return models.SongRequestAddResult{NothingFound: true}
 		}
 		duration, durationError := video.Items[0].ContentDetails.GetDuration()
 		if durationError != nil {
+			logger.Infof("Youtube error: %s", videoError.Error())
 			return models.SongRequestAddResult{InternalError: true}
 		}
 		likes, likesError := strconv.ParseInt(video.Items[0].Statistics.Likes, 10, 64)
