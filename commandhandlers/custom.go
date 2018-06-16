@@ -187,7 +187,7 @@ func (channelInfo *templateExtendedObject) AddSongRequest() string {
 	channelInfo.PreventRedirect = true
 	result := repos.AddSongRequest(&channelInfo.User, channelInfo.IsSub, &channelInfo.UserID, &channelInfo.ChannelID, &channelInfo.CommandBody)
 	if result.Success == true {
-		result.LengthStr = l10n.HumanizeDuration(result.Length, channelInfo.Lang)
+		result.LengthStr = l10n.HumanizeDurationFull(result.Length, channelInfo.Lang, true)
 	}
 
 	if result.YoutubeRestricted == true {
