@@ -19,6 +19,6 @@ func GetChannelToken(channelID string) (string, error) {
 
 func RandomizeChannelToken(channelID string) string {
 	token := utils.RandomString(24)
-	db.C(tokenCollection).Upsert(bson.M{"channeliid": channelID }, bson.M{"$set": bson.M{"token": token}})
+	db.C(tokenCollection).Upsert(bson.M{"channelid": channelID }, bson.M{"$set": bson.M{"token": token}})
 	return token
 }
