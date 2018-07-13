@@ -15,6 +15,7 @@ type songRequest struct {
 	*models.ChannelSongRequest
 	IsMod   bool `json:"isMod"`
 	IsOwner bool `json:"isOwner"`
+	Token string `json:"token"`
 }
 
 func songrequests(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -24,11 +25,15 @@ func songrequests(w http.ResponseWriter, r *http.Request, s *models.HTTPSession,
 		writeJSONError(w, "That channel is not defined", http.StatusForbidden)
 		return
 	}
-
-	result := songRequest{value, channelInfo.GetIfUserIsMod(&s.UserID), *channelID == s.UserID}
+	token, _ := repos.GetChannelToken(*channelID)
+	result := songRequest{value, channelInfo.GetIfUserIsMod(&s.UserID), *channelID == s.UserID, token}
 	json.NewEncoder(w).Encode(&result)
 }
+func songrequestsWidget(w http.ResponseWriter, r *http.Request, channelID *string) {
+	value := repos.GetSongRequest(channelID)
+	json.NewEncoder(w).Encode(&value)
 
+}
 func songrequestsSkip(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	id := pat.Param(r, "videoID")
 	if id == "" {
@@ -63,6 +68,10 @@ func songrequestsEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSe
 	websocketEventbusWriter(w, r, eventbus.Songrequest(channelID))
 }
 
+func songrequestsWidgetEvents(w http.ResponseWriter, r *http.Request, channelID *string) {
+	websocketEventbusWriter(w, r, eventbus.Songrequest(channelID))
+
+}
 func songrequestsPushSettings(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	decoder := json.NewDecoder(r.Body)
 	var request models.ChannelSongRequestSettings

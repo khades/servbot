@@ -122,5 +122,12 @@ func Start() {
 	mux.HandleFunc(pat.Post("/api/webhook/follows"), corsEnabled(webhookFollows))
 	mux.HandleFunc(pat.Options("/api/webhook/follows"), corsEnabled(options))
 
+	mux.HandleFunc(pat.Get("/api/widget/subtrain"), withTokenSession(subtrainWidget))
+	mux.HandleFunc(pat.Get("/api/widget/subtrainEvents"), withTokenSession(subtrainWidgetEvents))
+
+	mux.HandleFunc(pat.Get("/api/widget/songrequests"), withTokenSession(songrequestsWidget))
+	mux.HandleFunc(pat.Get("/api/widget/songrequestsEvents"), withTokenSession(songrequestsWidgetEvents))
+
 	http.ListenAndServe("localhost:8000", mux)
+
 }

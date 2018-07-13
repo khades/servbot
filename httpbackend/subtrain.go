@@ -1,16 +1,33 @@
 package httpbackend
 
 import (
-	"github.com/khades/servbot/eventbus"
 	"encoding/json"
 	"net/http"
+
+	"github.com/khades/servbot/eventbus"
 
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/repos"
 )
 
-func subtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+type subtrainResponse struct {
+	*models.SubTrain
+	Token string `json:"token"`
+}
 
+func subtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	token, _ := repos.GetChannelToken(*channelID)
+
+	channelInfo, error := repos.GetChannelInfo(channelID)
+	if error != nil {
+		writeJSONError(w, error.Error(), http.StatusInternalServerError)
+		return
+	}
+	result := subtrainResponse{&channelInfo.SubTrain, token}
+	json.NewEncoder(w).Encode(&result)
+}
+
+func subtrainWidget(w http.ResponseWriter, r *http.Request, channelID *string) {
 	channelInfo, error := repos.GetChannelInfo(channelID)
 	if error != nil {
 		writeJSONError(w, error.Error(), http.StatusInternalServerError)
@@ -18,6 +35,10 @@ func subtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, cha
 	}
 
 	json.NewEncoder(w).Encode(&channelInfo.SubTrain)
+}
+
+func subtrainWidgetEvents(w http.ResponseWriter, r *http.Request, channelID *string) {
+	websocketEventbusWriter(w, r, eventbus.Subtrain(channelID))
 }
 
 func putSubtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
@@ -36,5 +57,5 @@ func putSubtrain(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, 
 }
 
 func subtrainEvents(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	websocketEventbusWriter(w,r,eventbus.Subtrain(channelID))
+	websocketEventbusWriter(w, r, eventbus.Subtrain(channelID))
 }
