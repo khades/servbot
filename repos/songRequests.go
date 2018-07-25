@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	//"net/http/httputil"
 
 	"time"
@@ -220,7 +221,15 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 			return models.SongRequestAddResult{InternalError: true}
 		}
 		if len(video.Items) == 0 {
-			return models.SongRequestAddResult{NothingFound: true}
+			var videoStringError error
+			video, videoStringError = getYoutubeVideoInfoByString(&parsedVideoID)
+			if videoStringError != nil {
+				logger.Infof("Youtube error: %s", videoError.Error())
+				return models.SongRequestAddResult{InternalError: true}
+			}
+			if len(video.Items) == 0 {
+				return models.SongRequestAddResult{NothingFound: true}
+			}
 		}
 		duration, durationError := video.Items[0].ContentDetails.GetDuration()
 		if durationError != nil {
@@ -380,6 +389,28 @@ func getYoutubeVideoInfo(id *string) (*models.YoutubeVideo, error) {
 	}
 	return &ytVideo, nil
 }
+func getYoutubeVideoInfoByString(id *string) (*models.YoutubeVideo, error) {
+	if Config.YoutubeKey == "" {
+		return nil, errors.New("YT key is not set")
+	}
+	resp, error := getYoutubeSearchResult(id)
+	if error != nil {
+		return nil, error
+	}
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	var ytVideo models.YoutubeVideo
+
+	marshallError := json.NewDecoder(resp.Body).Decode(&ytVideo)
+	if marshallError != nil {
+		return nil, marshallError
+	}
+	if ytVideo.PageInfo.TotalResults == 0 {
+		return nil, errors.New("not found")
+	}
+	return getYoutubeVideoInfo(&ytVideo.Items[0].ID.VideoID)
+}
 
 func getYoutubeVideo(id *string) (*http.Response, error) {
 	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + Config.YoutubeKey
@@ -388,8 +419,9 @@ func getYoutubeVideo(id *string) (*http.Response, error) {
 	return client.Get(url)
 }
 
-// func getYoutubeSearchResult(input *string) (*http.Response, error) {
-// 	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + Config.YoutubeKey
-// 	"https://content.googleapis.com/youtube/v3/search?q=" + input + "&maxResults=25&part=snippet&key=" + Config.YoutubeKey
-
-// }
+func getYoutubeSearchResult(input *string) (*http.Response, error) {
+	url := "https://content.googleapis.com/youtube/v3/search?q=" + url.QueryEscape(*input) + "&maxResults=1&part=snippet&key=" + Config.YoutubeKey
+	var timeout = 5 * time.Second
+	var client = http.Client{Timeout: timeout}
+	return client.Get(url)
+}

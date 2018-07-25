@@ -18,9 +18,13 @@ type YoutubeVideo struct {
 type YTPageInfo struct {
 	TotalResults int `json:"totalResults"`
 }
+type YTID struct {
+	VideoID string `json:"videoId"`
+}
 
 // YTItem describes one parsed youtube video information
 type YTItem struct {
+	ID             YTID             `json:"id"`
 	Snippet        YTSnippet        `json:"snippet"`
 	ContentDetails YTContentDetails `json:"contentDetails"`
 	Statistics     YTStatistics     `json:"statistics"`
