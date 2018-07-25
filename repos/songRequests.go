@@ -98,7 +98,8 @@ func GetTopRequest(channelID *string, lang string) models.CurrentSong {
 				Link:      "https://youtu.be/" + request.VideoID,
 				Duration:  l10n.HumanizeDurationFull(request.Length, lang, true),
 				Volume:    songRequestInfo.Settings.Volume,
-				Count:     len(songRequestInfo.Requests)}
+				Count:     len(songRequestInfo.Requests),
+				ID:        request.VideoID}
 			break
 		}
 	}

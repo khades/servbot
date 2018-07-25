@@ -33,6 +33,7 @@ type CurrentSong struct {
 	Duration  string `json:"duration"`
 	Volume    int    `json:"volume"`
 	Count     int    `json:"count"`
+	ID        string `json:"id"`
 }
 
 // GetCommands Helper Command for mustashe

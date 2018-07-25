@@ -71,6 +71,20 @@ func (channelInfo templateExtendedObject) CurrentSong() models.CurrentSong {
 	return repos.GetTopRequest(&channelInfo.ChannelID, channelInfo.Lang)
 }
 
+func (channelInfo templateExtendedObject) SkipCurrentSong() string {
+	channelInfo.PreventRedirect = true
+	if channelInfo.IsMod == false {
+		return l10n.GetL10n(channelInfo.Lang).SongRequestNotAModerator
+	}
+	channelInfo.PreventDebounce = true
+	songrequest := repos.GetTopRequest(&channelInfo.ChannelID, channelInfo.Lang)
+	if songrequest.IsPlaying == false {
+		return l10n.GetL10n(channelInfo.GetChannelLang()).SongRequestNoRequests
+	}
+	repos.PullSongRequest(&channelInfo.ChannelID, &songrequest.ID)
+	return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulled, songrequest.Title)
+}
+
 func (channelInfo *templateExtendedObject) Random() string {
 	lowerLimit := 0
 	upperLimit := 100
@@ -279,6 +293,7 @@ func (channelInfo *templateExtendedObject) PullSongRequest() string {
 		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulled, pulledVideo.Title)
 	}
 	return l10n.GetL10n(channelInfo.Lang).SongRequestNoRequests
+
 }
 
 // custom handler checks if input command has template and then fills it in with mustache templating and sends to a specified/user
