@@ -37,7 +37,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 				commaIndex := strings.Index(message.Params[1], ":")
 				if commaIndex != -1 {
 					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
-					channel := message.Params[0][1:]
+					channel := strings.ToLower(message.Params[0][1:])
 					modHandler(&channel, mods)
 				}
 			}
