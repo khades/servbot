@@ -170,12 +170,15 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		return models.SongRequestAddResult{TooManyRequests: true}
 	}
 
-	// if parsedVideoID == "" {
-	// 	return models.SongRequestAddResult{InvalidLink: true}
-	// }
 	var songRequest models.SongRequest
-	libraryItem, libraryError := getVideo(&parsedVideoID)
-	if libraryError == nil {
+	var libraryItem = &models.SongRequestLibraryItem{}
+	var libraryError error
+
+	if parsedVideoIsID == true {
+		libraryItem, libraryError = getVideo(&parsedVideoID)
+	}
+
+	if parsedVideoIsID == false || libraryError == nil {
 		yTrestricted := false
 		twitchRestricted := false
 		channelRestricted := false
@@ -225,7 +228,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		// 	logger.Infof("Youtube error: %s", videoError.Error())
 		// 	return models.SongRequestAddResult{InternalError: true}
 		// }
-		if parsedVideoIsID != true || videoError != nil || len(video.Items) == 0 {
+		if parsedVideoIsID == false || videoError != nil || len(video.Items) == 0 {
 			var videoStringError error
 			video, videoStringError = getYoutubeVideoInfoByString(&parsedVideoID)
 			if videoStringError != nil {
@@ -249,12 +252,12 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		if dislikesError != nil {
 			dislikes = 0
 		}
-		addVideoToLibrary(&parsedVideoID, &video.Items[0].Snippet.Title, duration, video.Items[0].Statistics.GetViewCount(), likes, dislikes)
+		addVideoToLibrary(&video.Items[0].ID, &video.Items[0].Snippet.Title, duration, video.Items[0].Statistics.GetViewCount(), likes, dislikes)
 		songRequest = models.SongRequest{
 			User:     *user,
 			UserID:   *userID,
 			Date:     time.Now(),
-			VideoID:  parsedVideoID,
+			VideoID:  video.Items[0].ID,
 			Length:   *duration,
 			Order:    len(songRequestInfo.Requests) + 1,
 			Title:    video.Items[0].Snippet.Title,
@@ -425,7 +428,7 @@ func getYoutubeVideo(id *string) (*http.Response, error) {
 }
 
 func getYoutubeSearchResult(input *string) (*http.Response, error) {
-	url := "https://content.googleapis.com/youtube/v3/search?q=" + url.QueryEscape(*input) + "&maxResults=1&part=snippet&key=" + Config.YoutubeKey
+	url := "https://content.googleapis.com/youtube/v3/search?type=video&q=" + url.QueryEscape(*input) + "&maxResults=1&part=snippet&key=" + Config.YoutubeKey
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
 	return client.Get(url)
