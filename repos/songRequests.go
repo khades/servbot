@@ -216,11 +216,11 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	}
 	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
 		video, videoError := getYoutubeVideoInfo(&parsedVideoID)
-		if videoError != nil {
-			logger.Infof("Youtube error: %s", videoError.Error())
-			return models.SongRequestAddResult{InternalError: true}
-		}
-		if len(video.Items) == 0 {
+		// if videoError != nil {
+		// 	logger.Infof("Youtube error: %s", videoError.Error())
+		// 	return models.SongRequestAddResult{InternalError: true}
+		// }
+		if videoError != nil || len(video.Items) == 0 {
 			var videoStringError error
 			video, videoStringError = getYoutubeVideoInfoByString(&parsedVideoID)
 			if videoStringError != nil {
