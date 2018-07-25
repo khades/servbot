@@ -149,12 +149,13 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	if len(songRequestInfo.Requests) >= songRequestInfo.Settings.PlaylistLength {
 		return models.SongRequestAddResult{PlaylistIsFull: true}
 	}
-	parsedVideoID, _ := parseYoutubeLink(*videoID)
+	parsedVideoID, parsedVideoIsID := parseYoutubeLink(*videoID)
 
-	for _, request := range songRequestInfo.Requests {
-		if request.VideoID == parsedVideoID {
-			return models.SongRequestAddResult{AlreadyInPlaylist: true, Title: request.Title, Length: request.Length}
-
+	if parsedVideoIsID == true {
+		for _, request := range songRequestInfo.Requests {
+			if request.VideoID == parsedVideoID {
+				return models.SongRequestAddResult{AlreadyInPlaylist: true, Title: request.Title, Length: request.Length}
+			}
 		}
 	}
 
@@ -169,9 +170,9 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		return models.SongRequestAddResult{TooManyRequests: true}
 	}
 
-	if parsedVideoID == "" {
-		return models.SongRequestAddResult{InvalidLink: true}
-	}
+	// if parsedVideoID == "" {
+	// 	return models.SongRequestAddResult{InvalidLink: true}
+	// }
 	var songRequest models.SongRequest
 	libraryItem, libraryError := getVideo(&parsedVideoID)
 	if libraryError == nil {
@@ -215,12 +216,16 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		}
 	}
 	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
-		video, videoError := getYoutubeVideoInfo(&parsedVideoID)
+		var videoError error
+		var video = &models.YoutubeVideo{}
+		if parsedVideoIsID == true {
+			video, videoError = getYoutubeVideoInfo(&parsedVideoID)
+		}
 		// if videoError != nil {
 		// 	logger.Infof("Youtube error: %s", videoError.Error())
 		// 	return models.SongRequestAddResult{InternalError: true}
 		// }
-		if videoError != nil || len(video.Items) == 0 {
+		if parsedVideoIsID != true || videoError != nil || len(video.Items) == 0 {
 			var videoStringError error
 			video, videoStringError = getYoutubeVideoInfoByString(&parsedVideoID)
 			if videoStringError != nil {
