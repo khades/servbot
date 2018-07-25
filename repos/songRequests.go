@@ -31,10 +31,10 @@ func short(s string, i int) string {
 	return s
 }
 
-func parseYoutubeLink(input string) string {
+func parseYoutubeLink(input string) (string, bool) {
 
 	if utf8.RuneCountInString(input) == 11 {
-		return input
+		return input, true
 	}
 	if strings.Contains(input, "youtube.com/watch?") {
 		result := ""
@@ -47,18 +47,18 @@ func parseYoutubeLink(input string) string {
 				break
 			}
 		}
-		return result
+		return result, true
 	}
 	if strings.Contains(input, "youtube.com/v/") {
-		return short(strings.Split(input, "youtube.com/v/")[1], 11)
+		return short(strings.Split(input, "youtube.com/v/")[1], 11), true
 
 	}
 
 	if strings.Contains(input, "youtu.be/") {
-		return short(strings.Split(input, "youtu.be/")[1], 11)
+		return short(strings.Split(input, "youtu.be/")[1], 11), true
 	}
 
-	return ""
+	return input, false
 }
 
 // GetSongRequest gets full songrequest info for specified channel
@@ -149,7 +149,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	if len(songRequestInfo.Requests) >= songRequestInfo.Settings.PlaylistLength {
 		return models.SongRequestAddResult{PlaylistIsFull: true}
 	}
-	parsedVideoID := parseYoutubeLink(*videoID)
+	parsedVideoID, _ := parseYoutubeLink(*videoID)
 
 	for _, request := range songRequestInfo.Requests {
 		if request.VideoID == parsedVideoID {
