@@ -240,6 +240,15 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 				return models.SongRequestAddResult{NothingFound: true}
 			}
 		}
+
+		if parsedVideoIsID == false {
+			for _, request := range songRequestInfo.Requests {
+				if request.VideoID == video.Items[0].ID {
+					return models.SongRequestAddResult{AlreadyInPlaylist: true, Title: request.Title, Length: request.Length}
+				}
+			}
+		}
+	
 		duration, durationError := video.Items[0].ContentDetails.GetDuration()
 		if durationError != nil {
 			logger.Infof("Youtube error: %s", videoError.Error())
