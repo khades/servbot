@@ -33,6 +33,8 @@ func modHandler(channel *string, mods []string) {
 		return
 	}
 	if channelID == "" {
+		logger.Debugf("ChannelID is not found for channel %s", *channel)
+
 		return
 	}
 	userIDs := []string{}
