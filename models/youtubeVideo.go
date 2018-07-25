@@ -14,6 +14,10 @@ type YoutubeVideo struct {
 	Items    []YTItem   `json:"items"`
 }
 
+type YoutubeStringVideo struct {
+	PageInfo YTPageInfo `json:"pageInfo"`
+	Items    []YTStringItem   `json:"items"`
+}
 // YTPageInfo describes statistics of YoutubeVideo response
 type YTPageInfo struct {
 	TotalResults int `json:"totalResults"`
@@ -24,12 +28,16 @@ type YTID struct {
 
 // YTItem describes one parsed youtube video information
 type YTItem struct {
-	ID             YTID             `json:"id"`
 	Snippet        YTSnippet        `json:"snippet"`
 	ContentDetails YTContentDetails `json:"contentDetails"`
 	Statistics     YTStatistics     `json:"statistics"`
 }
 
+type YTStringItem struct {
+	ID             YTID             `json:"id"`
+	Snippet        YTSnippet        `json:"snippet"`
+
+}
 // YTSnippet describes parsed "snippet" value of youtube video
 type YTSnippet struct {
 	Title string `json:"title"`

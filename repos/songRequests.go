@@ -400,7 +400,7 @@ func getYoutubeVideoInfoByString(id *string) (*models.YoutubeVideo, error) {
 	if resp != nil {
 		defer resp.Body.Close()
 	}
-	var ytVideo models.YoutubeVideo
+	var ytVideo models.YoutubeStringVideo
 
 	marshallError := json.NewDecoder(resp.Body).Decode(&ytVideo)
 	if marshallError != nil {
