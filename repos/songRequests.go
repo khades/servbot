@@ -387,3 +387,9 @@ func getYoutubeVideo(id *string) (*http.Response, error) {
 	var client = http.Client{Timeout: timeout}
 	return client.Get(url)
 }
+
+// func getYoutubeSearchResult(input *string) (*http.Response, error) {
+// 	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + Config.YoutubeKey
+// 	"https://content.googleapis.com/youtube/v3/search?q=" + input + "&maxResults=25&part=snippet&key=" + Config.YoutubeKey
+
+// }

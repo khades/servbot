@@ -113,7 +113,7 @@ func main() {
 			wg.Done()
 		}
 	}(&wg)
-	modTicker := time.NewTicker(time.Second * 30)
+	modTicker := time.NewTicker(time.Second * 10)
 
 	go func(wg *sync.WaitGroup) {
 		for {
