@@ -71,7 +71,7 @@ func (channelInfo templateExtendedObject) CurrentSong() models.CurrentSong {
 	return repos.GetTopRequest(&channelInfo.ChannelID, channelInfo.Lang)
 }
 
-func (channelInfo templateExtendedObject) SkipCurrentSong() string {
+func (channelInfo *templateExtendedObject) SkipCurrentSong() string {
 	channelInfo.PreventRedirect = true
 	if channelInfo.IsMod == false {
 		return l10n.GetL10n(channelInfo.Lang).SongRequestNotAModerator
