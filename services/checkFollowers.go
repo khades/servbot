@@ -53,11 +53,15 @@ func processOneChannel(channel models.FollowersToGreet) {
 		return
 	}
 	for _, follower := range *followersMap {
-		followers = append(followers, follower)
+		if (strings.TrimSpace(follower) != "") {
+			followers = append(followers, follower)
+		}
 	}
-	if channelInfoError == nil && channelInfo.Enabled == true && alertInfo.Enabled == true && alertInfo.FollowerMessage != "" {
+	
+	followersString := strings.TrimSpace(strings.Join(followers, " @"))
+	if channelInfoError == nil && channelInfo.Enabled == true && alertInfo.Enabled == true && followersString != "" && alertInfo.FollowerMessage != "" {
 		bot.IrcClientInstance.SendPublic(&models.OutgoingMessage{
 			Channel: channelInfo.Channel,
-			Body:    "@" + strings.Join(followers, " @") + " " + alertInfo.FollowerMessage})
+			Body:    "@" + followersString + " " + alertInfo.FollowerMessage})
 	}
 }
