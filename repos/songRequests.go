@@ -16,6 +16,7 @@ import (
 
 	"time"
 
+	"github.com/BurntSushi/locker"
 	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/models"
@@ -120,8 +121,7 @@ func SetSongRequestVolumeNoEvent(channelID *string, volume int) {
 			"channelid": *channelID}, bson.M{"$set": bson.M{"settings.volume": volume}})
 }
 
-// PushSongRequest pushes songrequest for specified channel
-func PushSongRequest(channelID *string, request *models.SongRequest) {
+func pushSongRequest(channelID *string, request *models.SongRequest) {
 	db.C(songRequestCollectionName).Upsert(
 		bson.M{
 			"channelid": *channelID}, bson.M{"$push": bson.M{"requests": *request}})
@@ -141,6 +141,12 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		"package": "repos",
 		"feature": "songrequests",
 		"action":  "AddSongRequest"})
+	locker.Lock("sr" + *channelID)
+	logger.Debugf("Setting Songrequest lock for channel %s", *channelID)
+
+	defer locker.Unlock("sr" + *channelID)
+	defer logger.Debugf("Releasing Songrequest lock for channel %s", *channelID)
+
 	songRequestInfo := GetSongRequest(channelID)
 	channelInfo, channelInfoError := GetChannelInfo(channelID)
 
@@ -248,7 +254,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 				}
 			}
 		}
-	
+
 		duration, durationError := video.Items[0].ContentDetails.GetDuration()
 		if durationError != nil {
 			logger.Infof("Youtube error: %s", videoError.Error())
@@ -293,6 +299,10 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		return models.SongRequestAddResult{TooLong: true, Title: songRequest.Title, Length: songRequest.Length}
 
 	}
+	if songRequest.Length.Seconds() < float64(songRequestInfo.Settings.MinVideoLength) {
+		return models.SongRequestAddResult{TooShort: true, Title: songRequest.Title, Length: songRequest.Length}
+
+	}
 	if songRequest.Views < songRequestInfo.Settings.VideoViewLimit {
 		return models.SongRequestAddResult{TooLittleViews: true, Title: songRequest.Title, Length: songRequest.Length}
 
@@ -301,7 +311,7 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 		return models.SongRequestAddResult{MoreDislikes: true, Title: songRequest.Title, Length: songRequest.Length}
 	}
 
-	PushSongRequest(channelID, &songRequest)
+	pushSongRequest(channelID, &songRequest)
 
 	eventbus.EventBus.Publish(eventbus.Songrequest(channelID), "update")
 
@@ -310,6 +320,8 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 
 // PullSongRequest removes songrequest, specified by youtube video ID on specified channel
 func PullSongRequest(channelID *string, videoID *string) {
+	locker.Lock("sr" + *channelID)
+	defer locker.Unlock("sr" + *channelID)
 	songRequestInfo := GetSongRequest(channelID)
 	if len(songRequestInfo.Requests) == 0 {
 		return
@@ -336,6 +348,8 @@ func PullSongRequest(channelID *string, videoID *string) {
 
 // PullLastUserSongRequest removes last specified user request on specified channel
 func PullLastUserSongRequest(channelID *string, userID *string) (*models.SongRequest, bool) {
+	locker.Lock("sr" + *channelID)
+	defer locker.Unlock("sr" + *channelID)
 	songRequestInfo := GetSongRequest(channelID)
 	if len(songRequestInfo.Requests) == 0 {
 		return nil, false
@@ -358,6 +372,8 @@ func PushSettings(channelID *string, settings *models.ChannelSongRequestSettings
 
 // BubbleUpVideo sets order of song to 1, and increases order of other songs
 func BubbleUpVideo(channelID *string, videoID *string) bool {
+	locker.Lock("sr" + *channelID)
+	defer locker.Unlock("sr" + *channelID)
 	songRequestInfo := GetSongRequest(channelID)
 	if len(songRequestInfo.Requests) == 0 {
 		return false
@@ -372,6 +388,8 @@ func BubbleUpVideo(channelID *string, videoID *string) bool {
 
 // BubbleUpVideoToSecond sets order of song to 2
 func BubbleUpVideoToSecond(channelID *string, videoID *string) bool {
+	locker.Lock("sr" + *channelID)
+	defer locker.Unlock("sr" + *channelID)
 	songRequestInfo := GetSongRequest(channelID)
 	if len(songRequestInfo.Requests) == 0 {
 		return false

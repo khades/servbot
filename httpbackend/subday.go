@@ -112,14 +112,42 @@ func subdayRandomize(w http.ResponseWriter, r *http.Request, s *models.HTTPSessi
 		writeJSONError(w, "subday id is not found", http.StatusNotFound)
 		return
 	}
-	winner := repos.PickRandomWinnerForSubday(channelID, &id)
+	winner := repos.PickRandomWinnerForSubday(channelID, &id, false, false)
 	if winner != nil {
 		json.NewEncoder(w).Encode(winner)
 	} else {
 		json.NewEncoder(w).Encode(optionResponse{"OK"})
 	}
-
 }
+
+func subdayRandomizeSubs(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	id := pat.Param(r, "subdayID")
+	if id == "" {
+		writeJSONError(w, "subday id is not found", http.StatusNotFound)
+		return
+	}
+	winner := repos.PickRandomWinnerForSubday(channelID, &id, true, false)
+	if winner != nil {
+		json.NewEncoder(w).Encode(winner)
+	} else {
+		json.NewEncoder(w).Encode(optionResponse{"OK"})
+	}
+}
+
+func subdayRandomizeNonSubs(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
+	id := pat.Param(r, "subdayID")
+	if id == "" {
+		writeJSONError(w, "subday id is not found", http.StatusNotFound)
+		return
+	}
+	winner := repos.PickRandomWinnerForSubday(channelID, &id, false, true)
+	if winner != nil {
+		json.NewEncoder(w).Encode(winner)
+	} else {
+		json.NewEncoder(w).Encode(optionResponse{"OK"})
+	}
+}
+
 func subdayPullWinner(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
 	id := pat.Param(r, "subdayID")
 	if id == "" {

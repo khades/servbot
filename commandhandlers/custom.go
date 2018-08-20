@@ -199,6 +199,9 @@ func (channelInfo *templateExtendedObject) Ask() string {
 func (channelInfo *templateExtendedObject) AddSongRequest() string {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
+	if strings.TrimSpace(channelInfo.CommandBody) == "" {
+		return ""
+	}
 	result := repos.AddSongRequest(&channelInfo.User, channelInfo.IsSub, &channelInfo.UserID, &channelInfo.ChannelID, &channelInfo.CommandBody)
 	if result.Success == true {
 		result.LengthStr = l10n.HumanizeDurationFull(result.Length, channelInfo.Lang, true)
@@ -251,7 +254,9 @@ func (channelInfo *templateExtendedObject) AddSongRequest() string {
 	if result.TooLong == true {
 		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestTooLong, result.Title)
 	}
-
+	if result.TooShort == true {
+		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestTooShort, result.Title)
+	}
 	if result.TooLittleViews == true {
 		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestTooLittleViews, result.Title)
 	}

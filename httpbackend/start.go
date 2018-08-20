@@ -87,6 +87,12 @@ func Start() {
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/randomize"), withMod(subdayRandomize))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/randomize"), corsEnabled(options))
 
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/randomizeSubs"), withMod(subdayRandomizeSubs))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/randomizeSubs"), corsEnabled(options))
+
+	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/randomizeNonSubs"), withMod(subdayRandomizeNonSubs))
+	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/randomizeNonSubs"), corsEnabled(options))
+
 	mux.HandleFunc(pat.Get("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), withMod(subdayPullWinner))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/subdays/:subdayID/pullwinner/:user"), corsEnabled(options))
 

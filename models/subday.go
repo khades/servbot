@@ -11,6 +11,7 @@ type SubdayRecord struct {
 	User   string `json:"user"`
 	UserID string `json:"userID"`
 	Game   string `json:"game"`
+	IsSub bool `json:"isSub"`
 }
 
 // SubdayWinnersHistory describes history of winners picking on subday

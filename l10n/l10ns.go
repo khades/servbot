@@ -41,6 +41,8 @@ type Item struct {
 	SongRequestNothingFound            string
 	SongRequestInternalError           string
 	SongRequestTooLong                 string
+	SongRequestTooShort                 string
+
 	SongRequestTooLittleViews          string
 	SongRequestMoreDislikes            string
 	SongRequestSuccess                 string
@@ -87,6 +89,7 @@ var l10n = map[string]Item{
 		SongRequestNothingFound:            "Song Request: Nothing found by that link",
 		SongRequestInternalError:           "Song Request: Internal error, try again later or contact Bot administrator",
 		SongRequestTooLong:                 "Song Request: Track \"%s\" is too long",
+		SongRequestTooShort:                 "Song Request: Track \"%s\" is too short",
 		SongRequestTooLittleViews:          "Song Request: Track \"%s\" has not enough views",
 		SongRequestMoreDislikes:            "Song Request: Track \"%s\" has more dislikes than likes",
 		SongRequestSuccess:                 "Song Request: Track \"%s\", duration %s has been added to playlist",
@@ -131,6 +134,7 @@ var l10n = map[string]Item{
 		SongRequestNothingFound:            "Заказ песен: По ссылке ничего не найдено",
 		SongRequestInternalError:           "Заказ песен: Внутренняя ошибка, попробуйте позже или свяжитесь с Администратором Бота",
 		SongRequestTooLong:                 "Заказ песен: Трек \"%s\" слишком длинный",
+		SongRequestTooShort:                 "Заказ песен: Трек \"%s\" слишком короткий",
 		SongRequestTooLittleViews:          "Заказ песен: Трек \"%s\" не имеет достаточного количества просмотров",
 		SongRequestMoreDislikes:            "Заказ песен: Трек \"%s\" имеет больше дизлайков чем лайков",
 		SongRequestSuccess:                 "Заказ песен: Трек \"%s\" длительностью %s добавлен в список заказов",

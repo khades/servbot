@@ -14,3 +14,10 @@ type SongRequestLibraryItem struct {
 	Likes      int64         `json:"likes"`
 	Dislikes   int64         `json:"dislikes"`
 }
+
+type SongRequestLibraryResponse struct {
+	Item *SongRequestLibraryItem 
+	VideoDoesntExist bool
+	InternalError bool
+	VideoID    string
+}

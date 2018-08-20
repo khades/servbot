@@ -108,7 +108,7 @@ func PushWinners(id bson.ObjectId, winners []models.SubdayRecord) {
 }
 
 // PickRandomWinnerForSubday rolls one winner and automatically upserts him to winners in specified subday for specified channel (this was made to enforce that only streamer could roll)
-func PickRandomWinnerForSubday(channelID *string, id *string) *models.SubdayRecord {
+func PickRandomWinnerForSubday(channelID *string, id *string, subsOnly bool, nonsubsOnly bool) *models.SubdayRecord {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "subday",
@@ -139,11 +139,17 @@ func PickRandomWinnerForSubday(channelID *string, id *string) *models.SubdayReco
 				break
 			}
 		}
-		if found == false {
+		if found == true {
+			continue
+		}
+		if (nonsubsOnly == false && subsOnly == false) || (subsOnly == true && vote.IsSub == true) || (nonsubsOnly == true && vote.IsSub == false) {
 			votes = append(votes, vote)
 		}
 	}
 	var winner models.SubdayRecord
+	if len(votes) == 0 {
+		return nil
+	}
 	random := rand.Intn(len(votes))
 	winner = votes[random]
 	winners = append(winners, winner)
@@ -152,20 +158,22 @@ func PickRandomWinnerForSubday(channelID *string, id *string) *models.SubdayReco
 }
 
 // VoteForSubday upserts specified vote variant of specified user for specified subday
-func VoteForSubday(user *string, userID *string, id *bson.ObjectId, game *string) {
+func VoteForSubday(user *string, userID *string, isSub bool, id *bson.ObjectId, game *string) {
 
 	db.C(subdayCollection).UpdateAll(bson.M{
 		"_id":          *id,
 		"votes.userid": userID},
 		bson.M{"$set": bson.M{
-			"votes.$.game": *game,
-			"votes.$.user": *user}})
+			"votes.$.game":  *game,
+			"votes.$.isSub": isSub,
+			"votes.$.user":  *user}})
 
 	db.C(subdayCollection).UpdateAll(bson.M{
 		"_id":          *id,
 		"votes.userid": bson.M{"$ne": userID}},
 		bson.M{"$push": bson.M{"votes": models.SubdayRecord{
 			User:   *user,
+			IsSub:  isSub,
 			UserID: *userID,
 			Game:   *game}}})
 

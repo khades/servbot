@@ -25,6 +25,7 @@ type ChannelSongRequestSettings struct {
 	OnlySubs           bool     `json:"onlySubs"`
 	PlaylistLength     int      `json:"playlistLength"`
 	MaxVideoLength     int      `json:"maxVideoLength"`
+	MinVideoLength     int      `json:"minVideoLength"`
 	MaxRequestsPerUser int      `json:"maxRequestsPerUser"`
 	VideoViewLimit     int64    `json:"videoViewLimit"`
 	MoreLikes          bool     `json:"moreLikes"`
@@ -183,6 +184,7 @@ type SongRequestAddResult struct {
 	TooLittleViews    bool
 	MoreDislikes      bool
 	Success           bool
+	TooShort          bool
 	Title             string
 	Length            time.Duration
 	LengthStr         string

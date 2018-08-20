@@ -27,10 +27,78 @@ func getBannedTracksCountForChannel(channelID *string) int {
 		count, _ := db.C(videolibraryCollection).Find(bson.M{"tags.tag": *channelID + "-restricted"}).Count()
 		videolibraryBannedCountPerChannel[*channelID] = count
 		return count
-	} 
-		return bannedVideos
-	
+	}
+	return bannedVideos
+
 }
+
+// func getVideoItem(videoID *string) *models.SongRequestLibraryResponse {
+// 	logger := logrus.WithFields(logrus.Fields{
+// 		"package": "repos",
+// 		"feature": "songrequests",
+// 		"action":  "getVideoItem"})
+// 	result := &models.SongRequestLibraryResponse{}
+// 	parsedVideoID, parsedVideoIsID := parseYoutubeLink(*videoID)
+// 	var libraryItem = &models.SongRequestLibraryItem{}
+// 	var libraryError error
+
+// 	if parsedVideoIsID == true {
+// 		libraryItem, libraryError = getVideo(&parsedVideoID)
+// 	}
+// 	if libraryError == nil && time.Now().Sub(libraryItem.LastCheck) < 3*60*time.Minute {
+// 		result.VideoID = libraryItem.VideoID
+// 		result.Item = libraryItem
+// 		return result
+// 	}
+
+// 	var videoError error
+// 	var video = &models.YoutubeVideo{}
+// 	if parsedVideoIsID == true {
+// 		result.VideoID = parsedVideoID
+// 		video, videoError = getYoutubeVideoInfo(&parsedVideoID)
+// 	}
+
+// 	if parsedVideoIsID == false || videoError != nil || len(video.Items) == 0 {
+// 		var videoStringError error
+// 		video, videoStringError = getYoutubeVideoInfoByString(&parsedVideoID)
+// 		if videoStringError != nil {
+// 			logger.Infof("Youtube error: %s", videoError.Error())
+// 			result.InternalError = true
+// 			return result
+// 		}
+// 		if len(video.Items) == 0 {
+// 			result.VideoDoesntExist = true
+// 			return result
+// 		}
+// 	}
+
+// 	duration, durationError := video.Items[0].ContentDetails.GetDuration()
+// 	if durationError != nil {
+// 		logger.Infof("Youtube error: %s", videoError.Error())
+// 		result.InternalError = true
+// 		return result
+// 	}
+// 	likes, likesError := strconv.ParseInt(video.Items[0].Statistics.Likes, 10, 64)
+// 	if likesError != nil {
+// 		likes = 0
+// 	}
+// 	dislikes, dislikesError := strconv.ParseInt(video.Items[0].Statistics.Dislikes, 10, 64)
+// 	if dislikesError != nil {
+// 		dislikes = 0
+// 	}
+// 	addVideoToLibrary(&video.Items[0].ID, &video.Items[0].Snippet.Title, duration, video.Items[0].Statistics.GetViewCount(), likes, dislikes)
+// 	libraryItem.Dislikes = dislikes
+// 	libraryItem.LastCheck = time.Now()
+// 	libraryItem.Likes = likes
+// 	libraryItem.Length = *duration
+// 	libraryItem.Title = video.Items[0].Snippet.Title
+// 	libraryItem.Views = video.Items[0].Statistics.GetViewCount()
+// 	libraryItem.VideoID = video.Items[0].ID
+// 	result.VideoID = video.Items[0].ID
+
+// 	result.Item = libraryItem
+// 	return result
+// }
 
 func getVideo(videoID *string) (*models.SongRequestLibraryItem, error) {
 	var result models.SongRequestLibraryItem

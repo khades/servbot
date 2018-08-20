@@ -36,5 +36,5 @@ func Vote(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage, chat
 			Command:    "%vote"})
 		return
 	}
-	repos.VoteForSubday(&chatMessage.User, &chatMessage.UserID, &subday.ID, &game)
+	repos.VoteForSubday(&chatMessage.User, &chatMessage.UserID, chatMessage.IsSub, &subday.ID, &game)
 }

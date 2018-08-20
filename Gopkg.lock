@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/BurntSushi/locker"
+  packages = ["."]
+  revision = "a6e239ea1c69bff1cfdb20c4b73dadf52f784b6a"
+
+[[projects]]
   name = "github.com/JanBerktold/sse"
   packages = ["."]
   revision = "c176c35d2fb8558f79fbe3d124569dbb3c80a5b6"
@@ -14,10 +20,10 @@
   revision = "d46933a94f05c6657d7b923fcf5ac563ee37ec79"
 
 [[projects]]
+  branch = "master"
   name = "github.com/cbroglie/mustache"
   packages = ["."]
-  revision = "2eb171290cbdc792c57bcd10f5a030b53500b28f"
-  version = "v1.0.0"
+  revision = "73b1f3905474dd28d480fbb3f1da71b625a58e76"
 
 [[projects]]
   branch = "development"
@@ -29,7 +35,7 @@
     "internal/sasl",
     "internal/scram"
   ]
-  revision = "876956d3205ac690e6488c1ba6fed94943c82718"
+  revision = "01a90c510f8d8df3c3fa92fcdc0c121e02b609d4"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -46,8 +52,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "goji.io"
@@ -64,7 +70,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "12892e8c234f4fe6f6803f052061de9057903bb2"
+  revision = "aabede6cba87e37f413b3e60ebfc214f8eeca1b0"
 
 [[projects]]
   branch = "master"
@@ -73,7 +79,7 @@
     "unix",
     "windows"
   ]
-  revision = "378d26f46672a356c46195c28f61bdb4c0a781dd"
+  revision = "1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded"
 
 [[projects]]
   name = "gopkg.in/asaskevich/govalidator.v4"
@@ -90,6 +96,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "067228c91ca910861d83bd21394e45fcfa6bd24d2fbb979b8bad01c39b46e854"
+  inputs-digest = "16924a3fc5e6bac83ac87cf8c69e1bcb63818ff6758984720f18ad986f2b313b"
   solver-name = "gps-cdcl"
   solver-version = 1
