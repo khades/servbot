@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/globalsign/mgo/bson"
+	"github.com/khades/servbot/l10n"
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
 )
@@ -182,12 +183,21 @@ func VoteForSubday(user *string, userID *string, isSub bool, id *bson.ObjectId, 
 // CreateNewSubday creates new subday IF there's no active subdays
 func CreateNewSubday(channelID *string, subsOnly bool, name *string) (bool, *bson.ObjectId) {
 	_, subdayError := GetLastActiveSubday(channelID)
+
 	if subdayError == nil {
 		return false, nil
 	}
 	id := bson.NewObjectId()
-
-	object := models.Subday{ID: id, Name: *name, SubsOnly: subsOnly, IsActive: true, Date: time.Now(), ChannelID: *channelID}
+	subdayName := *name
+	if subdayName == "" {
+		channelInfo, channelInfoError := GetChannelInfo(channelID)
+		lang := "en"
+		if channelInfoError == nil {
+			lang = channelInfo.GetChannelLang()
+		}
+		subdayName = l10n.GetL10n(lang).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
+	}
+	object := models.Subday{ID: id, Name: subdayName, SubsOnly: subsOnly, IsActive: true, Date: time.Now(), ChannelID: *channelID}
 	err := db.C(subdayCollection).Insert(object)
 	if err != nil {
 		return false, nil

@@ -31,9 +31,6 @@ func subdayNew(channelInfo *models.ChannelInfo, chatMessage *models.ChatMessage,
 	if strings.Contains(chatCommand.Body, "allowNonSubs=true") {
 		subsOnly = false
 	}
-	if subdayName == "" {
-		subdayName = l10n.GetL10n(channelInfo.GetChannelLang()).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
-	}
 	created, _ := repos.CreateNewSubday(&chatMessage.ChannelID, subsOnly, &subdayName)
 	if created == true {
 		ircClient.SendPublic(&models.OutgoingMessage{
