@@ -2,7 +2,6 @@ package commandhandlers
 
 import (
 	"strings"
-	"time"
 
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/l10n"
