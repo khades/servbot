@@ -46,12 +46,15 @@ func processOneChannel(channel models.FollowersToGreet) {
 		return
 	}
 	followers := []string{}
+	logger.Debugf("Looking for followers names: ", strings.Join(channel.Followers, ", "))
 	followersMap, followersError := repos.GetUsernames(channel.Followers)
 	if followersError != nil {
 		logger.Debugf("Followers resolve failed for channel %s", channel.ChannelID)
 
 		return
 	}
+	logger.Debugf("Search result: %+v", followersMap)
+
 	for _, follower := range *followersMap {
 		if (strings.TrimSpace(follower) != "") {
 			followers = append(followers, follower)
