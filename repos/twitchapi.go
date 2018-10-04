@@ -63,7 +63,7 @@ func twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
 	var client = http.Client{Timeout: timeout}
 	logger.Debugf("Url: %s", urlStr)
 	req, error := http.NewRequest("POST", "https://api.twitch.tv/helix/"+urlStr, body)
-	req.Header.Add("Authorization", "Bearer "+strings.Replace(Config.OauthKey, "oauth:", "", 1))
+	req.Header.Add("Authorization", "Bearer "+strings.Replace(Config.APIKey, "oauth:", "", 1))
 	req.Header.Add("Client-ID", Config.ClientID)
 	req.Header.Add("Content-Type", "application/json")
 	dump, dumpErr := httputil.DumpRequestOut(req, true)
@@ -141,7 +141,7 @@ func getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, er
 }
 
 func twitchHelix(method string, urlStr string, body io.Reader) (*http.Response, error) {
-	return twitchHelixOauth(method, urlStr, body, Config.OauthKey)
+	return twitchHelixOauth(method, urlStr, body, Config.APIKey)
 }
 func getUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 	logger := logrus.WithFields(logrus.Fields{

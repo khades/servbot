@@ -2,6 +2,7 @@ package models
 
 // Config struct describes configuration of that chatbot instance
 type Config struct {
+	APIKey       string `valid:"required"`
 	OauthKey     string `valid:"required"`
 	BotUserName  string `valid:"required"`
 	BotUserID    string `valid:"required"`
