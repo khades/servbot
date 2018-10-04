@@ -68,7 +68,7 @@ func twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
 	req.Header.Add("Content-Type", "application/json")
 	dump, dumpErr := httputil.DumpRequestOut(req, true)
 	if dumpErr == nil {
-		logger.Debugf("Repsonse is %q", dump)
+		logger.Debugf("Request is %q", dump)
 	}
 	if error != nil {
 		return nil, error
@@ -85,14 +85,23 @@ func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) 
 	req, error := http.NewRequest(method, "https://api.twitch.tv/helix/"+urlStr, body)
 	req.Header.Add("Authorization", "Bearer "+strings.Replace(key, "oauth:", "", 1))
 	req.Header.Add("Client-ID", Config.ClientID)
-	dump, dumpErr := httputil.DumpRequestOut(req, true)
-	if dumpErr == nil {
-		logger.Debugf("Repsonse is %q", dump)
-	}
+
 	if error != nil {
 		return nil, error
 	}
-	return client.Do(req)
+	res, err := client.Do(req)
+
+	if err != nil {
+		logger.Debugf("error: %s", err.Error())
+		return nil, err
+	}
+
+	dump, dumpErr := httputil.DumpResponse(res, true)
+	if dumpErr == nil {
+		logger.Debugf("Repsonse is %q", dump)
+	}
+	
+	return res, err
 }
 
 func getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, error) {
