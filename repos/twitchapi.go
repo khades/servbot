@@ -216,13 +216,21 @@ type twitchStreamResponse struct {
 }
 
 func getStreamStatusesPaged(channels []string) ([]models.TwitchStreamStatus, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "twitchapi",
+		"action":  "getStreamStatusesPaged"})
 	var twitchResult twitchStreamResponse
 
 	streamsString := "streams?user_id=" + strings.Join(channels, "&user_id=")
+	logger.Infof("Url: %s", streamsString)
 	resp, error := twitchHelix("GET", streamsString, nil)
 	if error != nil {
+		logger.Printf("Error: %s", error.Error())
 		return nil, error
 	}
+	dumpedResponse, _ := httputil.DumpResponse(resp, true)
+	logger.Infof("Response: %s", string(dumpedResponse[:]))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -235,6 +243,10 @@ func getStreamStatusesPaged(channels []string) ([]models.TwitchStreamStatus, err
 
 // getStreamStatuses returns stream information for all active channels for that chatbot instance
 func getStreamStatuses() ([]models.TwitchStreamStatus, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "twitchapi",
+		"action":  "getStreamStatuses"})
 	var twitchResult []models.TwitchStreamStatus
 	sliceStart := 0
 
@@ -242,6 +254,7 @@ func getStreamStatuses() ([]models.TwitchStreamStatus, error) {
 		if index == len(Config.ChannelIDs)-1 || index-sliceStart > 48 {
 			pageResult, error := getStreamStatusesPaged(Config.ChannelIDs[sliceStart : index+1])
 			if error != nil {
+				logger.Printf("Api error: %+v", error)
 				return nil, error
 			}
 			twitchResult = append(twitchResult, pageResult...)
