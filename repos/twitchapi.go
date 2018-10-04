@@ -61,6 +61,7 @@ func twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
 		"action":  "twitchHelixPost"})
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
+	logger.Debugf("Url: %s", urlStr)
 	req, error := http.NewRequest("POST", "https://api.twitch.tv/helix/"+urlStr, body)
 	req.Header.Add("Authorization", "Bearer "+strings.Replace(Config.OauthKey, "oauth:", "", 1))
 	req.Header.Add("Client-ID", Config.ClientID)
@@ -75,12 +76,19 @@ func twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
 	return client.Do(req)
 }
 func twitchHelixOauth(method string, urlStr string, body io.Reader, key string) (*http.Response, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "twitchapi",
+		"action":  "twitchHelixOauth"})
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
 	req, error := http.NewRequest(method, "https://api.twitch.tv/helix/"+urlStr, body)
 	req.Header.Add("Authorization", "Bearer "+strings.Replace(key, "oauth:", "", 1))
 	req.Header.Add("Client-ID", Config.ClientID)
-
+	dump, dumpErr := httputil.DumpRequestOut(req, true)
+	if dumpErr == nil {
+		logger.Debugf("Repsonse is %q", dump)
+	}
 	if error != nil {
 		return nil, error
 	}
