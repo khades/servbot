@@ -293,6 +293,10 @@ func updateGamesByID(gameID *string, game *string) {
 
 // UpdateStreamStatuses gets all stream statuses for active channels and processes them before updating them into database
 func UpdateStreamStatuses() error {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "repos",
+		"feature": "twitchGames",
+		"action":  "UpdateStreamStatuses"})
 	streams := make(map[string]models.StreamStatus)
 	userIDs := Config.ChannelIDs
 
@@ -301,6 +305,7 @@ func UpdateStreamStatuses() error {
 			Online: false}
 	}
 	streamstatuses, error := getStreamStatuses()
+	logger.Printf("Statuses: %+v", streamstatuses)
 	if error != nil {
 		return error
 	}
