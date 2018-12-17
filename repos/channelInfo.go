@@ -3,9 +3,7 @@ package repos
 import (
 	"strings"
 	"time"
-
 	"github.com/globalsign/mgo/bson"
-
 	"github.com/khades/servbot/models"
 	"github.com/sirupsen/logrus"
 )

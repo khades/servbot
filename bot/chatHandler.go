@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/khades/servbot/commandhandlers"
+	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/pubsub"
@@ -89,7 +90,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		}
 	}
 	if message.Command == "PRIVMSG" {
-	//	logger.Debug("Got PRIVMSG, parsing")
+		//	logger.Debug("Got PRIVMSG, parsing")
 
 		formedMessage := models.ChatMessage{
 			MessageStruct: models.MessageStruct{
@@ -104,7 +105,7 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 			IsMod:     message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
 			IsSub:     message.Tags["subscriber"] == "1",
 			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
-	//	logger.Debug("Logging PRIVMSG")
+		//	logger.Debug("Logging PRIVMSG")
 		repos.LogMessage(&formedMessage)
 		channelInfo, _ := repos.GetChannelInfo(&formedMessage.ChannelID)
 		repos.DecrementAutoMessages(channelInfo)
@@ -125,16 +126,30 @@ var chatHandler irc.HandlerFunc = func(client *irc.Client, message *irc.Message)
 		// }
 		if isCommand == true {
 			logger.Debug("PRIVMGS is chat command")
-			if message.User == "khadesru" && commandBody.Command == "debugSub" {
+			logger.Debug(message.User)
+			logger.Debug(commandBody.Command)
+			if message.User == "khadesru" && commandBody.Command == "debugsub" {
 				subPlan := "2000"
 				sendSubMessage(channelInfo, &formedMessage.User, &subPlan)
 
 			}
-			if message.User == "khadesru" && commandBody.Command == "debugResub" {
+			if message.User == "khadesru" && commandBody.Command == "debugresub" {
 				resubCount := 3
 				subPlan := "2000"
 				sendResubMessage(channelInfo, &formedMessage.User, &resubCount, &subPlan)
+				loggedSubscription := models.SubscriptionInfo{
+					User:      "khades",
+					UserID:    "khades",
+					ChannelID: formedMessage.ChannelID,
+					Count:     resubCount,
+					IsPrime:   false,
+					SubPlan:   "1000",
+					Date:      time.Now()}
 
+				repos.LogSubscription(&loggedSubscription)
+
+				eventbus.EventBus.Publish(eventbus.EventSub(&formedMessage.ChannelID), "newsub")
+				eventbus.EventBus.Publish(eventbus.Subtrain(&formedMessage.ChannelID), "newsub")
 			}
 			handlerFunction := commandhandlers.Router.Go(commandBody.Command)
 			logger.Debug("Getting channel info")

@@ -16,6 +16,6 @@ type SubTrain struct {
 	AppendTemplate       string    `json:"appendTemplate"`
 	TimeoutTemplate      string    `json:"timeoutTemplate"`
 	NotificationTemplate string    `json:"notificationTemplate"`
-	CurrentStreak        int       `json:"сurrentStreak"`
+	CurrentStreak        int       `json:"currentStreak"`
 	Users                []string  `json:"users"`
 }

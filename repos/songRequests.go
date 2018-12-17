@@ -153,9 +153,11 @@ func AddSongRequest(user *string, userIsSub bool, userID *string, channelID *str
 	if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfo.StreamStatus.Online == false) {
 		return models.SongRequestAddResult{Offline: true}
 	}
+
 	if len(songRequestInfo.Requests) >= songRequestInfo.Settings.PlaylistLength {
 		return models.SongRequestAddResult{PlaylistIsFull: true}
 	}
+	
 	parsedVideoID, parsedVideoIsID := parseYoutubeLink(*videoID)
 
 	if parsedVideoIsID == true {

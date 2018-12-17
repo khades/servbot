@@ -20,7 +20,20 @@ type subscriptionEvent struct {
 }
 
 func subscriptions(w http.ResponseWriter, r *http.Request, s *models.HTTPSession, channelID *string, channelName *string) {
-	result, _ := repos.GetSubsForChannel(channelID)
+	dateLimit := r.URL.Query().Get("limit")
+	if dateLimit == "" {
+		result, _ := repos.GetSubsForChannel(channelID)
+		json.NewEncoder(w).Encode(result)
+		return
+	}
+
+	unixTime, error := strconv.ParseInt(dateLimit, 10, 64)
+	if error != nil {
+		writeJSONError(w, error.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+	date := time.Unix(0, unixTime*int64(time.Millisecond))
+	result, _ := repos.GetSubsForChannelWithLimit(channelID, date)
 	json.NewEncoder(w).Encode(result)
 }
 

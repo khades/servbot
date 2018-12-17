@@ -1,19 +1,20 @@
 package models
 
 import (
-	"github.com/khades/servbot/l10n"
 	"fmt"
 	"math"
 	"sort"
 	"time"
 	"unicode/utf8"
+
+	"github.com/khades/servbot/l10n"
 )
 
 // StreamStatusGameHistory struct describes game on stream and its starting time
 type StreamStatusGameHistory struct {
-	Game   string    `bson:",omitempty"`
-	GameID string    `bson:",omitempty"`
-	Start  time.Time `bson:",omitempty"`
+	Game   string    `bson:",omitempty" json:"game"`
+	GameID string    `bson:",omitempty" json:"gameID"`
+	Start  time.Time `bson:",omitempty" json:"start"`
 }
 
 // GamesHistory is type alias to array of StreamStatusGameHistory, used to properly sorting history by date
@@ -85,12 +86,12 @@ func (history GamesHistory) ReturnHistory(lang string) string {
 
 // StreamStatus Describes info about stream, when started, what game and title is, and if it is online
 type StreamStatus struct {
-	Online         bool
-	Game           string       `bson:",omitempty"`
-	GameID         string       `bson:",omitempty"`
-	Title          string       `bson:",omitempty"`
-	Start          time.Time    `bson:",omitempty"`
-	LastOnlineTime time.Time    `bson:",omitempty"`
-	Viewers        int          `bson:",omitempty"`
-	GamesHistory   GamesHistory `bson:",omitempty"`
+	Online         bool         `json:"online"`
+	Game           string       `bson:",omitempty" json:"game"`
+	GameID         string       `bson:",omitempty" json:"gameID"`
+	Title          string       `bson:",omitempty" json:"title"`
+	Start          time.Time    `bson:",omitempty" json:"start"`
+	LastOnlineTime time.Time    `bson:",omitempty" json:"lastOnlineTime"`
+	Viewers        int          `bson:",omitempty" json:"viewers"`
+	GamesHistory   GamesHistory `bson:",omitempty" json:"gamesHistory"`
 }
