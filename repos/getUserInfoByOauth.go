@@ -72,6 +72,6 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 		UserID:   usernameStruct.Data[0].ID,
 		Key:      *oauthKey, AvatarURL: usernameStruct.Data[0].ProfileImage},
 		time.Now()}
-	db.C(httpsessionCollection).Update(bson.M{"key": *oauthKey}, httpSessionDBstruct{})
+	db.C(httpsessionCollection).Upsert(bson.M{"key": *oauthKey}, httpSessionDBstruct{})
 	return &result.HTTPSession, nil
 }
