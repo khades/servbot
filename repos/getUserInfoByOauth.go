@@ -28,7 +28,7 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 		"action":  "GetUserInfoByOauth"})
 	result := httpSessionDBstruct{}
 	change := mgo.Change{
-		Update:    bson.M{"$set": bson.M{"cretedat": time.Now()}},
+		Update:    bson.M{"$set": bson.M{"createdat": time.Now()}},
 		ReturnNew: true,
 	}
 
@@ -70,8 +70,9 @@ func GetUserInfoByOauth(oauthKey *string) (*models.HTTPSession, error) {
 	result = httpSessionDBstruct{models.HTTPSession{
 		Username: strings.ToLower(usernameStruct.Data[0].DisplayName),
 		UserID:   usernameStruct.Data[0].ID,
-		Key:      *oauthKey, AvatarURL: usernameStruct.Data[0].ProfileImage},
+		Key:      *oauthKey, 
+		AvatarURL: usernameStruct.Data[0].ProfileImage},
 		time.Now()}
-	db.C(httpsessionCollection).Upsert(bson.M{"key": *oauthKey}, httpSessionDBstruct{})
+	db.C(httpsessionCollection).Upsert(bson.M{"key": *oauthKey}, result)
 	return &result.HTTPSession, nil
 }
