@@ -100,9 +100,9 @@ func Start() {
 
 	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests"), corsEnabled(options))
 
-	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/skip/:videoID"), withSessionAndChannel(songrequestsSkip))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bubbleup/:videoID"), withSessionAndChannel(songrequestsBubbleUp))
-	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bubbleuptosecond/:videoID"), withSessionAndChannel(songrequestsBubbleUpToSecond))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/skip/:videoID"), withMod(songrequestsSkip))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bubbleup/:videoID"), withMod(songrequestsBubbleUp))
+	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bubbleuptosecond/:videoID"), withMod(songrequestsBubbleUpToSecond))
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/events"), withSessionAndChannel(songrequestsEvents))
 	mux.HandleFunc(pat.Post("/api/channel/:channel/songrequests/settings"), withMod(songrequestsPushSettings))
