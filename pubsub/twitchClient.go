@@ -2,6 +2,10 @@ package pubsub
 
 import (
 	"encoding/json"
+	"github.com/khades/servbot/channelInfo"
+	"github.com/khades/servbot/channelLogs"
+	"github.com/khades/servbot/chatMessage"
+	"github.com/khades/servbot/config"
 
 	"net"
 	"net/http"
@@ -11,73 +15,42 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/khades/servbot/models"
-	"github.com/khades/servbot/repos"
 	"github.com/sirupsen/logrus"
 )
 
 var IsWorking = false
 
-type twitchWSOutgoingMessage struct {
-	Type  string          `json:"type"`
-	Nonce string          `json:"nonce"`
-	Data  authMessageData `json:"data"`
-}
-type authMessageData struct {
-	AuthToken string   `json:"auth_token"`
-	Topics    []string `json:"topics"`
-}
-
-type wsMessage struct {
-	Type string `json:"type"`
-	Data wsData `json:"data"`
-}
-type wsData struct {
-	Topic   string `json:"topic"`
-	Message string `json:"message"`
-}
-type moderationActionMessage struct {
-	Data moderationActionData `json:"data"`
-}
-type moderationActionData struct {
-	Type            string   `json:"type"`
-	ModeratorAction string   `json:"moderation_action"`
-	Args            []string `json:"args"`
-	User            string   `json:"created_by"`
-	UserID          string   `json:"created_by_user_id"`
-	RecipientID     string   `json:"target_user_id"`
-}
-
-func RunPubSub() {
+// TODO: Needs autorestart
+func Run(channelInfoService *channelInfo.Service, config *config.Config, channelLogsService *channelLogs.Service) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
 		"feature": "pubsub",
-		"action":  "RunPubSub"})
+		"action":  "Run"})
 	var timerDur time.Duration
-	channels, channelError := repos.GetChannelsWithExtendedLogging()
+	channels, channelError := channelInfoService .GetChannelsWithExtendedLogging()
 	if channelError != nil && len(channels) == 0 {
 		return
 	}
 
 	for {
-		channels, channelError := repos.GetChannelsWithExtendedLogging()
+		channels, channelError := channelInfoService.GetChannelsWithExtendedLogging()
 		if channelError != nil && len(channels) == 0 {
 			return
 		}
 		var topics []string
 		for _, channel := range channels {
-			topics = append(topics, "chat_moderator_actions."+repos.Config.BotUserID+"."+channel.ChannelID)
+			topics = append(topics, "chat_moderator_actions."+config.BotUserID+"."+channel.ChannelID)
 		}
 		logger.Info("Starting Pubsub client")
 		timer := time.NewTimer(timerDur * time.Second)
 		<-timer.C
-		twitchPubSubClient(topics)
+		twitchPubSubClient(topics, channelLogsService, config)
 		logger.Info("Pubsub client died")
 		timerDur = timerDur + 5
 	}
 }
 
-func twitchPubSubClient(topics []string) {
+func twitchPubSubClient(topics []string, channelLogsService *channelLogs.Service,  config *config.Config) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
 		"feature": "pubsub",
@@ -103,17 +76,11 @@ func twitchPubSubClient(topics []string) {
 	}
 	pongWait := 12 * time.Second
 
-	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(repos.Config.OauthKey, "oauth:", "", 1), Topics: topics}})
+	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(config.OauthKey, "oauth:", "", 1), Topics: topics}})
 	if writeErr1 != nil {
 		logger.Info("Initial message error:", writeErr1.Error())
 		return
 	}
-
-	// writeErr2 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "PING"})
-	// if writeErr2 != nil {
-	// 	logger.Info("Initial ping error:", writeErr2.Error())
-	// 	return
-	// }
 
 	IsWorking = true
 
@@ -161,8 +128,8 @@ func twitchPubSubClient(topics []string) {
 
 					moderAction := moderationActionMessage{}
 					json.Unmarshal([]byte(messageObj.Data.Message), &moderAction)
-					result := models.ChatMessage{
-						MessageStruct: models.MessageStruct{
+					result := chatMessage.ChatMessage{
+						MessageStruct: chatMessage.MessageStruct{
 							Date:        time.Now(),
 							Username:    moderAction.Data.Args[0],
 							MessageType: strings.ToLower(moderAction.Data.ModeratorAction),
@@ -174,21 +141,17 @@ func twitchPubSubClient(topics []string) {
 
 					if moderAction.Data.ModeratorAction == "ban" {
 						result.MessageStruct.BanReason = moderAction.Data.Args[1]
-						repos.LogMessage(&result)
+						channelLogsService.Log(&result)
 
 					}
 
 					if moderAction.Data.ModeratorAction == "timeout" {
 						length, _ := strconv.Atoi(moderAction.Data.Args[1])
 						result.MessageStruct.BanLength = length
-						repos.LogMessage(&result)
-
+						channelLogsService.Log(&result)
 					}
-
-
 				}
 			}
-
 		}
 		logger.Infof("Websocket connection closed")
 
@@ -206,7 +169,6 @@ Loop:
 				logger.Infof("Ping write error: %s", err.Error())
 				break Loop
 			}
-
 			conn.SetReadDeadline(time.Now().Add(pongWait))
 		}
 	}

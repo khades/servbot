@@ -1,8 +1,11 @@
 package eventbus
 
-import evbus "github.com/asaskevich/EventBus"
+//import evbus "github.com/asaskevich/EventBus"
 
-var EventBus = evbus.New()
+//type EventBus struct {
+//
+//}
+//var EventBus = evbus.New()
 
 func EventSub(channelID *string) string {
 	return "sub:" + *channelID
@@ -17,4 +20,4 @@ func Songrequest(channelID *string) string {
 }
 
 
-var SubtrainBus = evbus.New()
+//var SubtrainBus = evbus.New()
