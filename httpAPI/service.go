@@ -23,8 +23,6 @@ var authLogger = logrus.WithFields(logrus.Fields{
 	"feature": "auth",
 	"action":  "auth"})
 
-var requestsCounter = make(map[string]requestCounterRecord)
-
 type Service struct {
 	config             *config.Config
 	httpSessionService *httpSession.Service
@@ -51,15 +49,15 @@ func (service *Service) auth(next SessionHandlerFunc) SessionHandlerFunc {
 			return
 		}
 		authLogger.Debugf("Incoming authorized request for userID %s", s.UserID)
-		requestCounterForUser, found := requestsCounter[s.Key]
+		requestCounterForUser, found := service.requestsCounter[s.Key]
 		if found == true && requestCounterForUser.Date.After(time.Now()) {
-			requestsCounter[s.Key] = requestCounterRecord{Count: requestCounterForUser.Count + 1, Date: requestCounterForUser.Date}
+			service.requestsCounter[s.Key] = requestCounterRecord{Count: requestCounterForUser.Count + 1, Date: requestCounterForUser.Date}
 		} else {
-			requestsCounter[s.Key] = requestCounterRecord{Count: 1, Date: time.Now().Add(time.Minute)}
+			service.requestsCounter[s.Key] = requestCounterRecord{Count: 1, Date: time.Now().Add(time.Minute)}
 		}
-		authLogger.Debugf("Current request count for user %s is %d", s.UserID, requestsCounter[s.Key].Count)
+		authLogger.Debugf("Current request count for user %s is %d", s.UserID, service.requestsCounter[s.Key].Count)
 
-		if requestsCounter[s.Key].Count > 200 {
+		if service.requestsCounter[s.Key].Count > 200 {
 			authLogger.Debugf("Rejecting user api request for userID %s ", s.UserID)
 
 			WriteJSONError(w, "Too Many Requests", http.StatusTooManyRequests)
