@@ -6,7 +6,7 @@ import (
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
 	"github.com/khades/servbot/gameResolve"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +14,7 @@ type Service struct {
 	config             *config.Config
 	channelInfoService *channelInfo.Service
 	gameResolveService *gameResolve.Service
-	twitchAPIClient    *twitchAPIClient.TwitchAPIClient
+	twitchAPIClient    *twitchAPI.Client
 }
 
 func (service *Service) UpdateFromTwitch() error {

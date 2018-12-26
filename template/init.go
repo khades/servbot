@@ -5,11 +5,11 @@ import (
 	"github.com/khades/servbot/channelInfo"
 )
 
-var templateCollection = "templates"
+const collectionName = "templates"
 
 func Init(db *mgo.Database, channelInfoService *channelInfo.Service) *Service {
 
-	collection := db.C(templateCollection)
+	collection := db.C(collectionName)
 
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "commandname"}})
@@ -18,9 +18,6 @@ func Init(db *mgo.Database, channelInfoService *channelInfo.Service) *Service {
 		collection:         collection,
 		channelInfoService: channelInfoService,
 	}
-
-
-
 
 	return service
 }

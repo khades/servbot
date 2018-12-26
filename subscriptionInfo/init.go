@@ -4,10 +4,10 @@ import (
 	"github.com/globalsign/mgo"
 )
 
-var subscriptionInfoCollection = "subscriptionInfo"
+const collectionName = "subscriptionInfo"
 
 func Init(db *mgo.Database) *Service {
-	collection := db.C(subscriptionInfoCollection)
+	collection := db.C(collectionName)
 	
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "userid"}})

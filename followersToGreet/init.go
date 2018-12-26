@@ -2,10 +2,10 @@ package followersToGreet
 
 import "github.com/globalsign/mgo"
 
-var followersToGreetCollection = "followersToGreet"
+const collectionName  = "followersToGreet"
 
 func Init(db *mgo.Database) *Service {
-	collection:= db.C(followersToGreetCollection )
+	collection:= db.C(collectionName)
 
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})

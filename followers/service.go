@@ -3,7 +3,7 @@ package followers
 import (
 	"github.com/globalsign/mgo"
 	"github.com/khades/servbot/followersToGreet"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 
 	"time"
 
@@ -19,7 +19,7 @@ import (
 
 type Service struct {
 	// Dependencies
-	twitchAPIClient         *twitchAPIClient.TwitchAPIClient
+	twitchAPIClient         *twitchAPI.Client
 	followersToGreetService *followersToGreet.Service
 
 	// Own fields

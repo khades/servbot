@@ -4,13 +4,13 @@ import (
 	"time"
 
 	"github.com/globalsign/mgo"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 )
 
-var httpsessionCollection = "httpSessions"
+const collectionName = "httpSessions"
 
-func Init(db *mgo.Database, twitchAPIClient *twitchAPIClient.TwitchAPIClient) *Service {
-	collection := db.C(httpsessionCollection)
+func Init(db *mgo.Database, twitchAPIClient *twitchAPI.Client) *Service {
+	collection := db.C(collectionName)
 
 	collection.EnsureIndex(mgo.Index{
 		Key:         []string{"createdat"},

@@ -2,11 +2,11 @@ package videoLibrary
 
 import "github.com/globalsign/mgo"
 
-const videolibraryCollection = "videolibrary"
+const collectionName = "videolibrary"
 
 // Init initalises mongo collection, creates indexes and returns service
 func Init(db *mgo.Database) *Service {
-	collection := db.C(videolibraryCollection)
+	collection := db.C(collectionName)
 
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"videoid"}})

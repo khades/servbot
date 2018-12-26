@@ -1,7 +1,7 @@
 package httpSession
 
 import (
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 	"strings"
 	"time"
 
@@ -13,7 +13,7 @@ import (
 
 type Service struct{
 	collection      *mgo.Collection
-	twitchAPIClient *twitchAPIClient.TwitchAPIClient
+	twitchAPIClient *twitchAPI.Client
 }
 
 // Get returns information of user specified by his oauth key

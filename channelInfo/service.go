@@ -12,7 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var channelInfoCollection = "channelInfo"
 
 type Service struct {
 	// Dependencies

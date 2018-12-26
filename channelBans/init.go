@@ -4,12 +4,12 @@ import (
 
 )
 
-const channelBansCollectionName = "channelBans"
+const collectionName = "channelBans"
 
 func Init(db *mgo.Database) *Service {
-	collection := db.C(channelBansCollectionName)
+	collection := db.C(collectionName)
 
-	db.C(channelBansCollectionName).EnsureIndex(mgo.Index{
+	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
 
 	return &Service{

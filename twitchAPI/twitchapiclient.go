@@ -1,4 +1,4 @@
-package twitchAPIClient
+package twitchAPI
 
 import (
 	"bytes"
@@ -15,17 +15,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type TwitchAPIClient struct {
+type Client struct {
 	config *config.Config
 }
 
-func Init(config *config.Config) *TwitchAPIClient {
-	return &TwitchAPIClient{
+func Init(config *config.Config) *Client {
+	return &Client{
 		config: config,
 	}
 }
 
-func (tApi *TwitchAPIClient) twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
+func (tApi *Client) twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -47,7 +47,7 @@ func (tApi *TwitchAPIClient) twitchHelixPost(urlStr string, body io.Reader) (*ht
 	return client.Do(req)
 }
 
-func (tApi *TwitchAPIClient) twitchHelixOauth(method string, urlStr string, body io.Reader, key string) (*http.Response, error) {
+func (tApi *Client) twitchHelixOauth(method string, urlStr string, body io.Reader, key string) (*http.Response, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -77,11 +77,11 @@ func (tApi *TwitchAPIClient) twitchHelixOauth(method string, urlStr string, body
 	return res, err
 }
 
-func (tApi *TwitchAPIClient) twitchHelix(method string, urlStr string, body io.Reader) (*http.Response, error) {
+func (tApi *Client) twitchHelix(method string, urlStr string, body io.Reader) (*http.Response, error) {
 	return tApi.twitchHelixOauth(method, urlStr, body, tApi.config.APIKey)
 }
 
-// func (tApi *TwitchAPIClient) getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, error) {
+// func (tApi *Client) getFollowers(channelID *string, noCursor bool) (*twitchFollowerResponse, error) {
 // 	logger := logrus.WithFields(logrus.Fields{
 // 		"package": "repos",
 // 		"feature": "twitchapi",
@@ -116,7 +116,7 @@ func (tApi *TwitchAPIClient) twitchHelix(method string, urlStr string, body io.R
 // 	return &twitchResponseStruct, nil
 // }
 
-func (tApi *TwitchAPIClient) SubscribeToChannelFollwerWebhook(channelID string, secret string) bool {
+func (tApi *Client) SubscribeToChannelFollwerWebhook(channelID string, secret string) bool {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -147,7 +147,7 @@ func (tApi *TwitchAPIClient) SubscribeToChannelFollwerWebhook(channelID string, 
 	return false
 }
 
-func (tApi *TwitchAPIClient) GetUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
+func (tApi *Client) GetUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -179,7 +179,7 @@ func (tApi *TwitchAPIClient) GetUserFollowDate(channelID *string, userID *string
 	return true, twitchResponseStruct.Followers[0].Date
 }
 
-func (tApi *TwitchAPIClient) getUsersByParameterPaged(idSlice []string, idType string) ([]TwitchUserInfo, error) {
+func (tApi *Client) getUsersByParameterPaged(idSlice []string, idType string) ([]TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -203,7 +203,7 @@ func (tApi *TwitchAPIClient) getUsersByParameterPaged(idSlice []string, idType s
 	return twitchUserResponseStruct.Data, nil
 }
 
-func (tApi *TwitchAPIClient) getUsersByParameter(idList []string, idType string) ([]TwitchUserInfo, error) {
+func (tApi *Client) getUsersByParameter(idList []string, idType string) ([]TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -226,15 +226,15 @@ func (tApi *TwitchAPIClient) getUsersByParameter(idList []string, idType string)
 	return result, nil
 }
 
-func (tApi *TwitchAPIClient) GetTwitchUsersByDisplayName(displayNames []string) ([]TwitchUserInfo, error) {
+func (tApi *Client) GetTwitchUsersByDisplayName(displayNames []string) ([]TwitchUserInfo, error) {
 	return tApi.getUsersByParameter(displayNames, "login")
 }
 
-func (tApi *TwitchAPIClient) GetTwitchUsersByID(userIDS []string) ([]TwitchUserInfo, error) {
+func (tApi *Client) GetTwitchUsersByID(userIDS []string) ([]TwitchUserInfo, error) {
 	return tApi.getUsersByParameter(userIDS, "id")
 }
 
-func (tApi *TwitchAPIClient) getStreamStatusesPaged(channels []string) ([]TwitchStreamStatus, error) {
+func (tApi *Client) getStreamStatusesPaged(channels []string) ([]TwitchStreamStatus, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -261,7 +261,7 @@ func (tApi *TwitchAPIClient) getStreamStatusesPaged(channels []string) ([]Twitch
 }
 
 // getStreamStatuses returns stream information for all active channels for that chatbot instance
-func (tApi *TwitchAPIClient) GetStreamStatuses() ([]TwitchStreamStatus, error) {
+func (tApi *Client) GetStreamStatuses() ([]TwitchStreamStatus, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",
@@ -282,7 +282,7 @@ func (tApi *TwitchAPIClient) GetStreamStatuses() ([]TwitchStreamStatus, error) {
 	return twitchResult, nil
 }
 
-func (tApi *TwitchAPIClient) getGamesByIDPaged(gamesIDS []string) ([]twitchGameStruct, error) {
+func (tApi *Client) getGamesByIDPaged(gamesIDS []string) ([]twitchGameStruct, error) {
 	var twitchResult twitchGameStructResponse
 
 	gamesString := "games?id=" + strings.Join(gamesIDS, "&id=")
@@ -300,7 +300,7 @@ func (tApi *TwitchAPIClient) getGamesByIDPaged(gamesIDS []string) ([]twitchGameS
 	return twitchResult.Data, nil
 }
 
-func (tApi *TwitchAPIClient) GetGamesByID(gameIDS []string) ([]twitchGameStruct, error) {
+func (tApi *Client) GetGamesByID(gameIDS []string) ([]twitchGameStruct, error) {
 	var twitchResult []twitchGameStruct
 	sliceStart := 0
 	for index := range gameIDS {
@@ -317,7 +317,7 @@ func (tApi *TwitchAPIClient) GetGamesByID(gameIDS []string) ([]twitchGameStruct,
 	return twitchResult, nil
 }
 
-func (tApi *TwitchAPIClient) GetUserByOauth(key string) (*TwitchUserInfo , error) {
+func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo , error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "twitchapi",

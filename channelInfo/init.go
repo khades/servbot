@@ -6,8 +6,10 @@ import (
 	"github.com/khades/servbot/userResolve"
 )
 
+const collectionName = "channelInfo"
+
 func Init(db *mgo.Database, config *config.Config, userResolveService *userResolve.Service) *Service {
-	collection := db.C(channelInfoCollection)
+	collection := db.C(collectionName)
 	
 	service := Service{
 		collection:         collection,

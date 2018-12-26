@@ -42,7 +42,7 @@ import (
 	"github.com/khades/servbot/subAlert"
 	"github.com/khades/servbot/subday"
 	"github.com/khades/servbot/videoLibrary"
-	"github.com/khades/servbot/youtubeAPIClient"
+	"github.com/khades/servbot/youtubeAPI"
 
 	"github.com/khades/servbot/channelBans"
 	"github.com/khades/servbot/channelLogs"
@@ -54,7 +54,7 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 	"github.com/khades/servbot/userResolve"
 	"github.com/sirupsen/logrus"
 )
@@ -100,12 +100,12 @@ func main() {
 	if config.Debug == true {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	// Creating twitchAPIClient service
-	twitchAPIClient := twitchAPIClient.Init(
+	// Creating twitchAPI service
+	twitchAPIClient := twitchAPI.Init(
 		config)
 
-	// Creating youtubeAPIClient service
-	youtubeAPIClient := youtubeAPIClient.Init(
+	// Creating youtubeAPI service
+	youtubeAPIClient := youtubeAPI.Init(
 		config)
 
 	// Service
@@ -145,7 +145,7 @@ func main() {
 		twitchAPIClient,
 		channelInfoService)
 
-	// Creating twitchAPIClient stream status checker service
+	// Creating twitchAPI stream status checker service
 	streamStatusService := streamStatus.Init(
 		config,
 		channelInfoService,

@@ -1,4 +1,4 @@
-package youtubeAPIClient
+package youtubeAPI
 
 import (
 	"encoding/json"
@@ -10,29 +10,29 @@ import (
 	"github.com/khades/servbot/config"
 )
 
-type YouTubeAPIClient struct {
+type Client struct {
 	config *config.Config
 }
 
-func (service *YouTubeAPIClient) get(id *string) (*http.Response, error) {
-	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + service.config.YoutubeKey
+func (client *Client) get(id *string) (*http.Response, error) {
+	url := "https://content.googleapis.com/youtube/v3/videos?id=" + *id + "&part=snippet%2CcontentDetails%2Cstatistics&key=" + client.config.YoutubeKey
 	var timeout = 5 * time.Second
-	var client = http.Client{Timeout: timeout}
-	return client.Get(url)
+	var httpClient = http.Client{Timeout: timeout}
+	return httpClient.Get(url)
 }
 
-func (service *YouTubeAPIClient) search(input *string) (*http.Response, error) {
-	url := "https://content.googleapis.com/youtube/v3/search?type=video&q=" + url.QueryEscape(*input) + "&maxResults=1&part=snippet&key=" + service.config.YoutubeKey
+func (client *Client) search(input *string) (*http.Response, error) {
+	url := "https://content.googleapis.com/youtube/v3/search?type=video&q=" + url.QueryEscape(*input) + "&maxResults=1&part=snippet&key=" + client.config.YoutubeKey
 	var timeout = 5 * time.Second
-	var client = http.Client{Timeout: timeout}
-	return client.Get(url)
+	var httpClient = http.Client{Timeout: timeout}
+	return httpClient.Get(url)
 }
 
-func (service *YouTubeAPIClient) Get(id *string) (*YoutubeVideo, error) {
-	if service.config.YoutubeKey == "" {
+func (client *Client) Get(id *string) (*YoutubeVideo, error) {
+	if client.config.YoutubeKey == "" {
 		return nil, errors.New("YT key is not set")
 	}
-	resp, error := service.get(id)
+	resp, error := client.get(id)
 	if error != nil {
 		return nil, error
 	}
@@ -48,11 +48,11 @@ func (service *YouTubeAPIClient) Get(id *string) (*YoutubeVideo, error) {
 	return &ytVideo, nil
 }
 
-func (service *YouTubeAPIClient) Search(id *string) (*YoutubeVideo, error) {
-	if service.config.YoutubeKey == "" {
+func (client *Client) Search(id *string) (*YoutubeVideo, error) {
+	if client.config.YoutubeKey == "" {
 		return nil, errors.New("YT key is not set")
 	}
-	resp, error := service.search(id)
+	resp, error := client.search(id)
 
 	if error != nil {
 		return nil, error
@@ -70,5 +70,5 @@ func (service *YouTubeAPIClient) Search(id *string) (*YoutubeVideo, error) {
 		return nil, errors.New("not found")
 	}
 
-	return service.Get(&ytVideo.Items[0].ID.VideoID)
+	return client.Get(&ytVideo.Items[0].ID.VideoID)
 }

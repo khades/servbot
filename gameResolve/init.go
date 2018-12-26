@@ -7,16 +7,16 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 )
 
-var gamesCollection = "games"
+const collectionName  = "games"
 
 func Init(db *mgo.Database,
-	twitchAPIClient *twitchAPIClient.TwitchAPIClient,
+	twitchAPIClient *twitchAPI.Client,
 	channelInfoService *channelInfo.Service) (*Service, *time.Ticker) {
 
-	collection := db.C(gamesCollection)
+	collection := db.C(collectionName)
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"gameid"}})
 

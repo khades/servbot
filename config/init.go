@@ -7,7 +7,7 @@ import (
 	"gopkg.in/asaskevich/govalidator.v4"
 )
 
-var configCollection = "config"
+const collectionName = "config"
 
 // Init returns config object parsed from mongodb
 func Init(db *mgo.Database) (*Config, error) {
@@ -16,7 +16,7 @@ func Init(db *mgo.Database) (*Config, error) {
 		"feature": "init",
 		"action":  "init"})
 	var config Config
-	config.collection = db.C(configCollection)
+	config.collection = db.C(collectionName)
 
 	error := config.collection.Find(bson.M{"entity": "config"}).One(&config)
 

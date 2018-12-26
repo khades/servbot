@@ -6,7 +6,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/videoLibrary"
-	"github.com/khades/servbot/youtubeAPIClient"
+	"github.com/khades/servbot/youtubeAPI"
 
 	"github.com/khades/servbot/l10n"
 	"github.com/sirupsen/logrus"
@@ -25,7 +25,7 @@ import (
 
 type Service struct {
 	collection          *mgo.Collection
-	youtubeAPIClient    *youtubeAPIClient.YouTubeAPIClient
+	youtubeAPIClient    *youtubeAPI.Client
 	channelInfoService  *channelInfo.Service
 	videoLibraryService *videoLibrary.Service
 	eventBus            EventBus.Bus
@@ -222,7 +222,7 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 	}
 	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
 		var videoError error
-		var video = &youtubeAPIClient.YoutubeVideo{}
+		var video = &youtubeAPI.YoutubeVideo{}
 		if parsedVideoIsID == true {
 			video, videoError = service.youtubeAPIClient.Get(&parsedVideoID)
 		}

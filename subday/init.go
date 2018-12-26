@@ -5,11 +5,11 @@ import (
 	"github.com/khades/servbot/channelInfo"
 )
 
-const subdayCollection = "subdays"
+const collectionName = "subdays"
 
 func Init(db *mgo.Database, channelInfoService *channelInfo.Service) *Service {
 
-	collection := db.C(subdayCollection)
+	collection := db.C(collectionName)
 
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid", "commandname"}})

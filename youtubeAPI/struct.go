@@ -1,4 +1,4 @@
-package youtubeAPIClient
+package youtubeAPI
 
 
 import (

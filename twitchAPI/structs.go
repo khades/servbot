@@ -1,4 +1,4 @@
-package twitchAPIClient
+package twitchAPI
 
 import "time"
 

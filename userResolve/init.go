@@ -4,26 +4,27 @@ import (
 	"time"
 
 	"github.com/globalsign/mgo"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 )
 
-var usernameCacheCollection = "usernameCacheColleciton"
+const collectionName = "usernameCacheColleciton"
 
-func Init(db *mgo.Database, twitchAPIClient *twitchAPIClient.TwitchAPIClient) *Service {
-	
-	db.C(usernameCacheCollection).EnsureIndex(mgo.Index{
+func Init(db *mgo.Database, twitchAPIClient *twitchAPI.Client) *Service {
+	collection := db.C(collectionName)
+
+	collection.EnsureIndex(mgo.Index{
 		Key:         []string{"createdat"},
 		ExpireAfter: 60 * 12 * time.Minute})
 
-	db.C(usernameCacheCollection).EnsureIndex(mgo.Index{
+	collection.EnsureIndex(mgo.Index{
 		Key: []string{"id"}})
 
-	db.C(usernameCacheCollection).EnsureIndex(mgo.Index{
+	collection.EnsureIndex(mgo.Index{
 		Key: []string{"userid"}})
 
 	service := Service{
-		collection:               db.C(usernameCacheCollection),
-		twitchAPIClient:                twitchAPIClient,
+		collection:               collection,
+		twitchAPIClient:          twitchAPIClient,
 		usernameCacheChatDates:   make(map[string]time.Time),
 		usernameCacheRejectDates: make(map[string]time.Time),
 	}

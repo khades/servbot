@@ -6,7 +6,7 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchAPIClient"
+	"github.com/khades/servbot/twitchAPI"
 	"github.com/khades/servbot/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -18,7 +18,7 @@ import (
 type Service struct {
 	collection         *mgo.Collection
 	channelInfoService *channelInfo.Service
-	twitchAPIService   *twitchAPIClient.TwitchAPIClient
+	twitchAPIService   *twitchAPI.Client
 }
 
 func (service *Service) update(channelID *string, topic string, secret *string, expiresAt time.Time) {

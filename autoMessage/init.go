@@ -4,10 +4,10 @@ import (
 	"github.com/globalsign/mgo"
 )
 
-var autoMessageCollectionName = "autoMessages"
+const collectionName = "autoMessages"
 
 func Init(db *mgo.Database) *Service {
-	collection := db.C(autoMessageCollectionName)
+	collection := db.C(collectionName)
 
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
