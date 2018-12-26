@@ -1,11 +1,11 @@
-package twitchIRCClient
+package twitchIRC
 
 import (
 	irc "gopkg.in/irc.v2"
 )
 
 // type TwitchIRCHandle
-type TwitchIRCHandle func(client *TwitchIRCClient, message *irc.Message)
+type TwitchIRCHandle func(client *Client, message *irc.Message)
 
 
 // HandlerFunc is a simple wrapper around a function which allows it

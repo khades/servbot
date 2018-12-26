@@ -1,23 +1,20 @@
-package vkGroupAnnounce
+package vkGroupSchedule
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/config"
-	"github.com/khades/servbot/twitchIRCClient"
-	"github.com/khades/servbot/utils"
 	"net/http"
-
-	//"log"
 	"strings"
 	"time"
 	"unicode/utf8"
 
+	"github.com/khades/servbot/channelInfo"
+	"github.com/khades/servbot/config"
+	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/utils"
 	"github.com/sirupsen/logrus"
 )
-
 
 type Service struct {
 	config             *config.Config
@@ -31,7 +28,7 @@ func (service *Service) Check() {
 		"package": "services",
 		"feature": "vk",
 		"action":  "CheckVK"})
-		
+
 	logger.Debugf("Checking VK")
 	if service.config.VkClientKey == "" {
 		logger.Debugf("VK key is not set")

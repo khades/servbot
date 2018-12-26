@@ -1,4 +1,4 @@
-package vkGroupAnnounce
+package vkGroupSchedule
 
 import (
 	"github.com/khades/servbot/channelInfo"
@@ -9,16 +9,16 @@ import (
 )
 
 func Init(config *config.Config, channelInfoService *channelInfo.Service, twitchIRCClient *twitchIRCClient.TwitchIRCClient, wg *sync.WaitGroup) *time.Ticker {
-	vkTimer := time.NewTicker(time.Second * 60)
+	ticker := time.NewTicker(time.Second * 60)
 	service := Service{config, channelInfoService, twitchIRCClient}
 	go func(wg *sync.WaitGroup) {
 		for {
 
-			<-vkTimer.C
+			<-ticker.C
 			wg.Add(1)
 			service.Check()
 			wg.Done()
 		}
 	}(wg)
-	return vkTimer
+	return ticker
 }

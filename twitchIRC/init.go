@@ -13,7 +13,7 @@ func Init(
 	config *config.Config,
 	channelInfoService *channelInfo.Service,
 	handle TwitchIRCHandle,
-	wg *sync.WaitGroup) (*TwitchIRCClient, *time.Ticker, *time.Ticker) {
+	wg *sync.WaitGroup) *TwitchIRCClient {
 
 	twitchIRCClient := TwitchIRCClient{
 		config:             config,
@@ -31,27 +31,6 @@ func Init(
 		wg.Done()
 	}(wg)
 
-	ircClientTicker := time.NewTicker(time.Second * 3)
 
-	go func(wg *sync.WaitGroup) {
-		for {
-			wg.Add(1)
-			<-ircClientTicker.C
-			twitchIRCClient.SendMessages(3)
-			wg.Done()
-		}
-	}(wg)
-
-	modTicker := time.NewTicker(time.Second * 10)
-
-	go func(wg *sync.WaitGroup) {
-		for {
-			<-modTicker.C
-			wg.Add(1)
-			twitchIRCClient.SendModsCommand()
-			wg.Done()
-		}
-	}(wg)
-
-	return &twitchIRCClient, ircClientTicker, modTicker
+	return &twitchIRCClient
 }

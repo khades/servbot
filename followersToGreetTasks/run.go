@@ -1,4 +1,4 @@
-package followersAnnounce
+package followersToGreetSchedule
 
 import (
 	"github.com/khades/servbot/channelInfo"
@@ -17,7 +17,7 @@ func Init(channelInfoService *channelInfo.Service,
 	twitchIRCClient *twitchIRCClient.TwitchIRCClient,
 	wg *sync.WaitGroup,
 ) *time.Ticker {
-	followerTicker := time.NewTicker(time.Second * 20)
+	ticker := time.NewTicker(time.Second * 20)
 
 	service := Service{
 		channelInfoService,
@@ -28,12 +28,12 @@ func Init(channelInfoService *channelInfo.Service,
 	}
 	go func(wg *sync.WaitGroup) {
 		for {
-			<-followerTicker.C
+			<-ticker.C
 			wg.Add(1)
 			service.AnnounceFollowers()
 			wg.Done()
 		}
 	}(wg)
 
-	return followerTicker
+	return ticker
 }

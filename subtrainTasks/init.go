@@ -1,4 +1,4 @@
-package subtrainAnnounce
+package subtrainSchedule
 
 import (
 	"github.com/asaskevich/EventBus"
@@ -13,7 +13,7 @@ func Init(channelInfoService *channelInfo.Service,
 	twitchIRCClient *twitchIRCClient.TwitchIRCClient,
 	eventBus EventBus.Bus,
 	wg *sync.WaitGroup) *time.Ticker {
-	subtrainAnnounceTicker := time.NewTicker(time.Second * 10)
+	ticker := time.NewTicker(time.Second * 10)
 
 	service := Service{
 		channelInfoService,
@@ -22,11 +22,11 @@ func Init(channelInfoService *channelInfo.Service,
 	}
 	go func(wg *sync.WaitGroup) {
 		for {
-			<-subtrainAnnounceTicker.C
+			<-ticker.C
 			wg.Add(1)
 			service.Announce()
 			wg.Done()
 		}
 	}(wg)
-	return subtrainAnnounceTicker
+	return ticker
 }

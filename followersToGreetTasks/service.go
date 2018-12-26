@@ -1,4 +1,4 @@
-package followersAnnounce
+package followersToGreetSchedule
 
 import (
 	"github.com/khades/servbot/channelInfo"

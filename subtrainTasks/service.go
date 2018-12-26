@@ -1,4 +1,4 @@
-package subtrainAnnounce
+package subtrainSchedule
 
 import (
 	"github.com/asaskevich/EventBus"

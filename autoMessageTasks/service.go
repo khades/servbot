@@ -1,4 +1,4 @@
-package autoMessageAnnounce
+package autoMessageSchedule
 
 import (
 	"html"

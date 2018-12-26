@@ -1,4 +1,4 @@
-package autoMessageAnnounce
+package autoMessageSchedule
 
 import (
 	"sync"
@@ -13,7 +13,7 @@ func Init(channelInfoService *channelInfo.Service,
 	automessageService *autoMessage.Service,
 	twitchIRCClient *twitchIRCClient.TwitchIRCClient,
 	wg *sync.WaitGroup) *time.Ticker {
-	automessageTicker := time.NewTicker(time.Second * 20)
+	ticker := time.NewTicker(time.Second * 20)
 
 	service := Service{
 		channelInfoService,
@@ -22,11 +22,11 @@ func Init(channelInfoService *channelInfo.Service,
 	}
 	go func(wg *sync.WaitGroup) {
 		for {
-			<-automessageTicker.C
+			<-ticker.C
 			wg.Add(1)
 			service.Send()
 			wg.Done()
 		}
 	}(wg)
-	return automessageTicker;
+	return ticker
 }

@@ -1,4 +1,4 @@
-package vkGroupAnnounce
+package vkGroupSchedule
 
 import (
 	"fmt"

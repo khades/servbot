@@ -53,9 +53,6 @@ func (channelInfo *templateExtendedObject) FollowerInfo() followerDuration {
 	return followerDuration{false, ""}
 }
 
-func (channelInfo templateExtendedObject) CurrentSong() channelInfo.CurrentSong {
-	return channelInfo.songRequestService.GetLast(&channelInfo.ChannelID, channelInfo.Lang)
-}
 
 func (channelInfo *templateExtendedObject) SkipCurrentSong() string {
 	channelInfo.PreventRedirect = true
