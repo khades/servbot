@@ -2,14 +2,13 @@ package httpAPI
 
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
-	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/httpSession"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/khades/servbot/channelInfo"
+	"github.com/khades/servbot/httpSession"
 	"github.com/sirupsen/logrus"
 )
 
@@ -71,8 +70,7 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 }
 
-
-func (service *Service)  oauthInitiate(w http.ResponseWriter, r *http.Request) {
+func (service *Service) oauthInitiate(w http.ResponseWriter, r *http.Request) {
 	isValidCookie := validateSession(r, service.httpSessionService)
 	if isValidCookie == false {
 
@@ -110,4 +108,3 @@ func channelInfoHandler(w http.ResponseWriter, r *http.Request, s *httpSession.H
 func getTime(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(timeResponse{time.Now()})
 }
-

@@ -2,15 +2,14 @@ package autoMessage
 
 import (
 	"errors"
-	"github.com/globalsign/mgo"
-	"github.com/khades/servbot/channelInfo"
 	"strings"
 	"time"
 
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/khades/servbot/channelInfo"
 	"github.com/sirupsen/logrus"
 )
-
 
 type Service struct {
 	// Own Fields

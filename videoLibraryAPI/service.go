@@ -3,28 +3,27 @@ package videoLibraryAPI
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/asaskevich/EventBus"
-	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/httpAPI"
-	"github.com/khades/servbot/httpSession"
-	"github.com/khades/servbot/songRequest"
-	"github.com/khades/servbot/twitchIRCClient"
-	"github.com/khades/servbot/videoLibrary"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/asaskevich/EventBus"
+	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/eventbus"
+	"github.com/khades/servbot/httpAPI"
+	"github.com/khades/servbot/httpSession"
 	"github.com/khades/servbot/l10n"
+	"github.com/khades/servbot/songRequest"
+	"github.com/khades/servbot/twitchIRC"
+	"github.com/khades/servbot/videoLibrary"
 	"goji.io/pat"
 )
 
-
 type Service struct {
 	videoLibraryService *videoLibrary.Service
-	songRequestService *songRequest.Service
-	twitchIRCClient *twitchIRCClient.TwitchIRCClient
-	eventBus EventBus.Bus
+	songRequestService  *songRequest.Service
+	twitchIRCClient     *twitchIRC.Client
+	eventBus            EventBus.Bus
 }
 
 func (service *Service) get(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
@@ -77,25 +76,25 @@ func (service *Service) setTag(w http.ResponseWriter, r *http.Request, s *httpSe
 
 		if result.RemovedYoutubeRestricted == true {
 			service.eventBus.Publish(eventbus.Songrequest(&channelInfo.ChannelID), "youtuberestricted:"+result.Title)
-			service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+			service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 				Channel: channelInfo.Channel,
 				Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledYoutubeRestricted, result.Title)})
 		}
 		if result.RemovedTwitchRestricted == true {
 			service.eventBus.Publish(eventbus.Songrequest(&channelInfo.ChannelID), "twitchrestricted:"+result.Title)
-			service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+			service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 				Channel: channelInfo.Channel,
 				Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledTwitchRestricted, result.Title)})
 		}
 		if result.RemovedChannelRestricted == true {
 			service.eventBus.Publish(eventbus.Songrequest(&channelInfo.ChannelID), "channelrestricted:"+result.Title)
-			service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+			service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 				Channel: channelInfo.Channel,
 				Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledChannelRestricted, result.Title)})
 		}
 		if result.RemovedTagRestricted == true {
 			service.eventBus.Publish(eventbus.Songrequest(&channelInfo.ChannelID), "tagrestricted:"+result.Title)
-			service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+			service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 				Channel: channelInfo.Channel,
 				Body:    fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulledTagRestricted, result.Title, result.Tag)})
 		}

@@ -4,7 +4,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/khades/servbot/httpAPI"
 	"github.com/khades/servbot/songRequest"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 	"github.com/khades/servbot/videoLibrary"
 	"goji.io/pat"
 )
@@ -13,7 +13,7 @@ func Init(
 	httpAPIService *httpAPI.Service,
 	videoLibraryService *videoLibrary.Service,
 	songRequestService *songRequest.Service,
-	twitchIRCClient *twitchIRCClient.TwitchIRCClient,
+	twitchIRCClient *twitchIRC.Client,
 	eventBus EventBus.Bus) {
 	service := Service{
 		videoLibraryService,

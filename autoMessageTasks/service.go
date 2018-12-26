@@ -1,4 +1,4 @@
-package autoMessageSchedule
+package autoMessageTasks
 
 import (
 	"html"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/khades/servbot/autoMessage"
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 
 	"github.com/cbroglie/mustache"
 )
@@ -14,12 +14,12 @@ import (
 type Service struct {
 	channelInfoService *channelInfo.Service
 	automessageService *autoMessage.Service
-	twitchIRCClient    *twitchIRCClient.TwitchIRCClient
+	twitchIRCClient    *twitchIRC.Client
 }
 
 func (service *Service) processMessage(message *autoMessage.AutoMessage) {
 
-	channelInfo, error := service.channelInfoService.GetChannelInfo(&message.ChannelID)
+	channelInfo, error := service.channelInfoService.Get(&message.ChannelID)
 	if error != nil {
 		return
 	}
@@ -33,7 +33,7 @@ func (service *Service) processMessage(message *autoMessage.AutoMessage) {
 	if compiledMessageError != nil || strings.TrimSpace(compiledMessage) == "" {
 		return
 	}
-	service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+	service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 		Channel: channelInfo.Channel,
 		Body:    html.UnescapeString(compiledMessage)})
 

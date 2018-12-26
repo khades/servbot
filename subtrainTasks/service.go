@@ -1,4 +1,4 @@
-package subtrainSchedule
+package subtrainTasks
 
 import (
 	"github.com/asaskevich/EventBus"
@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/eventbus"
@@ -14,7 +14,7 @@ import (
 
 type Service struct {
 	channelInfoService *channelInfo.Service
-	twitchIRCClient    *twitchIRCClient.TwitchIRCClient
+	twitchIRCClient    *twitchIRC.Client
 	eventBus 		   EventBus.Bus
 }
 
@@ -28,7 +28,7 @@ func (service *Service) Announce() {
 	for _, channel := range channels {
 		compiledMessage, compiledMessageError := mustache.Render(channel.SubTrain.TimeoutTemplate, channel.SubTrain)
 		if compiledMessageError != nil || strings.TrimSpace(compiledMessage) != "" {
-			service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+			service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 				Channel: channel.Channel,
 				Body:    html.UnescapeString(compiledMessage)})
 		}
@@ -42,7 +42,7 @@ func (service *Service) Announce() {
 	for _, channel := range channels {
 		compiledMessage, compiledMessageError := mustache.Render(channel.SubTrain.NotificationTemplate, channel.SubTrain)
 		if compiledMessageError != nil && strings.TrimSpace(compiledMessage) != "" {
-			service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+			service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 				Channel: channel.Channel,
 				Body:    html.UnescapeString(compiledMessage)})
 		}

@@ -1,17 +1,15 @@
 package gameResolve
 
 import (
-	"github.com/globalsign/mgo"
 	"strings"
 	"time"
 
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/twitchAPIClient"
-
-	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
 )
-
 
 type Service struct {
 	collection         *mgo.Collection

@@ -1,22 +1,23 @@
 package twitchIRCHandler
 
 import (
+	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/subscriptionInfo"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/irc.v2"
 )
 
-func (service *TwitchIRCHandler) subHandler(client *twitchIRCClient.TwitchIRCClient, message *irc.Message) {
+func (service *TwitchIRCHandler) sub(client *twitchIRC.Client, message *irc.Message) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"feature": "subHandler",
-		"action":  "subHandler"})
+		"feature": "sub",
+		"action":  "sub"})
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
 	msgID, _ := message.Tags.GetTag("msg-id")
@@ -34,7 +35,7 @@ func (service *TwitchIRCHandler) subHandler(client *twitchIRCClient.TwitchIRCCli
 	}
 	channelID, channelIDFound := message.Tags.GetTag("room-id")
 	userID, userIDFound := message.Tags.GetTag("user-id")
-	channelInfo, _ := service.channelInfoService.GetChannelInfo(&channelID)
+	channelInfo, _ := service.channelInfoService.Get(&channelID)
 	channel := message.Params[0][1:]
 	if msgParamMonthsFound && userFound && channel != "" && channelIDFound && userIDFound {
 		subCount, subCountError := strconv.Atoi(msgParamMonths)
@@ -57,8 +58,8 @@ func (service *TwitchIRCHandler) subHandler(client *twitchIRCClient.TwitchIRCCli
 
 			logger.Debugf("Channel %v: %v subbed for %v months", channel, user, subCount)
 
-			// service.eventBus.Publish(eventbus.EventSub(&channelID), "newsub")
-			// service.eventBus.Publish(eventbus.Subtrain(&channelID), "newsub")
+			service.eventBus.Publish(eventbus.EventSub(&channelID), "newsub")
+			service.eventBus.Publish(eventbus.Subtrain(&channelID), "newsub")
 		}
 	}
 }

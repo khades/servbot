@@ -57,6 +57,29 @@ func (service *Service) Get(channelID *string) *ChannelSongRequest {
 	return &songRequestInfo
 }
 
+func (service *Service) formCurrentSong(channelID *string, volume int, songRequests SongRequests) (*channelInfo.CurrentSong, error) {
+	for _, request := range songRequests {
+		if request.Order == 1 {
+			channelInfoStruct, err := service.channelInfoService.Get(channelID)
+			if err != nil {
+				return nil, err
+			}
+			return &channelInfo.CurrentSong{
+				IsPlaying: true,
+				Title:     request.Title,
+				User:      request.User,
+				Link:      "https://youtu.be/" + request.VideoID,
+				Duration:  l10n.HumanizeDurationFull(request.Length, channelInfoStruct.Lang, true),
+				Volume:    volume,
+				Count:     len(songRequests),
+				ID:        request.VideoID}, nil
+			break
+		}
+	}
+	return &channelInfo.CurrentSong{
+		IsPlaying: false}, nil
+}
+
 func (service *Service) GetLast(channelID *string, lang string) channelInfo.CurrentSong {
 	songRequestInfo := service.Get(channelID)
 
@@ -118,7 +141,7 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 	defer logger.Debugf("Releasing Songrequest lock for channel %s", *channelID)
 
 	songRequestInfo := service.Get(channelID)
-	channelInfo, channelInfoError := service.channelInfoService.GetChannelInfo(channelID)
+	channelInfo, channelInfoError := service.channelInfoService.Get(channelID)
 
 	if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfo.StreamStatus.Online == false) {
 		return SongRequestAddResult{Offline: true}
@@ -301,7 +324,7 @@ func (service *Service) Pull(channelID *string, videoID *string) {
 	newRequests, pulledItem := songRequestInfo.Requests.PullOneRequest(videoID)
 
 	if pulledItem != nil {
-		service.put(channelID, newRequests)
+		service.put(channelID, newRequests, songRequestInfo.Settings.Volume)
 		service.eventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
 }
@@ -330,7 +353,7 @@ func (service *Service) PullLastUser(channelID *string, userID *string) (*SongRe
 
 	if pulledItem != nil {
 
-		service.put(channelID, newRequests)
+		service.put(channelID, newRequests, songRequestInfo.Settings.Volume)
 		service.eventBus.Publish(eventbus.Songrequest(channelID), "update")
 		return pulledItem, true
 	}
@@ -352,7 +375,7 @@ func (service *Service) BubbleUp(channelID *string, videoID *string) bool {
 	}
 	newRequests, changed := songRequestInfo.Requests.BubbleVideoUp(videoID, 1)
 	if changed == true {
-		service.put(channelID, newRequests)
+		service.put(channelID, newRequests, songRequestInfo.Settings.Volume)
 		service.eventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
 	return changed
@@ -368,13 +391,15 @@ func (service *Service) BubbleUpToSecond(channelID *string, videoID *string) boo
 	}
 	newRequests, changed := songRequestInfo.Requests.BubbleVideoUp(videoID, 2)
 	if changed == true {
-		service.put(channelID, newRequests)
+		service.put(channelID, newRequests, songRequestInfo.Settings.Volume)
 		service.eventBus.Publish(eventbus.Songrequest(channelID), "update")
 	}
 	return changed
 }
 
-func (service *Service) put(channelID *string, requests SongRequests) {
+func (service *Service) put(channelID *string, requests SongRequests, volume int) {
+	currentSong, _ := service.formCurrentSong(channelID,  volume, requests)
+	service.channelInfoService.PutCurrentSong(channelID, currentSong)
 	service.collection.Update(bson.M{"channelid": *channelID}, bson.M{"$set": bson.M{"requests": requests}})
 }
 
@@ -429,7 +454,7 @@ func (service *Service) PushTag(videoID *string, tag string, userID string, user
 			service.collection.Update(bson.M{"channelid": channel.ChannelID, "requests": bson.M{"videoid": *videoID, "tags.tag": bson.M{"$ne": tag}}}, bson.M{"$push": bson.M{"requests.$.tags": TagRecord{User: user, UserID: userID, Tag: tag}}})
 		} else {
 			newRequests, _ := channel.Requests.PullOneRequest(videoID)
-			service.put(&channel.ChannelID, newRequests)
+			service.put(&channel.ChannelID, newRequests, channel.Settings.Volume)
 		}
 		service.eventBus.Publish(eventbus.Songrequest(&channel.ChannelID), "update")
 

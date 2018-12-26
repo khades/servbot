@@ -1,4 +1,4 @@
-package twitchIRCClientTasks
+package twitchIRCCTasks
 
 import (
 	"github.com/khades/servbot/twitchIRC"

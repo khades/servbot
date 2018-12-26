@@ -52,7 +52,7 @@ func (service *Service) UpdateFromTwitch() error {
 
 // Push updates stream status (start of stream, topic of stream)
 func (service *Service) Push(channelID *string, streamStatus *channelInfo.StreamStatus) {
-	channelInfoData, _ := service.channelInfoService.GetChannelInfo(channelID)
+	channelInfoData, _ := service.channelInfoService.Get(channelID)
 	prevStatus := channelInfo.StreamStatus{}
 	currentStatus := channelInfo.StreamStatus{}
 	if channelInfoData != nil {

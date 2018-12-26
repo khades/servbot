@@ -1,4 +1,4 @@
-package twitchIRCClient
+package twitchIRC
 
 import (
 	"sync"
@@ -13,9 +13,9 @@ func Init(
 	config *config.Config,
 	channelInfoService *channelInfo.Service,
 	handle TwitchIRCHandle,
-	wg *sync.WaitGroup) *TwitchIRCClient {
+	wg *sync.WaitGroup) *Client {
 
-	twitchIRCClient := TwitchIRCClient{
+	twitchIRCClient := Client{
 		config:             config,
 		channelInfoService: channelInfoService,
 		handle:             handle,

@@ -24,7 +24,7 @@ func (service *Service) getCount() int {
 
 func (service *Service) getBannedTrackCount(channelID *string) int {
 	bannedVideos, bannedVideosFound := service.bannedCountPerChannel[*channelID]
-	if bannedVideosFound == false {
+	if !bannedVideosFound {
 		count, _ := service.collection.Find(bson.M{"tags.tag": *channelID + "-restricted"}).Count()
 		service.bannedCountPerChannel[*channelID] = count
 		return count
@@ -35,13 +35,12 @@ func (service *Service) getBannedTrackCount(channelID *string) int {
 
 func (service *Service) IncrementBannedTracks(channelID *string) {
 	bannedTracks, bannedVideosFound := service.bannedCountPerChannel[*channelID]
-	if bannedVideosFound == false {
+	if !bannedVideosFound {
 		service.bannedCountPerChannel[*channelID] = 1
 	} else {
 		service.bannedCountPerChannel[*channelID] = bannedTracks + 1
 	}
 }
-
 
 // func getVideoItem(videoID *string) *models.SongRequestLibraryResponse {
 // 	logger := logrus.WithFields(logrus.Fields{
@@ -130,7 +129,6 @@ func (service *Service) Add(videoID *string, title *string, duration *time.Durat
 		service.count = service.count + 1
 	}
 }
-
 
 func (service *Service) ListBannedTracks(channelID *string, page int) ([]SongRequestLibraryItem, int, error) {
 	pageSize := 25

@@ -6,10 +6,10 @@ import (
 
 var autoMessageCollectionName = "autoMessages"
 
-func Init(db *mgo.Database, ) *Service {
+func Init(db *mgo.Database) *Service {
 	collection := db.C(autoMessageCollectionName)
 
-	collection .EnsureIndex(mgo.Index{
+	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
 
 	service := &Service{

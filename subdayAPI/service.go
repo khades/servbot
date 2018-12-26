@@ -2,11 +2,12 @@ package subdayAPI
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/httpAPI"
 	"github.com/khades/servbot/httpSession"
 	"github.com/khades/servbot/subday"
-	"net/http"
 
 	"goji.io/pat"
 )
@@ -23,7 +24,7 @@ func (service *Service) create(w http.ResponseWriter, r *http.Request, s *httpSe
 		httpAPI.WriteJSONError(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	created, id := service.subdayService.Create(&channelInfo.ChannelID, request.SubsOnly, &request.Name)
+	created, id := service.subdayService.Create(channelInfo, request.SubsOnly, &request.Name)
 	if created == false {
 		httpAPI.WriteJSONError(w, "Subday already exists", http.StatusNotAcceptable)
 		return
@@ -42,7 +43,7 @@ func (service *Service) list(w http.ResponseWriter, r *http.Request, s *httpSess
 }
 
 func (service *Service) get(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
-	var error error;
+	var error error
 	id := pat.Param(r, "subdayID")
 	if id == "" {
 		httpAPI.WriteJSONError(w, "subday id is not found", http.StatusNotFound)

@@ -1,16 +1,13 @@
 package channelLogs
 
 import (
-	"time"
-
-	"github.com/khades/servbot/chatMessage"
-
 	"github.com/globalsign/mgo"
-	"github.com/khades/servbot/channelBans"
-	"github.com/khades/servbot/userResolve"
-
 	"github.com/globalsign/mgo/bson"
-	"github.com/khades/servbot/models"
+	"github.com/khades/servbot/channelBans"
+	"github.com/khades/servbot/chatMessage"
+	"github.com/khades/servbot/userResolve"
+	"github.com/khades/servbot/utils"
+	"time"
 )
 
 type Service struct {
@@ -21,10 +18,10 @@ type Service struct {
 }
 
 // GetUsers returns list of all users, who even wrote in chat room, with optional pattern to match
-func (service *Service) GetUsers(channelID *string, pattern *string) ([]models.ChannelUser, error) {
-	var channelUsers []models.ChannelUser
+func (service *Service) GetUsers(channelID *string, pattern *string) ([]ChannelUser, error) {
+	var channelUsers []ChannelUser
 	if *pattern == "" {
-		error := service.collection.Find(models.ChannelSelector{ChannelID: *channelID}).Sort("-lastupdate").Limit(100).All(&channelUsers)
+		error := service.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).Sort("-lastupdate").Limit(100).All(&channelUsers)
 		return channelUsers, error
 
 	}

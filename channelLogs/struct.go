@@ -27,3 +27,12 @@ type BanInfo struct {
 	Type        string    `json:"type"`
 	Date        time.Time `json:"date"`
 }
+
+// ChannelUser struct describes user on one channel
+type ChannelUser struct {
+	ChannelID      string    `json:"channelID"`
+	User           string    `json:"user"`
+	UserID         string    `json:"userID"`
+	KnownNicknames []string  `json:"knownNicknames"`
+	LastUpdate     time.Time `json:"lastUpdate"`
+}

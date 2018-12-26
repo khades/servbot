@@ -1,10 +1,10 @@
-package followersToGreetSchedule
+package followersToGreetTasks
 
 import (
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/followersToGreet"
 	"github.com/khades/servbot/subAlert"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 	"github.com/khades/servbot/userResolve"
 	"strings"
 
@@ -16,7 +16,7 @@ type Service struct {
 	followersToGreetService *followersToGreet.Service
 	subAlertService *subAlert.Service
 	userResolveService *userResolve.Service
-	twitchIRCClient *twitchIRCClient.TwitchIRCClient
+	twitchIRCClient *twitchIRC.Client
 }
 // AnnounceFollowers announces all new followers on channels
 func (service *Service) AnnounceFollowers() {
@@ -48,7 +48,7 @@ func (service *Service) processOneChannel(channel followersToGreet.FollowersToGr
 
 		return
 	}
-	channelInfo, channelInfoError := service.channelInfoService.GetChannelInfo(&channel.ChannelID)
+	channelInfo, channelInfoError := service.channelInfoService.Get(&channel.ChannelID)
 	if channelInfoError != nil {
 		logger.Debugf("No channelInfo for channel %s", channel.ChannelID)
 
@@ -72,7 +72,7 @@ func (service *Service) processOneChannel(channel followersToGreet.FollowersToGr
 	
 	followersString := strings.TrimSpace(strings.Join(followers, " @"))
 	if channelInfoError == nil && channelInfo.Enabled == true && alertInfo.Enabled == true && followersString != "@" && alertInfo.FollowerMessage != "" {
-		service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+		service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 			Channel: channelInfo.Channel,
 			Body:    "@" + followersString + " " + alertInfo.FollowerMessage})
 	}

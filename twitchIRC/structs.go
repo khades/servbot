@@ -1,4 +1,4 @@
-package twitchIRCClient
+package twitchIRC
 
 type OutgoingMessage struct {
 	Channel string

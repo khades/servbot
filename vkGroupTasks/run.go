@@ -1,24 +1,20 @@
-package vkGroupSchedule
+package vkGroupTasks
 
 import (
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
-	"github.com/khades/servbot/twitchIRCClient"
-	"sync"
+	"github.com/khades/servbot/twitchIRC"
 	"time"
 )
 
-func Init(config *config.Config, channelInfoService *channelInfo.Service, twitchIRCClient *twitchIRCClient.TwitchIRCClient, wg *sync.WaitGroup) *time.Ticker {
+func Run(config *config.Config, channelInfoService *channelInfo.Service, twitchIRCClient *twitchIRC.Client) *time.Ticker {
 	ticker := time.NewTicker(time.Second * 60)
 	service := Service{config, channelInfoService, twitchIRCClient}
-	go func(wg *sync.WaitGroup) {
+	go func() {
 		for {
-
 			<-ticker.C
-			wg.Add(1)
 			service.Check()
-			wg.Done()
 		}
-	}(wg)
+	}()
 	return ticker
 }

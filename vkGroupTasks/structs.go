@@ -1,4 +1,4 @@
-package vkGroupSchedule
+package vkGroupTasks
 
 
 type responseItem struct {

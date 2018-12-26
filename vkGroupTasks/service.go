@@ -1,4 +1,4 @@
-package vkGroupSchedule
+package vkGroupTasks
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 	"github.com/khades/servbot/utils"
 	"github.com/sirupsen/logrus"
 )
@@ -19,7 +19,7 @@ import (
 type Service struct {
 	config             *config.Config
 	channelInfoService *channelInfo.Service
-	twitchIRCClient    *twitchIRCClient.TwitchIRCClient
+	twitchIRCClient    *twitchIRC.Client
 }
 
 // Check checks all vk groups of all channels on that instance of bot
@@ -63,7 +63,7 @@ func (service *Service) checkOne(channel *channelInfo.ChannelInfo) {
 	}
 
 	logger.Debug("Sending message to channel")
-	service.twitchIRCClient.SendPublic(&twitchIRCClient.OutgoingMessage{
+	service.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 		Channel: channel.Channel,
 		Body:    "[VK https://vk.com/" + channel.VkGroupInfo.GroupName + "] " + result.LastMessageBody + " " + result.LastMessageURL})
 }

@@ -2,12 +2,18 @@ package main
 
 import (
 	"flag"
+	"github.com/khades/servbot/streamStatusTasks"
+	"github.com/khades/servbot/twitchIRCCTasks"
+	"github.com/khades/servbot/webhookTasks"
+	"sync"
+	"time"
+
 	evbus "github.com/asaskevich/EventBus"
 	"github.com/khades/servbot/autoMessageAPI"
-	"github.com/khades/servbot/autoMessageAnnounce"
+	"github.com/khades/servbot/autoMessageTasks"
 	"github.com/khades/servbot/channelBansAPI"
 	"github.com/khades/servbot/channelLogsAPI"
-	"github.com/khades/servbot/followersAnnounce"
+	"github.com/khades/servbot/followersToGreetTasks"
 	"github.com/khades/servbot/httpAPI"
 	"github.com/khades/servbot/httpSession"
 	"github.com/khades/servbot/songRequestAPI"
@@ -15,18 +21,16 @@ import (
 	"github.com/khades/servbot/subdayAPI"
 	"github.com/khades/servbot/subscriptionInfoAPI"
 	"github.com/khades/servbot/subtrainAPI"
-	"github.com/khades/servbot/subtrainAnnounce"
+	"github.com/khades/servbot/subtrainTasks"
 	"github.com/khades/servbot/templateAPI"
 	"github.com/khades/servbot/videoLibraryAPI"
 	"github.com/khades/servbot/vkGroupAPI"
-	"github.com/khades/servbot/vkGroupAnnounce"
+	"github.com/khades/servbot/vkGroupTasks"
 	"github.com/khades/servbot/webhookAPI"
-	"sync"
-	"time"
 
 	"github.com/khades/servbot/autoMessage"
 	"github.com/khades/servbot/subscriptionInfo"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 	"github.com/khades/servbot/twitchIRCHandler"
 	"github.com/khades/servbot/webhook"
 
@@ -83,6 +87,7 @@ func main() {
 
 	var eventBus = evbus.New()
 
+	// Creating ticker for websocket ping events
 	pingticker := time.NewTicker(time.Second * 30)
 
 	go func() {
@@ -92,118 +97,116 @@ func main() {
 		}
 	}()
 
-	tickers := []*time.Ticker{}
-
-	//TODO Decoumple timers from services
 	if config.Debug == true {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 	// Creating twitchAPIClient service
 	twitchAPIClient := twitchAPIClient.Init(
-		config,
-	)
+		config)
 
 	// Creating youtubeAPIClient service
 	youtubeAPIClient := youtubeAPIClient.Init(
-		config,
-	)
+		config)
 
 	// Service
 	httpSessionService := httpSession.Init(
 		db,
-		twitchAPIClient,
-	)
+		twitchAPIClient)
 
 	// Creating user to userID resolution service
 	userResolveService := userResolve.Init(
 		db,
-		twitchAPIClient,
-	)
+		twitchAPIClient)
 
 	// Creating channelInfo super-object service
 	channelInfoService := channelInfo.Init(
 		db,
 		config,
-		userResolveService,
-	)
+		userResolveService)
 
 	// HttpAPI
 	httpAPIService := httpAPI.Init(
 		config,
 		httpSessionService,
 		channelInfoService,
-		eventBus,
-	)
+		eventBus)
 
-	subtrainAPI.Init(httpAPIService, channelInfoService)
-	vkGroupAPI.Init(httpAPIService, channelInfoService)
+	subtrainAPI.Init(
+		httpAPIService,
+		channelInfoService)
+
+	vkGroupAPI.Init(
+		httpAPIService,
+		channelInfoService)
 
 	// Creating gameID to game resolution service
 	gameResolveService, _ := gameResolve.Init(
 		db,
 		twitchAPIClient,
-		channelInfoService,
-		&wg,
-	)
+		channelInfoService)
 
 	// Creating twitchAPIClient stream status checker service
-	streamStatusService, streamStatusTicker := streamStatus.Init(
+	streamStatusService := streamStatus.Init(
 		config,
 		channelInfoService,
 		gameResolveService,
-		twitchAPIClient,
-		&wg,
-	)
-	tickers = append(tickers, streamStatusTicker)
+		twitchAPIClient)
+
+	streamStatusTasks.Run(
+		streamStatusService)
 
 	// Creating Template service
-	templateService :=template.Init(
+	templateService := template.Init(
 		db,
-		channelInfoService,
-	)
+		channelInfoService)
 
 	// Initialising TemplateAPI
-	templateAPI.Init(httpAPIService, templateService)
+	templateAPI.Init(
+		httpAPIService,
+		templateService)
 
 	// Creating ChannelBans service
 	channelBansService := channelBans.Init(
-		db,
-	)
+		db)
 
 	// Initialising ChannelBansAPI
-	channelBansAPI.Init(httpAPIService, channelBansService)
+	channelBansAPI.Init(
+		httpAPIService,
+		channelBansService)
 
 	// Creating Service
 	channelLogsService := channelLogs.Init(
 		db,
 		channelBansService,
-		userResolveService,
-	)
+		userResolveService)
 
 	// Attaching api methods
-	channelLogsAPI.Init(httpAPIService, channelLogsService)
+	channelLogsAPI.Init(
+		httpAPIService,
+		channelLogsService)
 
 	// Creating Service
 	subdayService := subday.Init(
 		db,
-		channelInfoService,
-	)
+		channelInfoService)
 
 	// Registering subday to httpAPI
-	subdayAPI.Init(httpAPIService,subdayService)
+	subdayAPI.Init(
+		httpAPIService,
+		subdayService)
 
 	// Creating Service
 	subAlertService := subAlert.Init(
-		db,
-	)
+		db)
+
 	// API
-	subAlertAPI.Init(httpAPIService, subAlertService)
+	subAlertAPI.Init(
+		httpAPIService,
+		subAlertService)
 
 	// Creating videoLibraryService
-	videoLibraryService :=
-		videoLibrary.Init(
-			db,
-		)
+	videoLibraryService := videoLibrary.Init(
+		db)
 
 	// Creating songRequestService
 	songRequestService := songRequest.Init(
@@ -211,37 +214,41 @@ func main() {
 		youtubeAPIClient,
 		channelInfoService,
 		videoLibraryService,
-		eventBus,
-	)
-	songRequestAPI.Init(httpAPIService, songRequestService)
+		eventBus)
+
+	songRequestAPI.Init(
+		httpAPIService,
+		songRequestService)
 
 	// Service
 	followersToGreetService := followersToGreet.Init(
-		db,
-	)
+		db)
 
 	// Service
-	followersService :=	followers.Init(
+	followersService := followers.Init(
 		db,
 		twitchAPIClient,
-		followersToGreetService,
-	)
+		followersToGreetService)
 
 	// Running PubSub
 	// TODO: it runs once!
 	// pubsub.RunPubSub(channelInfoService, config, channelLogsService)
 
 	// Running Webhooks
-	webHookService, webHookTicker := webhook.Init(
+	webHookService := webhook.Init(
 		db,
 		channelInfoService,
-		twitchAPIClient,
-		&wg,
-	)
-	tickers = append(tickers, webHookTicker)
+		twitchAPIClient)
+
+	webhookTasks.Run(
+		webHookService)
 
 	// Constructing webhooksAPI
-	webhookAPI.Init(httpAPIService, webHookService, streamStatusService, followersService )
+	webhookAPI.Init(
+		httpAPIService,
+		webHookService,
+		streamStatusService,
+		followersService)
 
 	// Automessage service
 	autoMessageService := autoMessage.Init(db)
@@ -267,17 +274,21 @@ func main() {
 		autoMessageService,
 		userResolveService,
 		subscriptionInfoService,
+		templateService,
+		followersService,
+		songRequestService,
+		eventBus,
 	)
 
 	// TwitchBot
-	twitchIRCClient, twitchIRCTicker, twitchIRCModTicker := twitchIRCClient.Init(
+	twitchIRCClient := twitchIRC.Init(
 		config,
 		channelInfoService,
 		twitchIRCHandler.Handle,
 		&wg,
 	)
-	tickers = append(tickers, twitchIRCTicker)
-	tickers = append(tickers, twitchIRCModTicker)
+	twitchIRCCTasks.Run(
+		twitchIRCClient)
 
 	// Initialising videoLibraryAPI
 	videoLibraryAPI.Init(
@@ -285,43 +296,32 @@ func main() {
 		videoLibraryService,
 		songRequestService,
 		twitchIRCClient,
-		eventBus,
-	)
+		eventBus)
 	// FollowerAnnouncer
-	followersTicker := followersAnnounce.Init(
+	followersToGreetTasks.Run(
 		channelInfoService,
 		followersToGreetService,
 		subAlertService,
 		userResolveService,
 		twitchIRCClient,
-		&wg,
-	)
-	tickers = append(tickers, followersTicker)
+		&wg)
 
 	// AutomessageAnnouncer
-	automessageAnnounceTicker := autoMessageAnnounce.Init(
+	autoMessageTasks.Run(
 		channelInfoService,
 		autoMessageService,
-		twitchIRCClient,
-		&wg,
-	)
-	tickers = append(tickers, automessageAnnounceTicker)
+		twitchIRCClient)
 
 	// SubtrainAnnouncer
-	subtrainAnnounceTicker := subtrainAnnounce.Init(
+	subtrainTasks.Run(
 		channelInfoService,
 		twitchIRCClient,
-		eventBus,
-		&wg,
-	)
-	tickers = append(tickers, subtrainAnnounceTicker)
+		eventBus)
 
-	vkAnnounceTicker := vkGroupAnnounce.Init(
+	vkGroupTasks.Run(
 		config,
 		channelInfoService,
-		twitchIRCClient,
-		&wg)
-	tickers = append(tickers, vkAnnounceTicker)
+		twitchIRCClient)
 
 	httpAPIService.Serve()
 	wg.Wait()

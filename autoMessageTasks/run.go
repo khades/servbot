@@ -1,18 +1,16 @@
-package autoMessageSchedule
+package autoMessageTasks
 
 import (
-	"sync"
 	"time"
 
 	"github.com/khades/servbot/autoMessage"
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 )
 
-func Init(channelInfoService *channelInfo.Service,
+func Run(channelInfoService *channelInfo.Service,
 	automessageService *autoMessage.Service,
-	twitchIRCClient *twitchIRCClient.TwitchIRCClient,
-	wg *sync.WaitGroup) *time.Ticker {
+	twitchIRCClient *twitchIRC.Client) *time.Ticker {
 	ticker := time.NewTicker(time.Second * 20)
 
 	service := Service{
@@ -20,13 +18,11 @@ func Init(channelInfoService *channelInfo.Service,
 		automessageService,
 		twitchIRCClient,
 	}
-	go func(wg *sync.WaitGroup) {
+	go func() {
 		for {
 			<-ticker.C
-			wg.Add(1)
 			service.Send()
-			wg.Done()
 		}
-	}(wg)
+	}()
 	return ticker
 }

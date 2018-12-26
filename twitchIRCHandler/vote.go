@@ -3,14 +3,14 @@ package twitchIRCHandler
 import (
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/chatMessage"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 	"unicode/utf8"
 
 	"github.com/khades/servbot/l10n"
 )
 
 // Vote handlers processes incoming subday vote variants
-func (service *TwitchIRCHandler) vote(client *twitchIRCClient.TwitchIRCClient, channelInfo *channelInfo.ChannelInfo, chatMessage *chatMessage.ChatMessage) {
+func (service *TwitchIRCHandler) vote(client *twitchIRC.Client, channelInfo *channelInfo.ChannelInfo, chatMessage *chatMessage.ChatMessage) {
 	if utf8.RuneCountInString(chatMessage.MessageBody) < 2 {
 		return
 	}
@@ -19,7 +19,7 @@ func (service *TwitchIRCHandler) vote(client *twitchIRCClient.TwitchIRCClient, c
 	subday, subdayError := service.subdayService.GetActive(&chatMessage.ChannelID)
 	if subdayError != nil {
 
-		client.SendDebounced(twitchIRCClient.OutgoingDebouncedMessage{Message: twitchIRCClient.OutgoingMessage{
+		client.SendDebounced(twitchIRC.OutgoingDebouncedMessage{Message: twitchIRC.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayVoteNoActiveSubday,
 			User:    chatMessage.User},
@@ -28,7 +28,7 @@ func (service *TwitchIRCHandler) vote(client *twitchIRCClient.TwitchIRCClient, c
 		return
 	}
 	if subday.SubsOnly == true && chatMessage.IsSub == false {
-		client.SendDebounced(twitchIRCClient.OutgoingDebouncedMessage{Message: twitchIRCClient.OutgoingMessage{
+		client.SendDebounced(twitchIRC.OutgoingDebouncedMessage{Message: twitchIRC.OutgoingMessage{
 			Channel: chatMessage.Channel,
 			Body:    l10n.GetL10n(channelInfo.GetChannelLang()).SubdayVoteYouReNotSub,
 			User:    chatMessage.User},

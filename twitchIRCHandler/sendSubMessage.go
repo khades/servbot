@@ -5,10 +5,10 @@ import (
 
 	"github.com/cbroglie/mustache"
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 )
 
-func (service *TwitchIRCHandler) sendSubMessage(client *twitchIRCClient.TwitchIRCClient, channelInfo *channelInfo.ChannelInfo, user *string, subPlan *string) {
+func (service *TwitchIRCHandler) sendSubMessage(client *twitchIRC.Client, channelInfo *channelInfo.ChannelInfo, user *string, subPlan *string) {
 	subAlert, error := service.subAlertService.Get(&channelInfo.ChannelID)
 
 	if error != nil || subAlert.Enabled == false {
@@ -45,7 +45,7 @@ func (service *TwitchIRCHandler) sendSubMessage(client *twitchIRCClient.TwitchIR
 	}
 
 	if template != "" {
-		client.SendPublic(&twitchIRCClient.OutgoingMessage{
+		client.SendPublic(&twitchIRC.OutgoingMessage{
 			Body:    template,
 			Channel: channelInfo.Channel,
 			User:    *user})

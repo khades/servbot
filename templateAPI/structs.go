@@ -1,8 +1,9 @@
 package templateAPI
 
+import "github.com/khades/servbot/template"
 
 type templatesResponse struct {
-	Templates []TemplateInfo `json:"list"`
+	Templates []template.TemplateInfo `json:"templates"`
 	IsMod     bool                  `json:"isMod"`
 }
 

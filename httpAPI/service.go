@@ -1,10 +1,11 @@
 package httpAPI
 
 import (
-	"github.com/asaskevich/EventBus"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
+
+	"github.com/asaskevich/EventBus"
+	"github.com/gorilla/websocket"
 
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
@@ -34,7 +35,7 @@ type Service struct {
 }
 
 func (service *Service) NewMux() *goji.Mux {
-	return goji.SubMux()
+	return service.mux
 }
 
 func (service *Service) Serve() {
@@ -113,7 +114,7 @@ func (service *Service) sessionAndChannel(next SessionAndChannelHandlerFunc) Ses
 			return
 		}
 
-		channel, error := service.channelInfoService.GetChannelInfo(&channelID)
+		channel, error := service.channelInfoService.Get(&channelID)
 
 		if error != nil {
 			WriteJSONError(w, error.Error(), http.StatusInternalServerError)

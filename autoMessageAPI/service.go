@@ -2,20 +2,17 @@ package autoMessageAPI
 
 import (
 	"encoding/json"
+	"net/http"
+
+	"github.com/cbroglie/mustache"
+	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/autoMessage"
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/httpAPI"
 	"github.com/khades/servbot/httpSession"
-	"net/http"
-
-	"github.com/globalsign/mgo/bson"
-
-	"github.com/cbroglie/mustache"
 	"github.com/sirupsen/logrus"
-
 	"goji.io/pat"
 )
-
 
 type Service struct {
 	autoMessageService *autoMessage.Service

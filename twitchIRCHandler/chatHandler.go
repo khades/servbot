@@ -1,7 +1,12 @@
 package twitchIRCHandler
 
 import (
+	"github.com/asaskevich/EventBus"
+	"github.com/khades/servbot/eventbus"
+	"github.com/khades/servbot/followers"
+	"github.com/khades/servbot/songRequest"
 	"github.com/khades/servbot/subscriptionInfo"
+	"github.com/khades/servbot/template"
 	"strconv"
 	"strings"
 	"time"
@@ -11,7 +16,7 @@ import (
 	"github.com/khades/servbot/channelLogs"
 	"github.com/khades/servbot/subAlert"
 	"github.com/khades/servbot/subday"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 	"github.com/khades/servbot/userResolve"
 
 	"github.com/khades/servbot/chatMessage"
@@ -21,16 +26,20 @@ import (
 )
 
 type TwitchIRCHandler struct {
-	subdayService      *subday.Service
-	channelInfoService *channelInfo.Service
-	subAlertService    *subAlert.Service
-	channelLogsService *channelLogs.Service
-	autoMessageService *autoMessage.Service
-	userResolveService *userResolve.Service
+	subdayService           *subday.Service
+	channelInfoService      *channelInfo.Service
+	subAlertService         *subAlert.Service
+	channelLogsService      *channelLogs.Service
+	autoMessageService      *autoMessage.Service
+	userResolveService      *userResolve.Service
 	subscriptionInfoService *subscriptionInfo.Service
+	templateService         *template.Service
+	followersService        *followers.Service
+	songRequestService      *songRequest.Service
+	eventBus                EventBus.Bus
 }
 
-func (service *TwitchIRCHandler) Handle(client *twitchIRCClient.TwitchIRCClient, message *irc.Message) {
+func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.Message) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "bot",
 		"feature": "bot",
@@ -46,7 +55,7 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRCClient.TwitchIRCClient,
 		switch msgID {
 		case "subgift":
 			{
-				service.subHandler(client, message)
+				service.sub(client, message)
 			}
 		case "room_mods":
 			{
@@ -54,24 +63,24 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRCClient.TwitchIRCClient,
 				if commaIndex != -1 {
 					mods := strings.Split(message.Params[1][commaIndex+2:], ", ")
 					channel := strings.ToLower(message.Params[0][1:])
-					service.modHandler(&channel, mods)
+					service.mod(&channel, mods)
 				}
 			}
 		case "resub":
 			{
-				service.subHandler(client, message)
+				service.sub(client, message)
 			}
 
 		case "sub":
 			{
-				service.subHandler(client, message)
+				service.sub(client, message)
 			}
 		}
 	}
 
 	if message.Command == "CLEARCHAT" {
 		channelID := message.Tags["room-id"].Encode()
-		channelInfo, _ := service.channelInfoService.GetChannelInfo(&channelID)
+		channelInfo, _ := service.channelInfoService.Get(&channelID)
 		if pubsub.IsWorking == false || channelInfo.ExtendedBansLogging == false {
 			banDuration, banDurationFound := message.Tags.GetTag("ban-duration")
 			intBanDuration := 0
@@ -121,7 +130,7 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRCClient.TwitchIRCClient,
 			IsSub:     message.Tags["subscriber"] == "1",
 			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
 		service.channelLogsService.Log(&formedMessage)
-		channelInfo, _ := service.channelInfoService.GetChannelInfo(&formedMessage.ChannelID)
+		channelInfo, _ := service.channelInfoService.Get(&formedMessage.ChannelID)
 		service.autoMessageService.Decrement(channelInfo)
 
 		commandBody, isCommand := formedMessage.GetCommand()
@@ -159,13 +168,19 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRCClient.TwitchIRCClient,
 
 				service.subscriptionInfoService.Log(&loggedSubscription)
 
-				// service.eventBus.Publish(eventbus.EventSub(&formedMessage.ChannelID), "newsub")
-				// service.eventBus.Publish(eventbus.Subtrain(&formedMessage.ChannelID), "newsub")
+				service.eventBus.Publish(eventbus.EventSub(&formedMessage.ChannelID), "newsub")
+				service.eventBus.Publish(eventbus.Subtrain(&formedMessage.ChannelID), "newsub")
+			}
+			if commandBody.Command == "new" {
+				service.new(channelInfo, &formedMessage, commandBody, client)
+			} else if commandBody.Command == "alias" {
+				service.alias(channelInfo, &formedMessage, commandBody, client)
+			} else if commandBody.Command == "subdaynew" {
+				service.subdayNew(channelInfo, &formedMessage, commandBody, client)
+			} else {
+				service.custom(channelInfo, &formedMessage, commandBody, client)
 			}
 
-			//handlerFunction := commandhandlers.Router.Go(commandBody.Command)
-			//logger.Debug("Getting channel info")
-			//handlerFunction(channelInfo, &formedMessage, commandBody, IrcClientInstance)
 		}
 	}
 }

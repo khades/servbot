@@ -24,7 +24,7 @@ type ChannelInfo struct {
 	ExtendedBansLogging bool         `json:"extendedBansLogging"`
 	SubTrain            SubTrain     `json:"subTrain"`
 	SubdayIsActive      bool         `json:"subdayIsActive"`
-	SongRequest         CurrentSong  `json:"songRequest"`
+	CurrentSong        CurrentSong  `json:"currentSong"`
 }
 
 
@@ -257,4 +257,9 @@ type CurrentSong struct {
 	Volume    int    `json:"volume"`
 	Count     int    `json:"count"`
 	ID        string `json:"id"`
+}
+
+type ChannelWithID struct {
+	Channel   string `json:"channel"`
+	ChannelID string `json:"channelID"`
 }

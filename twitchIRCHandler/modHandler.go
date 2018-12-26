@@ -6,11 +6,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (service TwitchIRCHandler) modHandler(channel *string, mods []string) {
+func (service TwitchIRCHandler) mod(channel *string, mods []string) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "bot",
 		"feature": "mod",
-		"action":  "modHandler"})
+		"action":  "mod"})
 	filteredMods := []string{}
 	for _, mod := range mods {
 		if mod != "" {

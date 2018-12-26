@@ -2,10 +2,10 @@ package subAlert
 
 import (
 	"github.com/globalsign/mgo"
+	"github.com/khades/servbot/utils"
 	"time"
 
 	"github.com/cbroglie/mustache"
-	"github.com/khades/servbot/models"
 	"github.com/globalsign/mgo/bson"
 )
 
@@ -16,14 +16,14 @@ type Service struct {
 // Search returns subalert for specified channel
 func (service *Service) Get(channelID *string) (*SubAlert, error) {
 	var result SubAlert
-	error := service.collection.Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
+	error := service.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).One(&result)
 	return &result, error
 }
 
 // GetWithHistory returns subalert for specified channel with changelog
 func (service *Service) GetWithHistory(channelID *string) (*SubAlertWithHistory, error) {
 	var result SubAlertWithHistory
-	error := service.collection.Find(models.ChannelSelector{ChannelID: *channelID}).One(&result)
+	error := service.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).One(&result)
 	return &result, error
 }
 
@@ -56,7 +56,7 @@ func  (service *Service) Set(user *string, userID *string, subAlert *SubAlert) *
 		templateValidation.Error = true
 	}
 	if templateValidation.Error == false {
-		service.collection.Upsert(models.ChannelSelector{ChannelID: subAlert.ChannelID}, bson.M{
+		service.collection.Upsert(utils.ChannelSelector{ChannelID: subAlert.ChannelID}, bson.M{
 			"$set": &subAlert,
 			"$push": bson.M{
 				"history": bson.M{

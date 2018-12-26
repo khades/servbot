@@ -16,7 +16,7 @@ func (service *Service) get(w http.ResponseWriter, r *http.Request, s *httpSessi
 }
 
 //func subtrainWidget(w http.ResponseWriter, r *http.Request, channelID *string) {
-//	channelInfo, error := repos.GetChannelInfo(channelID)
+//	channelInfo, error := repos.Get(channelID)
 //	if error != nil {
 //		writeJSONError(w, error.Error(), http.StatusInternalServerError)
 //		return

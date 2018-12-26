@@ -4,12 +4,12 @@ import (
 	"strings"
 
 	"github.com/khades/servbot/channelInfo"
-	"github.com/khades/servbot/twitchIRCClient"
+	"github.com/khades/servbot/twitchIRC"
 
 	"github.com/cbroglie/mustache"
 )
 
-func (service *TwitchIRCHandler) sendResubMessage(client *twitchIRCClient.TwitchIRCClient, channelInfo *channelInfo.ChannelInfo, user *string, resubCount *int, subPlan *string) {
+func (service *TwitchIRCHandler) sendResubMessage(client *twitchIRC.Client, channelInfo *channelInfo.ChannelInfo, user *string, resubCount *int, subPlan *string) {
 	subAlert, error := service.subAlertService.Get(&channelInfo.ChannelID)
 
 	if error != nil || subAlert.Enabled == false {
@@ -55,7 +55,7 @@ func (service *TwitchIRCHandler) sendResubMessage(client *twitchIRCClient.Twitch
 		}
 
 		if compiledMessage != "" {
-			client.SendPublic(&twitchIRCClient.OutgoingMessage{
+			client.SendPublic(&twitchIRC.OutgoingMessage{
 				Body:    compiledMessage,
 				Channel: channelInfo.Channel,
 				User:    *user})

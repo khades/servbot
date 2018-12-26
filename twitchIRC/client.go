@@ -159,16 +159,16 @@ func (client *Client) SendModsCommand() {
 
 }
 
-func (client *Client) Handle(client *irc.Client, message *irc.Message) {
+func (client *Client) Handle(ircclient *irc.Client, message *irc.Message) {
 	client.handle(client, message)
 
 	if message.Command == "001" {
-		client.Write("CAP REQ twitch.tv/tags")
-		client.Write("CAP REQ twitch.tv/membership")
-		client.Write("CAP REQ twitch.tv/commands")
+		ircclient .Write("CAP REQ twitch.tv/tags")
+		ircclient .Write("CAP REQ twitch.tv/membership")
+		ircclient .Write("CAP REQ twitch.tv/commands")
 		activeChannels, _ := client.channelInfoService.GetActiveChannels()
 		for _, value := range activeChannels {
-			client.Write("JOIN #" + value.Channel)
+			ircclient .Write("JOIN #" + value.Channel)
 		}
 		client.ready = true
 		client.SendModsCommand()

@@ -1,4 +1,4 @@
-package models
+package utils
 
 //ChannelUserSelector is query selector for specific channel
 type ChannelUserSelector struct {

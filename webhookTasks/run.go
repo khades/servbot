@@ -1,23 +1,20 @@
-package webhookSchedule
+package webhookTasks
 
 import (
 	"github.com/khades/servbot/webhook"
-	"sync"
 	"time"
 )
 
-func Init(webhookService *webhook.Service, wg *sync.WaitGroup) *time.Ticker {
+func Run(webhookService *webhook.Service) *time.Ticker {
 	period := time.Minute * 15
 	ticker := time.NewTicker(period)
 	webhookService.Subscribe(period)
-	go func(wg *sync.WaitGroup) {
+	go func() {
 		for {
 			<-ticker.C
-			wg.Add(1)
 			webhookService.Subscribe(period)
-			wg.Done()
 		}
-	}(wg)
+	}()
 	return ticker
 }
 

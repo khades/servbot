@@ -1,38 +1,38 @@
 package channelInfo
 
 import (
+	"strings"
+	"time"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/khades/servbot/config"
-	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/userResolve"
+	"github.com/khades/servbot/utils"
 	"github.com/sirupsen/logrus"
-	"strings"
-	"time"
 )
 
 var channelInfoCollection = "channelInfo"
 
 type Service struct {
 	// Dependencies
-	collection       *mgo.Collection
-	config           *config.Config
+	collection         *mgo.Collection
+	config             *config.Config
 	userResolveService *userResolve.Service
 
 	// Own Fields
-	dataArray        map[string]*ChannelInfo
+	dataArray map[string]*ChannelInfo
 }
 
 func (c *Service) forceCreateObject(channelID string, object *ChannelInfo) {
 	c.dataArray[channelID] = object
 }
 
-
 //var с = Service{make(map[string]*models.ChannelInfo)}
 
 // setChannelName sets channel name after processing
 func (c *Service) setChannelName(channelID *string, channel string) {
-	channelInfo, _ := c.GetChannelInfo(channelID)
+	channelInfo, _ := c.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.Channel = channel
 	} else {
@@ -42,9 +42,9 @@ func (c *Service) setChannelName(channelID *string, channel string) {
 
 }
 
-// EnableChannel sets enabled flag of channel to true
-func (c *Service) EnableChannel(channelID *string) {
-	channelInfo, _ := c.GetChannelInfo(channelID)
+// Enable sets enabled flag of channel to true
+func (c *Service) Enable(channelID *string) {
+	channelInfo, _ := c.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.Enabled = true
 	} else {
@@ -54,9 +54,9 @@ func (c *Service) EnableChannel(channelID *string) {
 
 }
 
-// DisableChannel sets enabled flag of channel to false
-func (c *Service) DisableChannel(channelID *string) {
-	channelInfo, _ := c.GetChannelInfo(channelID)
+// Disable sets enabled flag of channel to false
+func (c *Service) Disable(channelID *string) {
+	channelInfo, _ := c.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.Enabled = false
 	} else {
@@ -78,19 +78,29 @@ func (c *Service) GetActiveChannels() ([]ChannelInfo, error) {
 	return results, error
 }
 
-// c.GetChannelInfo gets channel info, and stores copy of that object in memory
-func (c *Service) GetChannelInfo(channelID *string) (*ChannelInfo, error) {
+func (service *Service) PutCurrentSong(channelID *string, currentSong *CurrentSong) {
+	item, found := service.dataArray[*channelID]
+	if found {
+		item.CurrentSong = *currentSong
+	} else {
+		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, CurrentSong: *currentSong})
+	}
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"currentsong": *currentSong}})
+}
+
+// c.Get gets channel info, and stores copy of that object in memory
+func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
 		"feature": "channelInfo",
-		"action":  "c.GetChannelInfo"})
+		"action":  "c.Get"})
 	//	logger.Debugf("Function was called %d times", timesCalled)
 	item, found := c.dataArray[*channelID]
 	if found {
 		return item, nil
 	}
 	var dbObject = &ChannelInfo{}
-	error := c.collection.Find(models.ChannelSelector{ChannelID: *channelID}).One(dbObject)
+	error := c.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).One(dbObject)
 	if error != nil {
 		logger.Info("Error ", error)
 		return nil, error
@@ -100,8 +110,8 @@ func (c *Service) GetChannelInfo(channelID *string) (*ChannelInfo, error) {
 }
 
 // GetModChannels returns list where specified user is moderator
-func (c *Service) GetModChannels(userID *string) ([]models.ChannelWithID, error) {
-	var result []models.ChannelWithID
+func (c *Service) GetModChannels(userID *string) ([]ChannelWithID, error) {
+	var result []ChannelWithID
 	error := c.collection.Find(
 		bson.M{"$or": []bson.M{
 			bson.M{"mods": *userID},
@@ -122,7 +132,7 @@ func (c *Service) PreprocessChannels() error {
 		logger.Debugf("Channels Error: %s", channelError.Error())
 		return channelError
 	}
-	
+
 	for _, channel := range channels {
 		channelIDList = append(channelIDList, channel.ChannelID)
 		c.dataArray[channel.ChannelID] = &channel
@@ -153,45 +163,45 @@ func (service *Service) SetStreamStatus(channelID *string, streamStatus *StreamS
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, StreamStatus: *streamStatus})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"streamstatus": *streamStatus}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"streamstatus": *streamStatus}})
 }
 
 // PushMods updates list of mods on channel
 func (service *Service) PushMods(channelID *string, mods []string) {
-	channelInfo, _ := service.GetChannelInfo(channelID)
+	channelInfo, _ := service.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.Mods = mods
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, Mods: mods})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"mods": mods}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"mods": mods}})
 }
 
 // SetChannelLang sets channel language
 func (service *Service) SetChannelLang(channelID *string, lang *string) {
-	channelInfo, _ := service.GetChannelInfo(channelID)
+	channelInfo, _ := service.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.Lang = *lang
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, Lang: *lang})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"lang": *lang}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"lang": *lang}})
 }
 
 // SetSubdayIsActive sets channelinfo flag "subdayisactive" to true
 func (service *Service) SetSubdayIsActive(channelID *string, isActive bool) {
-	channelInfo, _ := service.GetChannelInfo(channelID)
+	channelInfo, _ := service.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.SubdayIsActive = isActive
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, SubdayIsActive: isActive})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subdayisactive": isActive}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subdayisactive": isActive}})
 }
 
 // SetCommandsForChannel sets active commands for channel
 func (service *Service) SetCommandsForChannel(channelID *string, commandsList []string) {
-	channelInfo, channelError := service.GetChannelInfo(channelID)
+	channelInfo, channelError := service.Get(channelID)
 
 	if channelError == nil {
 		channelInfo.Commands = commandsList
@@ -201,7 +211,7 @@ func (service *Service) SetCommandsForChannel(channelID *string, commandsList []
 			Commands:  commandsList,
 		})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{
 		"commands": commandsList}})
 }
 
@@ -243,7 +253,7 @@ func (c *Service) GetChannelNameByID(channelID *string) (*string, error) {
 
 	logger.Debugf("Looking for channel by id %s", *channelID)
 
-	channel, channelError := c.GetChannelInfo(channelID)
+	channel, channelError := c.Get(channelID)
 
 	if channelError != nil {
 		logger.Debugf("Looking for channelid %s in database failed: %s", *channelID, channelError.Error())
@@ -263,11 +273,11 @@ func (service *Service) GetChannelsWithSubtrainNotification() ([]ChannelInfo, er
 	result := []ChannelInfo{}
 	error := service.collection.Find(
 		bson.M{
-			"subtrain.enabled": true,
-			"subtrain.notificationshown" : false,
+			"subtrain.enabled":           true,
+			"subtrain.notificationshown": false,
 			"subtrain.currentstreak": bson.M{
-				"$ne":0},
-			"subtrain.notificationtime":bson.M{
+				"$ne": 0},
+			"subtrain.notificationtime": bson.M{
 				"$lt": time.Now()}}).All(&result)
 	return result, error
 }
@@ -279,28 +289,28 @@ func (service *Service) GetChannelsWithExpiredSubtrain() ([]ChannelInfo, error) 
 		bson.M{
 			"subtrain.enabled": true,
 			"subtrain.currentstreak": bson.M{
-				"$ne":0},
-			"subtrain.expirationtime":bson.M{
+				"$ne": 0},
+			"subtrain.expirationtime": bson.M{
 				"$lt": time.Now()}}).All(&result)
 	return result, error
 }
 
 // PutChannelSubtrain upserts subtrain infromation for channel
 func (service *Service) PutChannelSubtrain(channelID *string, subTrain *SubTrain) {
-	channelInfo, _ := service.GetChannelInfo(channelID)
+	channelInfo, _ := service.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.SubTrain = *subTrain
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, SubTrain: *subTrain})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
 }
 
 // PutChannelSubtrainWeb upserts subtrain infromation for channel, unlike previous function, it tries to save current streak if possible
 func (service *Service) PutChannelSubtrainWeb(channelID *string, subTrain *SubTrain) {
-	channelInfo, _ := service.GetChannelInfo(channelID)
+	channelInfo, _ := service.Get(channelID)
 	localSubtrain := channelInfo.SubTrain
-	if (subTrain.Enabled == true && localSubtrain.Enabled == true && localSubtrain.ExpirationLimit == subTrain.ExpirationLimit && localSubtrain.NotificationLimit == subTrain.NotificationLimit) {
+	if subTrain.Enabled == true && localSubtrain.Enabled == true && localSubtrain.ExpirationLimit == subTrain.ExpirationLimit && localSubtrain.NotificationLimit == subTrain.NotificationLimit {
 		subTrain.ExpirationTime = localSubtrain.ExpirationTime
 		subTrain.NotificationTime = localSubtrain.NotificationTime
 		subTrain.CurrentStreak = localSubtrain.CurrentStreak
@@ -312,7 +322,7 @@ func (service *Service) PutChannelSubtrainWeb(channelID *string, subTrain *SubTr
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, SubTrain: *subTrain})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"subtrain": *subTrain}})
 }
 
 // SetSubtrainNotificationShown sets "notificationshown" flag to true
@@ -324,7 +334,7 @@ func (service *Service) SetSubtrainNotificationShown(channelInfo *ChannelInfo) {
 
 // IncrementSubtrainCounterByChannelID is version of IncrementSubtrainCounter that gets channelInfo based on channelID
 func (service *Service) IncrementSubtrainCounterByChannelID(channelID *string, user *string) {
-	channelInfo, error := service.GetChannelInfo(channelID)
+	channelInfo, error := service.Get(channelID)
 	if error == nil {
 		service.IncrementSubtrainCounter(channelInfo, user)
 		return
@@ -340,7 +350,7 @@ func (service *Service) IncrementSubtrainCounter(channelInfo *ChannelInfo, user 
 	}
 	subTrain.ExpirationTime = time.Now().Add(time.Second * time.Duration(subTrain.ExpirationLimit))
 	subTrain.NotificationTime = time.Now().Add(time.Second * time.Duration(subTrain.NotificationLimit))
-	subTrain.CurrentStreak = subTrain.CurrentStreak +1
+	subTrain.CurrentStreak = subTrain.CurrentStreak + 1
 	subTrain.Users = append(subTrain.Users, *user)
 	service.PutChannelSubtrain(&channelInfo.ChannelID, &subTrain)
 }
@@ -358,19 +368,18 @@ func (service *Service) ResetSubtrainCounter(channelInfo *ChannelInfo) {
 // PushVkGroupInfo updates VK group info and last post content
 func (service *Service) PushVkGroupInfo(channelID *string, vkGroupInfo *VkGroupInfo) {
 
-	channelInfo, _ := service.GetChannelInfo(channelID)
+	channelInfo, _ := service.Get(channelID)
 	if channelInfo != nil {
 		channelInfo.VkGroupInfo = *vkGroupInfo
 	} else {
 		service.forceCreateObject(*channelID, &ChannelInfo{ChannelID: *channelID, VkGroupInfo: *vkGroupInfo})
 	}
-	service.collection.Upsert(models.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"vkgroupinfo": *vkGroupInfo}})
+	service.collection.Upsert(utils.ChannelSelector{ChannelID: *channelID}, bson.M{"$set": bson.M{"vkgroupinfo": *vkGroupInfo}})
 }
 
 // GetVKEnabledChannels returns list of channels, where VK group was configures
 func (service *Service) GetVKEnabledChannels() ([]ChannelInfo, error) {
 	result := []ChannelInfo{}
-	error := service.collection.Find(bson.M{"enabled":true,"vkgroupinfo.groupname": bson.M{"$exists": true, "$ne": ""}}).All(&result)
+	error := service.collection.Find(bson.M{"enabled": true, "vkgroupinfo.groupname": bson.M{"$exists": true, "$ne": ""}}).All(&result)
 	return result, error
 }
-

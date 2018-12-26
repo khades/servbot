@@ -1,9 +1,10 @@
 package subday
 
 import (
-	"github.com/globalsign/mgo"
 	"math/rand"
 	"time"
+
+	"github.com/globalsign/mgo"
 
 	"github.com/khades/servbot/channelInfo"
 
@@ -186,20 +187,17 @@ func (service *Service) Vote(user *string, userID *string, isSub bool, id *bson.
 }
 
 // Create creates new subday IF there's no active subdays
-func (service *Service) Create(channelID *string, subsOnly bool, name *string) (bool, *bson.ObjectId) {
-	_, subdayError := service.GetActive(channelID)
+func (service *Service) Create(channelInfoStruct *channelInfo.ChannelInfo, subsOnly bool, name *string, ) (bool, *bson.ObjectId) {
+	channelID := &channelInfoStruct.ChannelID
 
+	_, subdayError := service.GetActive(channelID)
 	if subdayError == nil {
 		return false, nil
 	}
 	id := bson.NewObjectId()
 	subdayName := *name
 	if subdayName == "" {
-		channelInfo, channelInfoError := service.channelInfoService.GetChannelInfo(channelID)
-		lang := "en"
-		if channelInfoError == nil {
-			lang = channelInfo.GetChannelLang()
-		}
+		lang := channelInfoStruct.GetChannelLang()
 		subdayName = l10n.GetL10n(lang).SubdayCreationPrefix + time.Now().Format(time.UnixDate)
 	}
 	object := Subday{ID: id, Name: subdayName, SubsOnly: subsOnly, IsActive: true, Date: time.Now(), ChannelID: *channelID}

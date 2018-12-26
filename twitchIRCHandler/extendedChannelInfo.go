@@ -1,22 +1,20 @@
-package commandhandler
+package twitchIRCHandler
 
 import (
 	"fmt"
-	"github.com/khades/servbot/bot"
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/followers"
-	"github.com/khades/servbot/ircClient"
 	"github.com/khades/servbot/l10n"
-	"github.com/khades/servbot/models"
 	"github.com/khades/servbot/songRequest"
 	"github.com/khades/servbot/subday"
+	"github.com/khades/servbot/twitchIRC"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type templateExtendedObject struct {
+type extendedChannelInfo struct {
 	channelInfo.ChannelInfo
 	UserID string
 	User   string
@@ -26,7 +24,7 @@ type templateExtendedObject struct {
 	CommandBodyIsEmpty bool
 	PreventDebounce    bool
 	PreventRedirect    bool
-	twitchIRCClient         *bot.TwitchIRCClient
+	twitchIRCClient         *twitchIRC.Client
 	followersService *followers.Service
 	subdayService *subday.Service
 	songRequestService *songRequest.Service
@@ -43,7 +41,7 @@ type banmeResult struct {
 	BanDuration int
 }
 
-func (channelInfo *templateExtendedObject) FollowerInfo() followerDuration {
+func (channelInfo *extendedChannelInfo) FollowerInfo() followerDuration {
 	channelInfo.PreventRedirect = true
 	isFollower, dur := channelInfo.followersService.IsFoller(&channelInfo.ChannelID, &channelInfo.UserID)
 	if isFollower == true {
@@ -54,7 +52,7 @@ func (channelInfo *templateExtendedObject) FollowerInfo() followerDuration {
 }
 
 
-func (channelInfo *templateExtendedObject) SkipCurrentSong() string {
+func (channelInfo *extendedChannelInfo) SkipCurrentSong() string {
 	channelInfo.PreventRedirect = true
 	if channelInfo.IsMod == false {
 		return l10n.GetL10n(channelInfo.Lang).SongRequestNotAModerator
@@ -68,7 +66,7 @@ func (channelInfo *templateExtendedObject) SkipCurrentSong() string {
 	return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulled, songrequest.Title)
 }
 
-func (channelInfo *templateExtendedObject) Random() string {
+func (channelInfo *extendedChannelInfo) Random() string {
 	lowerLimit := 0
 	upperLimit := 100
 	channelInfo.PreventDebounce = true
@@ -79,23 +77,23 @@ func (channelInfo *templateExtendedObject) Random() string {
 	return strconv.Itoa(lowerLimit + rand.Intn(upperLimit-lowerLimit+1))
 }
 
-func (channelInfo *templateExtendedObject) Banme30() banmeResult {
+func (channelInfo *extendedChannelInfo) Banme30() banmeResult {
 	return channelInfo.Banme(30)
 }
 
-func (channelInfo *templateExtendedObject) Banme60() banmeResult {
+func (channelInfo *extendedChannelInfo) Banme60() banmeResult {
 	return channelInfo.Banme(60)
 }
 
-func (channelInfo *templateExtendedObject) Banme300() banmeResult {
+func (channelInfo *extendedChannelInfo) Banme300() banmeResult {
 	return channelInfo.Banme(300)
 }
 
-func (channelInfo *templateExtendedObject) Banme600() banmeResult {
+func (channelInfo *extendedChannelInfo) Banme600() banmeResult {
 	return channelInfo.Banme(600)
 }
 
-func (channelInfo *templateExtendedObject) SubdayEnd() string {
+func (channelInfo *extendedChannelInfo) SubdayEnd() string {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
 	if channelInfo.IsMod == false {
@@ -109,7 +107,7 @@ func (channelInfo *templateExtendedObject) SubdayEnd() string {
 	return l10n.GetL10n(channelInfo.GetChannelLang()).SubdayEndNothingToClose
 }
 
-func (channelInfo *templateExtendedObject) Banme(length int) banmeResult {
+func (channelInfo *extendedChannelInfo) Banme(length int) banmeResult {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
 	if channelInfo.IsMod == true {
@@ -123,7 +121,7 @@ func (channelInfo *templateExtendedObject) Banme(length int) banmeResult {
 			Banned: false}
 	}
 
-	channelInfo.twitchIRCClient.SendPublic(&models.OutgoingMessage{
+	channelInfo.twitchIRCClient.SendPublic(&twitchIRC.OutgoingMessage{
 		Channel: channelInfo.Channel,
 		Body:    fmt.Sprintf("/timeout %s %d ", channelInfo.User, banDuration)})
 
@@ -132,7 +130,7 @@ func (channelInfo *templateExtendedObject) Banme(length int) banmeResult {
 		BanDuration: banDuration}
 }
 
-func (channelInfo *templateExtendedObject) Pick() string {
+func (channelInfo *extendedChannelInfo) Pick() string {
 	if channelInfo.IsMod == false && channelInfo.StreamStatus.Online == true {
 		return ""
 	}
@@ -150,7 +148,7 @@ func (channelInfo *templateExtendedObject) Pick() string {
 	return "SMOrc"
 }
 
-func (channelInfo *templateExtendedObject) Ask() string {
+func (channelInfo *extendedChannelInfo) Ask() string {
 	if channelInfo.IsMod == false && channelInfo.StreamStatus.Online == true {
 		return ""
 	}
@@ -180,7 +178,7 @@ func (channelInfo *templateExtendedObject) Ask() string {
 	return strings.TrimSpace(variants[rand.Intn(len(variants))])
 }
 
-func (channelInfo *templateExtendedObject) AddSongRequest() string {
+func (channelInfo *extendedChannelInfo) AddSongRequest() string {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
 	if strings.TrimSpace(channelInfo.CommandBody) == "" {
@@ -255,7 +253,7 @@ func (channelInfo *templateExtendedObject) AddSongRequest() string {
 	return l10n.GetL10n(channelInfo.Lang).SongRequestInternalError
 }
 
-func (channelInfo *templateExtendedObject) SetSongRequestVolume() string {
+func (channelInfo *extendedChannelInfo) SetSongRequestVolume() string {
 	channelInfo.PreventRedirect = true
 	if channelInfo.IsMod == false {
 		return l10n.GetL10n(channelInfo.Lang).SongRequestNotAModerator
@@ -273,7 +271,7 @@ func (channelInfo *templateExtendedObject) SetSongRequestVolume() string {
 	return l10n.GetL10n(channelInfo.Lang).VolumeChangeSuccess
 }
 
-func (channelInfo *templateExtendedObject) PullSongRequest() string {
+func (channelInfo *extendedChannelInfo) PullSongRequest() string {
 	channelInfo.PreventDebounce = true
 	channelInfo.PreventRedirect = true
 
@@ -282,5 +280,4 @@ func (channelInfo *templateExtendedObject) PullSongRequest() string {
 		return fmt.Sprintf(l10n.GetL10n(channelInfo.Lang).SongRequestPulled, pulledVideo.Title)
 	}
 	return l10n.GetL10n(channelInfo.Lang).SongRequestNoRequests
-
 }

@@ -16,7 +16,7 @@ import (
 func  (service *CommandHandler) custom(channelInfo *channelInfo.ChannelInfo, chatMessage *chatMessage.ChatMessage, chatCommand models.ChatCommand) {
 
 	// Here's most of magic
-	templateObject := &templateExtendedObject{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
+	templateObject := &ExtendedChannelInfo{ChannelInfo: *channelInfo, IsMod: chatMessage.IsMod, CommandBody: chatCommand.Body, CommandBodyIsEmpty: chatCommand.Body == ""}
 	templateObject.IsMod = chatMessage.IsMod
 	templateObject.IsSub = chatMessage.IsSub
 	templateObject.UserID = chatMessage.UserID
