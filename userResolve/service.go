@@ -50,10 +50,8 @@ func (service *Service) updateUserToUserID(userID *string, user *string, created
 func (service *Service) GetUsersID(users []string) (*map[string]string, error) {
 	// Cache every username -> userid pair for month
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "GetUsersID",
+		"package": "userResolve",
 		"action":  "GetUsersID"})
-	logger.Debugf("Function is called")
 
 	result := make(map[string]string)
 	logger.Debugf("Input users length: %d", len(users))
@@ -136,8 +134,7 @@ func (service *Service) GetUsersID(users []string) (*map[string]string, error) {
 func (service *Service) GetUsernames(userIDs []string) (*map[string]string, error) {
 	// Cache every username -> userid pair for month
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "GetUsersID",
+		"package": "userResolve",
 		"action":  "GetUsernames"})
 	logger.Debugf("Function is called")
 

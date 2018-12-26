@@ -13,8 +13,7 @@ const collectionName = "config"
 func Init(db *mgo.Database) (*Config, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "config",
-		"feature": "init",
-		"action":  "init"})
+		"action":  "Init"})
 	var config Config
 	config.collection = db.C(collectionName)
 

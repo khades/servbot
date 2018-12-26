@@ -49,14 +49,13 @@ func (service *Service) get(w http.ResponseWriter, r *http.Request, s *httpSessi
 
 func (service *Service) create(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "httpbackend",
-		"feature": "autoMessage",
+		"package": "autoMessageAPI",
 		"action":  "create"})
 	decoder := json.NewDecoder(r.Body)
 	var request autoMessage.AutoMessageUpdate
 	err := decoder.Decode(&request)
 	if err != nil {
-		logger.Info("Decoding Error: %s")
+		logger.Debugf("Decoding Error: %s", err.Error())
 		httpAPI.WriteJSONError(w, "Invalid entry", http.StatusUnprocessableEntity)
 		return
 	}
@@ -83,8 +82,7 @@ func (service *Service) create(w http.ResponseWriter, r *http.Request, s *httpSe
 func (service *Service) update(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
 	id := pat.Param(r, "id")
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "httpbackend",
-		"feature": "autoMessage",
+		"package": "autoMessageAPI",
 		"action":  "update"})
 	if id == "" || bson.IsObjectIdHex(id) == false {
 		httpAPI.WriteJSONError(w, "channel or id variable are not defined", http.StatusUnprocessableEntity)
@@ -94,7 +92,7 @@ func (service *Service) update(w http.ResponseWriter, r *http.Request, s *httpSe
 	var request autoMessage.AutoMessageUpdate
 	err := decoder.Decode(&request)
 	if err != nil {
-		logger.Info("Decoding Error: %s")
+		logger.Info("Decoding Error: %s", err.Error())
 
 		httpAPI.WriteJSONError(w, "Invalid entry", http.StatusUnprocessableEntity)
 		return

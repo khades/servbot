@@ -62,7 +62,7 @@ import (
 
 func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 
 	logger := logrus.WithFields(logrus.Fields{"package": "main"})
 	logger.Info("Starting")
@@ -80,6 +80,10 @@ func main() {
 	// Reading config from database
 	config, configError := config.Init(db)
 
+	if config.Debug == true {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+	
 	if configError != nil {
 		logger.Fatalf("Reading config from database failed: %s", configError)
 	}
@@ -98,9 +102,6 @@ func main() {
 		}
 	}()
 
-	if config.Debug == true {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
 	// Creating twitchAPI service
 	twitchAPIClient := twitchAPI.Init(
 		config)
@@ -327,7 +328,7 @@ func main() {
 		channelInfoService,
 		twitchIRCClient)
 
-	httpAPIService.Serve()
+	httpAPIService.Serve(&wg)
 	wg.Wait()
 
 }

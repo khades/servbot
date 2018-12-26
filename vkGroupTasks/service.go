@@ -25,13 +25,12 @@ type Service struct {
 // Check checks all vk groups of all channels on that instance of bot
 func (service *Service) Check() {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "services",
-		"feature": "vk",
-		"action":  "CheckVK"})
+		"package": "vkGroupTasks",
+		"action":  "Check"})
 
 	logger.Debugf("Checking VK")
 	if service.config.VkClientKey == "" {
-		logger.Debugf("VK key is not set")
+		logger.Infof("VK key is not set")
 		return
 	}
 	channels, error := service.channelInfoService.GetVKEnabledChannels()

@@ -21,7 +21,6 @@ import (
 
 	"github.com/khades/servbot/chatMessage"
 	"github.com/khades/servbot/pubsub"
-	"github.com/sirupsen/logrus"
 	"gopkg.in/irc.v2"
 )
 
@@ -41,16 +40,15 @@ type TwitchIRCHandler struct {
 }
 
 func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.Message) {
-	logger := logrus.WithFields(logrus.Fields{
-		"package": "bot",
-		"feature": "bot",
-		"action":  "chatHandler"})
-	if strings.Contains(message.String(), ":jtv") {
-		logger.Debug("JTV: " + message.String())
-	}
-	if strings.Contains(message.String(), ":tmi.twitch.tv") {
-		logger.Debug("TMI.TWITCH.TV: " + message.String())
-	}
+	//logger := logrus.WithFields(logrus.Fields{
+	//	"package": "twitchIRCHandler",
+	//	"action":  "Handle"})
+	//if strings.Contains(message.String(), ":jtv") {
+	//	logger.Debug("JTV: " + message.String())
+	//}
+	//if strings.Contains(message.String(), ":tmi.twitch.tv") {
+	//	logger.Debug("TMI.TWITCH.TV: " + message.String())
+	//}
 	msgID, found := message.Tags.GetTag("msg-id")
 	if found {
 		switch msgID {
@@ -109,10 +107,12 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 				User:      user,
 				UserID:    message.Tags["target-user-id"].Encode()}
 			service.channelLogsService.Log(&formedMessage)
-		} else {
-			logger.Debug("Not logging")
-
 		}
+
+		//else {
+		//	logger.Debug("Not logging")
+		//
+		//}
 	}
 	if message.Command == "PRIVMSG" {
 		//	logger.Debug("Got PRIVMSG, parsing")
@@ -148,7 +148,6 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 		// 	}
 		// }
 		if isCommand == true {
-			logger.Debug("PRIVMGS is chat command")
 			if message.User == "khadesru" && commandBody.Command == "debugsub" {
 				subPlan := "2000"
 				service.sendSubMessage(client, channelInfo, &formedMessage.User, &subPlan)

@@ -21,8 +21,7 @@ type Service struct {
 // AnnounceFollowers announces all new followers on channels
 func (service *Service) AnnounceFollowers() {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "services",
-		"feature": "followers",
+		"package": "followersToGreetTasks",
 		"action":  "AnnounceFollowers"})
 	channelFollowers, error := service.followersToGreetService.List()
 	if error != nil {
@@ -37,8 +36,7 @@ func (service *Service) AnnounceFollowers() {
 
 func (service *Service) processOneChannel(channel followersToGreet.FollowersToGreet) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "services",
-		"feature": "followers",
+		"package": "followersToGreetTasks",
 		"action":  "processOneChannel"})
 	defer service.followersToGreetService.Reset(&channel.ChannelID)
 	logger.Debugf("Processing channel %s", channel.ChannelID)

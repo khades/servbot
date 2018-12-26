@@ -8,8 +8,7 @@ import (
 
 func (service TwitchIRCHandler) mod(channel *string, mods []string) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "bot",
-		"feature": "mod",
+		"package": "twitchIRCHandler",
 		"action":  "mod"})
 	filteredMods := []string{}
 	for _, mod := range mods {

@@ -11,13 +11,15 @@ func Init(channelInfoService *channelInfo.Service,
 	config *config.Config,
 	channelLogsService *channelLogs.Service,
 	wg *sync.WaitGroup) *Client {
-		wg.Add(1)
+
 	client := &Client{
 		IsWorking:          false,
 		channelInfoService: channelInfoService,
 		config:             config,
 		channelLogsService: channelLogsService,
 	}
+	
+	wg.Add(1)
 
 	go func(wg *sync.WaitGroup) {
 		for {

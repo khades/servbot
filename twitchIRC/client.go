@@ -29,8 +29,7 @@ type Client struct {
 
 func (client *Client) Start() {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "bot",
-		"feature": "bot",
+		"package": "twitchIRC",
 		"action":  "Start"})
 	conn, err := net.Dial("tcp", "irc.chat.twitch.tv:6667")
 	if err != nil {
@@ -57,9 +56,8 @@ func (client *Client) Start() {
 func (client *Client) PushMessage(message string) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "twitchIRC",
-		"feature": "twitchIRC",
 		"action":  "PushMessage"})
-	logger.Infof("Pushing message: %s", message)
+	logger.Debugf("Pushing message: %s", message)
 	if client.messagesSent > 3 {
 		client.messageQueue = append(client.messageQueue, message)
 		logger.Debugf("Messages in queue :", len(client.messageQueue))
@@ -74,7 +72,6 @@ func (client *Client) PushMessage(message string) {
 func (client *Client) SendMessages(interval int) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "twitchIRC",
-		"feature": "twitchIRC",
 		"action":  "SendMessages"})
 	client.messagesSent = 0
 	queueSliceSize := 3

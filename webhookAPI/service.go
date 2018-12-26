@@ -28,8 +28,7 @@ type Service struct {
 }
 func (service *Service) streamStatus(w http.ResponseWriter, r *http.Request) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "httpbackend",
-		"feature": "webhook",
+		"package": "webhookAPI",
 		"action":  "streamStatus"})
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
 	dump, dumpErr := httputil.DumpRequest(r, true)
@@ -45,7 +44,7 @@ func (service *Service) streamStatus(w http.ResponseWriter, r *http.Request) {
 
 	topicItem, topicError := service.webHookService.Get(&channelID, "streams")
 	if topicError != nil {
-		logger.Debugf("Topic doesnt exists, exiting")
+		logger.Infof("Topic %s doesnt exists, exiting.", channelID+":streams")
 		httpAPI.WriteJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
 		return
 	}
@@ -53,11 +52,11 @@ func (service *Service) streamStatus(w http.ResponseWriter, r *http.Request) {
 	mac := hmac.New(sha256.New, []byte(topicItem.Secret))
 	mac.Write(bodyBytes)
 
-	logger.Debugf("calculated signature is %s", hex.EncodeToString(mac.Sum(nil)))
+	logger.Debugf("Calculated signature is %s", hex.EncodeToString(mac.Sum(nil)))
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
 
 	if strings.Replace(r.Header.Get("X-Hub-Signature"), "sha256=", "", 1) != hex.EncodeToString(mac.Sum(nil)) {
-		logger.Debugf("Hexes are not equal, exiting")
+		logger.Infof("Hexes are not equal for topic %s, exiting", channelID+":streams")
 		httpAPI.WriteJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
 		return
 	}
@@ -89,8 +88,7 @@ func (service *Service) streamStatus(w http.ResponseWriter, r *http.Request) {
 
 func (service *Service) follows(w http.ResponseWriter, r *http.Request) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "httpbackend",
-		"feature": "webhook",
+		"package": "webhookAPI",
 		"action":  "follows"})
 	follower := twitchPubSubFollows{}
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
@@ -111,7 +109,7 @@ func (service *Service) follows(w http.ResponseWriter, r *http.Request) {
 
 	topicItem, topicError := service.webHookService.Get(&follower.Data.ChannelID, "follows")
 	if topicError != nil {
-		logger.Debugf("Topic doesnt exists, exiting")
+		logger.Infof("Topic %s doesnt exists, exiting.", follower.Data.ChannelID+":follows")
 		httpAPI.WriteJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
 		return
 	}
@@ -123,7 +121,7 @@ func (service *Service) follows(w http.ResponseWriter, r *http.Request) {
 	logger.Debugf("Request signature is %s", r.Header.Get("X-Hub-Signature"))
 
 	if strings.Replace(r.Header.Get("X-Hub-Signature"), "sha256=", "", 1) != hex.EncodeToString(mac.Sum(nil)) {
-		logger.Debugf("Hexes are not equal, exiting")
+		logger.Infof("Hexes are not equal for topic %s, exiting", follower.Data.ChannelID+":follows")
 		httpAPI.WriteJSONError(w, "Wrong signature", http.StatusUnprocessableEntity)
 		return
 	}

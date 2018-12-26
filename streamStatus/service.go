@@ -19,8 +19,7 @@ type Service struct {
 
 func (service *Service) UpdateFromTwitch() error {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchGames",
+		"package": "streamStatuss",
 		"action":  "UpdateFromTwitch"})
 	streams := make(map[string]channelInfo.StreamStatus)
 	userIDs := service.config.ChannelIDs
@@ -30,7 +29,7 @@ func (service *Service) UpdateFromTwitch() error {
 			Online: false}
 	}
 	streamstatuses, error := service.twitchAPIClient.GetStreamStatuses()
-	logger.Printf("Statuses: %+v", streamstatuses)
+	logger.Debugf("Statuses: %+v", streamstatuses)
 	if error != nil {
 		return error
 	}

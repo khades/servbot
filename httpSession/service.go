@@ -19,8 +19,7 @@ type Service struct{
 // Get returns information of user specified by his oauth key
 func (service *Service) Get(oauthKey *string) (*HTTPSession, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "oauth",
+		"package": "httpSession",
 		"action":  "Get"})
 	result := httpSessionDBstruct{}
 	change := mgo.Change{

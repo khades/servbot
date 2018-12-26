@@ -90,9 +90,8 @@ func (service *Service) PutCurrentSong(channelID *string, currentSong *CurrentSo
 // c.Get gets channel info, and stores copy of that object in memory
 func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "channelInfo",
-		"action":  "c.Get"})
+		"package": "channelInfo",
+		"action":  "get"})
 	//	logger.Debugf("Function was called %d times", timesCalled)
 	item, found := c.dataArray[*channelID]
 	if found {
@@ -101,7 +100,7 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 	var dbObject = &ChannelInfo{}
 	error := c.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).One(dbObject)
 	if error != nil {
-		logger.Info("Error ", error)
+		logger.Debugf("Error %s", error.Error())
 		return nil, error
 	}
 	c.dataArray[*channelID] = dbObject
@@ -121,8 +120,7 @@ func (c *Service) GetModChannels(userID *string) ([]ChannelWithID, error) {
 // PreprocessChannels forces creation of empty channelInfo object in database, meanwhile preupdating channel names from IDs and writes everything to config
 func (c *Service) PreprocessChannels() error {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "channelInfo",
+		"package": "channelInfo",
 		"action":  "PreprocessChannels"})
 	channels, channelError := c.GetActiveChannels()
 	logger.Debugf("%d channels found", len(channels))
@@ -217,9 +215,8 @@ func (service *Service) SetCommandsForChannel(channelID *string, commandsList []
 // UpdateGamesByID updates gameIDs to full game names, when gameid->game resolution is done
 func (service *Service) UpdateGamesByID(gameID *string, game *string) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchGames",
-		"action":  "updateGamesByID"})
+		"package": "channelInfo",
+		"action":  "UpdateGamesByID"})
 	logger.Debugf("Updating gameID %s with proper name \"%s\"", *gameID, *game)
 	service.collection.UpdateAll(bson.M{"streamstatus.game": bson.M{"$exists": false}, "streamstatus.gameid": *gameID},
 		bson.M{"$set": bson.M{"streamstatus.game": *game}})
@@ -246,8 +243,7 @@ func (service *Service) UpdateGamesByID(gameID *string, game *string) {
 func (c *Service) GetChannelNameByID(channelID *string) (*string, error) {
 
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "GetUsersID",
+		"package": "channelInfo",
 		"action":  "GetChannelNameByID"})
 
 	logger.Debugf("Looking for channel by id %s", *channelID)

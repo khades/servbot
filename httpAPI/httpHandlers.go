@@ -18,8 +18,7 @@ type tokenResponse struct {
 
 func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "httpbackend",
-		"feature": "oauth",
+		"package": "httpAPI",
 		"action":  "oauth"})
 	code := r.URL.Query().Get("code")
 	if code == "" {
@@ -46,7 +45,6 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(resp.Body)
 
 		if err == nil {
-
 			logger.Infof("Parsed body of first 400 error: %s", string(body))
 		} else {
 			logger.Infof("We didnt parsed body of first 400 error: %s", err.Error())

@@ -42,9 +42,8 @@ func (service *Service) RemoveInactive(channelID *string) {
 // ListCurrent returns list of ALL autoMessage, which are served on that chatbot instance
 func (service *Service) ListCurrent() ([]AutoMessage, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "automessages",
-		"action":  "GetCurrentAutoMessage"})
+		"package": "autoMessage",
+		"action":  "ListCurrent"})
 	logger.Debug("AutoMessage: Getting Current AutoMessages")
 	var result []AutoMessage
 	error := service.collection.Find(bson.M{
@@ -58,8 +57,7 @@ func (service *Service) ListCurrent() ([]AutoMessage, error) {
 // ResetThreshold resets autoMessage thresholds after successfull autoMessage execution
 func (service *Service) ResetThreshold(autoMessage *AutoMessage) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "automessages",
+		"package": "autoMessage",
 		"action":  "ResetThreshold"})
 	logger.Infof("AutoMessage: Resetting AutoMessage %s", autoMessage.ID)
 	now := time.Now()

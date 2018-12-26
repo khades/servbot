@@ -117,13 +117,12 @@ func (service *Service) PushWinners(id bson.ObjectId, winners []SubdayRecord) {
 // PickRandomWinner rolls one winner and automatically upserts him to winners in specified subday for specified channel (this was made to enforce that only streamer could roll)
 func (service *Service) PickRandomWinner(channelID *string, id *string, subsOnly bool, nonsubsOnly bool) *SubdayRecord {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "subday",
+		"package": "subday",
 		"action":  "PickRandomWinner"})
 	var result Subday
 	error := service.collection.Find(bson.M{"_id": bson.ObjectIdHex(*id), "channelid": *channelID, "isactive": true}).One(&result)
 	if error != nil {
-		logger.Debugf("some error with collection")
+		logger.Debugf("Didnt found active subdays")
 		return nil
 	}
 	votes := []SubdayRecord{}

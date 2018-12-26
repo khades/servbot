@@ -14,7 +14,6 @@ func Init(
 	channelInfoService *channelInfo.Service,
 	handle TwitchIRCHandle,
 	wg *sync.WaitGroup) *Client {
-
 	twitchIRCClient := Client{
 		config:             config,
 		channelInfoService: channelInfoService,
@@ -25,8 +24,11 @@ func Init(
 		messagesSent:       0,
 	}
 
+	wg.Add(1)
+
 	go func(wg *sync.WaitGroup) {
 		twitchIRCClient.Start()
+		wg.Done()
 	}(wg)
 
 

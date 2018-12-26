@@ -15,8 +15,7 @@ import (
 
 func (service *TwitchIRCHandler) sub(client *twitchIRC.Client, message *irc.Message) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "sub",
+		"package": "twitchIRCHandler",
 		"action":  "sub"})
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")

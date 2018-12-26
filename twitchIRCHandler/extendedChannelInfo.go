@@ -43,7 +43,7 @@ type banmeResult struct {
 
 func (channelInfo *extendedChannelInfo) FollowerInfo() followerDuration {
 	channelInfo.PreventRedirect = true
-	isFollower, dur := channelInfo.followersService.IsFoller(&channelInfo.ChannelID, &channelInfo.UserID)
+	isFollower, dur := channelInfo.followersService.IsFollower(&channelInfo.ChannelID, &channelInfo.UserID)
 	if isFollower == true {
 		return followerDuration{true, l10n.HumanizeDuration(time.Now().Sub(dur), channelInfo.Lang)}
 

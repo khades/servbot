@@ -27,8 +27,7 @@ func Init(config *config.Config) *Client {
 
 func (tApi *Client) twitchHelixPost(urlStr string, body io.Reader) (*http.Response, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "twitchHelixPost"})
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
@@ -49,8 +48,7 @@ func (tApi *Client) twitchHelixPost(urlStr string, body io.Reader) (*http.Respon
 
 func (tApi *Client) twitchHelixOauth(method string, urlStr string, body io.Reader, key string) (*http.Response, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "twitchHelixOauth"})
 	var timeout = 5 * time.Second
 	var client = http.Client{Timeout: timeout}
@@ -65,7 +63,7 @@ func (tApi *Client) twitchHelixOauth(method string, urlStr string, body io.Reade
 	res, err := client.Do(req)
 
 	if err != nil {
-		logger.Debugf("error: %s", err.Error())
+		logger.Infof("Error: %s", err.Error())
 		return nil, err
 	}
 
@@ -118,8 +116,7 @@ func (tApi *Client) twitchHelix(method string, urlStr string, body io.Reader) (*
 
 func (tApi *Client) SubscribeToChannelFollwerWebhook(channelID string, secret string) bool {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "SubscribeToChannelFollwerWebhook"})
 	form := hub{
 		Mode:         "subscribe",
@@ -149,8 +146,7 @@ func (tApi *Client) SubscribeToChannelFollwerWebhook(channelID string, secret st
 
 func (tApi *Client) GetUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "getUserFollowDate"})
 	url := "users/follows?from_id=" + *userID + "&to_id=" + *channelID
 
@@ -181,8 +177,7 @@ func (tApi *Client) GetUserFollowDate(channelID *string, userID *string) (bool, 
 
 func (tApi *Client) getUsersByParameterPaged(idSlice []string, idType string) ([]TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "getUsersByParameterPaged"})
 	var delimiter = "&" + idType + "="
 
@@ -205,8 +200,7 @@ func (tApi *Client) getUsersByParameterPaged(idSlice []string, idType string) ([
 
 func (tApi *Client) getUsersByParameter(idList []string, idType string) ([]TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "getUsersByParameter"})
 	logger.Debugf("Fetching users: %s", strings.Join(idList, ", "))
 	var result []TwitchUserInfo
@@ -236,20 +230,19 @@ func (tApi *Client) GetTwitchUsersByID(userIDS []string) ([]TwitchUserInfo, erro
 
 func (tApi *Client) getStreamStatusesPaged(channels []string) ([]TwitchStreamStatus, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "getStreamStatusesPaged"})
 	var twitchResult twitchStreamResponse
 
 	streamsString := "streams?user_id=" + strings.Join(channels, "&user_id=")
-	logger.Infof("Url: %s", streamsString)
+	logger.Debugf("Url: %s", streamsString)
 	resp, error := tApi.twitchHelix("GET", streamsString, nil)
 	if error != nil {
-		logger.Printf("Error: %s", error.Error())
+		logger.Infof("Error: %s", error.Error())
 		return nil, error
 	}
 	dumpedResponse, _ := httputil.DumpResponse(resp, true)
-	logger.Infof("Response: %s", string(dumpedResponse[:]))
+	logger.Debugf("Response: %s", string(dumpedResponse[:]))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -263,8 +256,7 @@ func (tApi *Client) getStreamStatusesPaged(channels []string) ([]TwitchStreamSta
 // getStreamStatuses returns stream information for all active channels for that chatbot instance
 func (tApi *Client) GetStreamStatuses() ([]TwitchStreamStatus, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "getStreamStatuses"})
 	var twitchResult []TwitchStreamStatus
 	sliceStart := 0
@@ -273,7 +265,7 @@ func (tApi *Client) GetStreamStatuses() ([]TwitchStreamStatus, error) {
 		if index == len(tApi.config.ChannelIDs)-1 || index-sliceStart > 48 {
 			pageResult, error := tApi.getStreamStatusesPaged(tApi.config.ChannelIDs[sliceStart : index+1])
 			if error != nil {
-				logger.Printf("Api error: %+v", error)
+				logger.Infof("Api error: %+v", error)
 				return nil, error
 			}
 			twitchResult = append(twitchResult, pageResult...)
@@ -319,8 +311,7 @@ func (tApi *Client) GetGamesByID(gameIDS []string) ([]twitchGameStruct, error) {
 
 func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo , error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "twitchapi",
+		"package": "twitchAPI",
 		"action":  "GetUserByOauth"})
 
 	nameResp, err := tApi.twitchHelixOauth("GET", "users", nil, key)
@@ -334,7 +325,7 @@ func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo , error) {
 		defer nameResp.Body.Close()
 	}
 	if nameResp.StatusCode == 400 {
-		logger.Debug("Twitch Error, Cant get username")
+		logger.Info("Twitch Error, Cant get username")
 
 		return nil, errors.New("Twitch Error, Cant get username")
 

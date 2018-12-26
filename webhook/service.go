@@ -45,10 +45,8 @@ func (service *Service) getNonExpired(pollDuration time.Duration) ([]WebHookInfo
 
 func (service *Service) Subscribe(pollDuration time.Duration) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "webhook",
+		"package": "webhook",
 		"action":  "Subscribe"})
-	logger.Debugf("Starting")
 
 	channels, error := service.channelInfoService.GetActiveChannels()
 	if error != nil {
@@ -71,8 +69,7 @@ func (service *Service) Subscribe(pollDuration time.Duration) {
 
 func (service *Service) subToFollowerHook(channelID string) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "webhook",
+		"package": "webhook",
 		"action":  "SubToFollowerHook"})
 	secret := utils.RandomString(10)
 	success := service.twitchAPIService.SubscribeToChannelFollwerWebhook(channelID, secret)

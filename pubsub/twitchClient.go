@@ -6,7 +6,6 @@ import (
 	"github.com/khades/servbot/channelLogs"
 	"github.com/khades/servbot/chatMessage"
 	"github.com/khades/servbot/config"
-	"sync"
 
 	"net"
 	"net/http"
@@ -30,7 +29,6 @@ type Client struct {
 func (client *Client) run() {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
-		"feature": "pubsub",
 		"action":  "Run"})
 	var timerDur time.Duration
 	channels, channelError := client.channelInfoService.GetChannelsWithExtendedLogging()
@@ -59,7 +57,6 @@ func (client *Client) run() {
 func (client *Client) twitchPubSubClient(topics []string) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
-		"feature": "pubsub",
 		"action":  "twitchPubSubClient"})
 	u := url.URL{Scheme: "wss", Host: "pubsub-edge.twitch.tv"}
 	logger.Debugf("Connecting to %s", u.String())
@@ -82,7 +79,7 @@ func (client *Client) twitchPubSubClient(topics []string) {
 	}
 	pongWait := 12 * time.Second
 
-	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(config.OauthKey, "oauth:", "", 1), Topics: topics}})
+	writeErr1 := conn.WriteJSON(twitchWSOutgoingMessage{Type: "LISTEN", Nonce: "twitchPubSub", Data: authMessageData{AuthToken: strings.Replace(client.config.OauthKey, "oauth:", "", 1), Topics: topics}})
 	if writeErr1 != nil {
 		logger.Info("Initial message error:", writeErr1.Error())
 		return

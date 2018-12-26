@@ -40,7 +40,7 @@ func (service *Service) searchUsers(w http.ResponseWriter, r *http.Request, s *h
 func (service *Service) getByUsername(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
 	user := pat.Param(r, "user")
 	if user == "" {
-		httpAPI.WriteJSONError(w, "Bad request, no user or channel set", http.StatusBadRequest)
+		httpAPI.WriteJSONError(w, "Bad request, no user set", http.StatusBadRequest)
 		return
 	}
 	userLogs, error := service.channelLogsService.GetByUserName(&user, &channelInfo.ChannelID)
@@ -54,7 +54,7 @@ func (service *Service) getByUsername(w http.ResponseWriter, r *http.Request, s 
 func (service *Service) getByUserid(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
 	user := pat.Param(r, "userID")
 	if user == "" {
-		httpAPI.WriteJSONError(w, "Bad request, no user or channel set", http.StatusBadRequest)
+		httpAPI.WriteJSONError(w, "Bad request, no user set", http.StatusBadRequest)
 		return
 	}
 	userLogs, error := service.channelLogsService.GetByUserID(&user, &channelInfo.ChannelID)

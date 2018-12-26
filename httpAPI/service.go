@@ -2,6 +2,7 @@ package httpAPI
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/asaskevich/EventBus"
@@ -18,10 +19,6 @@ import (
 	"gopkg.in/asaskevich/govalidator.v4"
 )
 
-var authLogger = logrus.WithFields(logrus.Fields{
-	"package": "httpbackend",
-	"feature": "auth",
-	"action":  "auth"})
 
 type Service struct {
 	config             *config.Config
@@ -36,12 +33,21 @@ func (service *Service) NewMux() *goji.Mux {
 	return service.mux
 }
 
-func (service *Service) Serve() {
-	http.ListenAndServe("localhost:8000", service.mux)
+func (service *Service) Serve(wg *sync.WaitGroup) {
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		http.ListenAndServe("localhost:8000", service.mux)
+		wg.Done()
+	}(wg)
 }
 
 func (service *Service) auth(next SessionHandlerFunc) SessionHandlerFunc {
+
 	return func(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession) {
+		var authLogger = logrus.WithFields(logrus.Fields{
+			"package": "httpAPI",
+			"action":  "auth"})
+
 		_, err := govalidator.ValidateStruct(s)
 		// time.Sleep(2 * time.Second)
 		if err != nil {
@@ -170,9 +176,8 @@ func (service *Service) Options(w http.ResponseWriter, r *http.Request) {
 }
 func (service *Service) WSEvent(w http.ResponseWriter, r *http.Request, messageID string) {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "websocket",
-		"action":  messageID})
+		"package": "httpAPI",
+		"action":  "WSEvent:"+messageID})
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

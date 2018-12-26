@@ -131,8 +131,7 @@ func (service *Service) SetSettings(channelID *string, settings *ChannelSongRequ
 // Add processes youtube video link before pushing it to songrequest database
 func (service *Service) Add(user *string, userIsSub bool, userID *string, channelID *string, videoID *string) SongRequestAddResult {
 	logger := logrus.WithFields(logrus.Fields{
-		"package": "repos",
-		"feature": "songrequests",
+		"package": "songRequest",
 		"action":  "Add"})
 	locker.Lock("sr" + *channelID)
 	logger.Debugf("Setting Songrequest lock for channel %s", *channelID)

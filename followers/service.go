@@ -26,12 +26,11 @@ type Service struct {
 	collection *mgo.Collection
 }
 
-// IsFoller is cache for checking if user followed to channel, and returns duration
-func (service *Service) IsFoller(channelID *string, userID *string) (bool, time.Time) {
+// IsFollower is cache for checking if user followed to channel, and returns duration
+func (service *Service) IsFollower(channelID *string, userID *string) (bool, time.Time) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "repos",
-		"feature": "followers",
-		"action":  "IsFoller"})
+		"action":  "IsFollower"})
 
 	var followerResult Follower
 
