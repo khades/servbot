@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/khades/servbot/pubsub"
 	"github.com/khades/servbot/streamStatusTasks"
 	"github.com/khades/servbot/twitchIRCCTasks"
 	"github.com/khades/servbot/webhookTasks"
@@ -231,8 +232,11 @@ func main() {
 		followersToGreetService)
 
 	// Running PubSub
-	// TODO: it runs once!
-	// pubsub.RunPubSub(channelInfoService, config, channelLogsService)
+	pubsub:= pubsub.Init(
+		channelInfoService,
+		config,
+		channelLogsService,
+		&wg)
 
 	// Running Webhooks
 	webHookService := webhook.Init(
@@ -278,6 +282,7 @@ func main() {
 		followersService,
 		songRequestService,
 		eventBus,
+		pubsub,
 	)
 
 	// TwitchBot
@@ -303,8 +308,7 @@ func main() {
 		followersToGreetService,
 		subAlertService,
 		userResolveService,
-		twitchIRCClient,
-		&wg)
+		twitchIRCClient)
 
 	// AutomessageAnnouncer
 	autoMessageTasks.Run(

@@ -37,6 +37,7 @@ type TwitchIRCHandler struct {
 	followersService        *followers.Service
 	songRequestService      *songRequest.Service
 	eventBus                EventBus.Bus
+	pubsub                  *pubsub.Client
 }
 
 func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.Message) {
@@ -81,7 +82,7 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 	if message.Command == "CLEARCHAT" {
 		channelID := message.Tags["room-id"].Encode()
 		channelInfo, _ := service.channelInfoService.Get(&channelID)
-		if pubsub.IsWorking == false || channelInfo.ExtendedBansLogging == false {
+		if service.pubsub.IsWorking == false || channelInfo.ExtendedBansLogging == false {
 			banDuration, banDurationFound := message.Tags.GetTag("ban-duration")
 			intBanDuration := 0
 			if banDurationFound {

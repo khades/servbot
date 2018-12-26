@@ -6,6 +6,7 @@ import (
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/channelLogs"
 	"github.com/khades/servbot/followers"
+	"github.com/khades/servbot/pubsub"
 	"github.com/khades/servbot/songRequest"
 	"github.com/khades/servbot/subAlert"
 	"github.com/khades/servbot/subday"
@@ -24,7 +25,8 @@ func Init(subdayService *subday.Service,
 	templateService *template.Service,
 	followersService *followers.Service,
 	songRequestService *songRequest.Service,
-	eventBus EventBus.Bus) *TwitchIRCHandler {
+	eventBus EventBus.Bus,
+	pubsub *pubsub.Client) *TwitchIRCHandler {
 	return &TwitchIRCHandler{
 		subdayService:           subdayService,
 		channelInfoService:      channelInfoService,
@@ -37,5 +39,6 @@ func Init(subdayService *subday.Service,
 		followersService:        followersService,
 		songRequestService:      songRequestService,
 		eventBus:                eventBus,
+		pubsub: pubsub,
 	}
 }

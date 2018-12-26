@@ -26,9 +26,7 @@ func Init(
 	}
 
 	go func(wg *sync.WaitGroup) {
-		wg.Add(1)
 		twitchIRCClient.Start()
-		wg.Done()
 	}(wg)
 
 

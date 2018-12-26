@@ -6,6 +6,7 @@ import (
 	"github.com/khades/servbot/channelLogs"
 	"github.com/khades/servbot/chatMessage"
 	"github.com/khades/servbot/config"
+	"sync"
 
 	"net"
 	"net/http"
@@ -18,39 +19,44 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var IsWorking = false
+type Client struct {
+	IsWorking          bool
+	channelInfoService *channelInfo.Service
+	config             *config.Config
+	channelLogsService *channelLogs.Service
+}
 
 // TODO: Needs autorestart
-func Run(channelInfoService *channelInfo.Service, config *config.Config, channelLogsService *channelLogs.Service) {
+func (client *Client) run() {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
 		"feature": "pubsub",
 		"action":  "Run"})
 	var timerDur time.Duration
-	channels, channelError := channelInfoService .GetChannelsWithExtendedLogging()
+	channels, channelError := client.channelInfoService.GetChannelsWithExtendedLogging()
 	if channelError != nil && len(channels) == 0 {
 		return
 	}
 
 	for {
-		channels, channelError := channelInfoService.GetChannelsWithExtendedLogging()
+		channels, channelError := client.channelInfoService.GetChannelsWithExtendedLogging()
 		if channelError != nil && len(channels) == 0 {
 			return
 		}
 		var topics []string
 		for _, channel := range channels {
-			topics = append(topics, "chat_moderator_actions."+config.BotUserID+"."+channel.ChannelID)
+			topics = append(topics, "chat_moderator_actions."+client.config.BotUserID+"."+channel.ChannelID)
 		}
 		logger.Info("Starting Pubsub client")
 		timer := time.NewTimer(timerDur * time.Second)
 		<-timer.C
-		twitchPubSubClient(topics, channelLogsService, config)
+		client.twitchPubSubClient(topics)
 		logger.Info("Pubsub client died")
 		timerDur = timerDur + 5
 	}
 }
 
-func twitchPubSubClient(topics []string, channelLogsService *channelLogs.Service,  config *config.Config) {
+func (client *Client) twitchPubSubClient(topics []string) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
 		"feature": "pubsub",
@@ -82,7 +88,7 @@ func twitchPubSubClient(topics []string, channelLogsService *channelLogs.Service
 		return
 	}
 
-	IsWorking = true
+	client.IsWorking = true
 
 	defer conn.Close()
 	ticker := time.NewTicker(4 * time.Minute)
@@ -141,14 +147,14 @@ func twitchPubSubClient(topics []string, channelLogsService *channelLogs.Service
 
 					if moderAction.Data.ModeratorAction == "ban" {
 						result.MessageStruct.BanReason = moderAction.Data.Args[1]
-						channelLogsService.Log(&result)
+						client.channelLogsService.Log(&result)
 
 					}
 
 					if moderAction.Data.ModeratorAction == "timeout" {
 						length, _ := strconv.Atoi(moderAction.Data.Args[1])
 						result.MessageStruct.BanLength = length
-						channelLogsService.Log(&result)
+						client.channelLogsService.Log(&result)
 					}
 				}
 			}
@@ -172,6 +178,6 @@ Loop:
 			conn.SetReadDeadline(time.Now().Add(pongWait))
 		}
 	}
-	IsWorking = false
+	client.IsWorking = false
 
 }
