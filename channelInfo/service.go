@@ -19,11 +19,11 @@ type Service struct {
 	userResolveService *userResolve.Service
 
 	// Own Fields
-	dataArray map[string]*ChannelInfo
+	dataArray map[string]ChannelInfo
 }
 
 func (c *Service) forceCreateObject(channelID string, object *ChannelInfo) {
-	c.dataArray[channelID] = object
+	c.dataArray[channelID] = *object
 }
 
 //var с = Service{make(map[string]*models.ChannelInfo)}
@@ -95,16 +95,16 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 	//	logger.Debugf("Function was called %d times", timesCalled)
 	item, found := c.dataArray[*channelID]
 	if found {
-		return item, nil
+		return &item, nil
 	}
-	var dbObject = &ChannelInfo{}
+	var dbObject = ChannelInfo{}
 	error := c.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).One(dbObject)
 	if error != nil {
 		logger.Debugf("Error %s", error.Error())
 		return nil, error
 	}
 	c.dataArray[*channelID] = dbObject
-	return dbObject, error
+	return &dbObject, error
 }
 
 // GetModChannels returns list where specified user is moderator
@@ -140,7 +140,7 @@ func (c *Service) PreprocessChannels() error {
 
 	for _, channel := range channels {
 		channelIDList = append(channelIDList, channel.ChannelID)
-		c.dataArray[channel.ChannelID] = &channel
+		c.dataArray[channel.ChannelID] = channel
 	}
 
 	users, error := c.userResolveService.GetUsernames(channelIDList)
@@ -276,7 +276,7 @@ func (service *Service) GetChannelsWithSubtrainNotification() ([]ChannelInfo, er
 	result := []ChannelInfo{}
 	error := service.collection.Find(
 		bson.M{
-			"enabled": true,
+			"enabled":                    true,
 			"subtrain.enabled":           true,
 			"subtrain.notificationshown": false,
 			"subtrain.currentstreak": bson.M{
@@ -291,7 +291,7 @@ func (service *Service) GetChannelsWithExpiredSubtrain() ([]ChannelInfo, error) 
 	result := []ChannelInfo{}
 	error := service.collection.Find(
 		bson.M{
-			"enabled": true,
+			"enabled":          true,
 			"subtrain.enabled": true,
 			"subtrain.currentstreak": bson.M{
 				"$ne": 0},

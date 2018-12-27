@@ -15,7 +15,7 @@ func Init(db *mgo.Database, config *config.Config, userResolveService *userResol
 		collection:         collection,
 		config:             config,
 		userResolveService: userResolveService,
-		dataArray:          make(map[string]*ChannelInfo),
+		dataArray:          make(map[string]ChannelInfo),
 	}
 	collection.EnsureIndex(mgo.Index{
 		Key: []string{"channelid"}})
