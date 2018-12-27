@@ -93,6 +93,7 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 		"package": "channelInfo",
 		"action":  "get"})
 	//	logger.Debugf("Function was called %d times", timesCalled)
+	logger.Debugf("Getting channel :%s", *channelID)
 	item, found := c.dataArray[*channelID]
 	if found {
 		return &item, nil
