@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
@@ -15,20 +17,20 @@ func Init(db *mgo.Database) (*Config, error) {
 		"package": "config",
 		"action":  "Init"})
 	var config Config
-	config.collection = db.C(collectionName)
+	collection := db.C(collectionName)
 
-	error := config.collection.Find(bson.M{"entity": "config"}).One(&config)
+	error := collection.Find(bson.M{"entity": "config"}).One(&config)
 
 	if error != nil {
 		return nil, error
 	}
-
+	config.collection = collection
 	validated, validationError := govalidator.ValidateStruct(config)
 
-	if validated == true {
+	if validated != true {
 		logger.Infof("Config parsing error: %+v", validationError)
-		return nil, error
+		return nil, errors.New("Config parsing error")
 	}
-
+	logger.Infof("%+v", config)
 	return &config, error
 }

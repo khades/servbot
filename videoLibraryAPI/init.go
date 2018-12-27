@@ -23,7 +23,6 @@ func Init(
 	}
 	mux:= httpAPIService.NewMux()
 
-	// TODO: NOT THERE U DUMMY
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/:videoID/settag/:tag"), httpAPIService.WithMod(service.setTag))
 	mux.HandleFunc(pat.Options("/api/channel/:channel/songrequests/:videoID/settag/:tag"), httpAPIService.Options)
 
@@ -32,7 +31,5 @@ func Init(
 
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/library/get"), httpAPIService.WithMod(service.get))
 	mux.HandleFunc(pat.Get("/api/channel/:channel/songrequests/bannedtracks"), httpAPIService.WithMod(service.getBanned))
-	//
-	//
 
 }

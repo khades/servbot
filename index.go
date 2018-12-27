@@ -2,19 +2,26 @@ package main
 
 import (
 	"flag"
-	"github.com/khades/servbot/pubsub"
-	"github.com/khades/servbot/streamStatusTasks"
-	"github.com/khades/servbot/twitchIRCCTasks"
-	"github.com/khades/servbot/webhookTasks"
 	"sync"
 	"time"
 
-	evbus "github.com/asaskevich/EventBus"
-	"github.com/khades/servbot/autoMessageAPI"
+	"github.com/asaskevich/EventBus"
 	"github.com/khades/servbot/autoMessageTasks"
+	"github.com/khades/servbot/configTasks"
+	"github.com/khades/servbot/followersToGreetTasks"
+	"github.com/khades/servbot/pubsub"
+	"github.com/khades/servbot/streamStatusTasks"
+	"github.com/khades/servbot/subtrainTasks"
+	"github.com/khades/servbot/twitchIRC"
+	"github.com/khades/servbot/twitchIRCCTasks"
+	"github.com/khades/servbot/twitchIRCHandler"
+	"github.com/khades/servbot/videoLibraryAPI"
+	"github.com/khades/servbot/vkGroupTasks"
+	"github.com/khades/servbot/webhookTasks"
+
+	"github.com/khades/servbot/autoMessageAPI"
 	"github.com/khades/servbot/channelBansAPI"
 	"github.com/khades/servbot/channelLogsAPI"
-	"github.com/khades/servbot/followersToGreetTasks"
 	"github.com/khades/servbot/httpAPI"
 	"github.com/khades/servbot/httpSession"
 	"github.com/khades/servbot/songRequestAPI"
@@ -22,17 +29,12 @@ import (
 	"github.com/khades/servbot/subdayAPI"
 	"github.com/khades/servbot/subscriptionInfoAPI"
 	"github.com/khades/servbot/subtrainAPI"
-	"github.com/khades/servbot/subtrainTasks"
 	"github.com/khades/servbot/templateAPI"
-	"github.com/khades/servbot/videoLibraryAPI"
 	"github.com/khades/servbot/vkGroupAPI"
-	"github.com/khades/servbot/vkGroupTasks"
 	"github.com/khades/servbot/webhookAPI"
 
 	"github.com/khades/servbot/autoMessage"
 	"github.com/khades/servbot/subscriptionInfo"
-	"github.com/khades/servbot/twitchIRC"
-	"github.com/khades/servbot/twitchIRCHandler"
 	"github.com/khades/servbot/webhook"
 
 	"github.com/khades/servbot/followers"
@@ -61,8 +63,8 @@ import (
 )
 
 func main() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetFormatter(&logrus.JSONFormatter{})
 
 	logger := logrus.WithFields(logrus.Fields{"package": "main"})
 	logger.Info("Starting")
@@ -83,14 +85,14 @@ func main() {
 	if config.Debug == true {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	
+
 	if configError != nil {
 		logger.Fatalf("Reading config from database failed: %s", configError)
 	}
 	// Creating waitgroup for timed services
 	var wg sync.WaitGroup
 
-	var eventBus = evbus.New()
+	var eventBus = EventBus.New()
 
 	// Creating ticker for websocket ping events
 	pingticker := time.NewTicker(time.Second * 30)
@@ -105,6 +107,7 @@ func main() {
 	// Creating twitchAPI service
 	twitchAPIClient := twitchAPI.Init(
 		config)
+	configTasks.Run(twitchAPIClient, config)
 
 	// Creating youtubeAPI service
 	youtubeAPIClient := youtubeAPI.Init(
@@ -233,7 +236,7 @@ func main() {
 		followersToGreetService)
 
 	// Running PubSub
-	pubsub:= pubsub.Init(
+	pubsub := pubsub.Init(
 		channelInfoService,
 		config,
 		channelLogsService,

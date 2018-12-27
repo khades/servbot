@@ -30,27 +30,35 @@ func (client *Client) run() {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "pubsub",
 		"action":  "Run"})
-	var timerDur time.Duration
-	channels, channelError := client.channelInfoService.GetChannelsWithExtendedLogging()
-	if channelError != nil && len(channels) == 0 {
-		return
+	var timerDur time.Duration = 10 * time.Second
+	var timerIncrement = func() {
+		if (timerDur < 1 * time.Minute) {
+			timerDur = timerDur + (5 * time.Second)
+		}
 	}
+	//channels, channelError := client.channelInfoService.GetChannelsWithExtendedLogging()
+	//if channelError != nil && len(channels) == 0 {
+	//	return
+	//}
 
 	for {
+		timer := time.NewTimer(timerDur)
+
 		channels, channelError := client.channelInfoService.GetChannelsWithExtendedLogging()
-		if channelError != nil && len(channels) == 0 {
-			return
+		if channelError != nil || len(channels) == 0 {
+			logger.Info("Nothing to listen")
+			<-timer.C
+			continue
 		}
 		var topics []string
 		for _, channel := range channels {
 			topics = append(topics, "chat_moderator_actions."+client.config.BotUserID+"."+channel.ChannelID)
 		}
-		logger.Info("Starting Pubsub client")
-		timer := time.NewTimer(timerDur * time.Second)
+		logger.Infof("Starting Pubsub client with topics: %+v", topics)
 		<-timer.C
 		client.twitchPubSubClient(topics)
 		logger.Info("Pubsub client died")
-		timerDur = timerDur + 5
+		timerIncrement()
 	}
 }
 

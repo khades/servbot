@@ -73,7 +73,6 @@ func (service *Service) formCurrentSong(channelID *string, volume int, songReque
 				Volume:    volume,
 				Count:     len(songRequests),
 				ID:        request.VideoID}, nil
-			break
 		}
 	}
 	return &channelInfo.CurrentSong{
@@ -94,7 +93,6 @@ func (service *Service) GetLast(channelID *string, lang string) channelInfo.Curr
 				Volume:    songRequestInfo.Settings.Volume,
 				Count:     len(songRequestInfo.Requests),
 				ID:        request.VideoID}
-			break
 		}
 	}
 	return channelInfo.CurrentSong{
@@ -174,51 +172,12 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 	var songRequest SongRequest
 	var libraryItem = &videoLibrary.SongRequestLibraryItem{}
 	var libraryError error
-
 	if parsedVideoIsID == true {
 		libraryItem, libraryError = service.videoLibraryService.GetVideo(&parsedVideoID)
 	}
+	logger.Debug(libraryError)
+	logger.Debug(libraryItem)
 
-	if parsedVideoIsID == false || libraryError == nil {
-		yTrestricted := false
-		twitchRestricted := false
-		channelRestricted := false
-		tagRestricted := false
-		bannedTag := ""
-		for _, tag := range libraryItem.Tags {
-			if tag.Tag == "youtuberestricted" {
-				yTrestricted = true
-				break
-			}
-			if tag.Tag == "twitchrestricted" {
-				twitchRestricted = true
-				break
-			}
-			if tag.Tag == *channelID+"-restricted" {
-				channelRestricted = true
-				break
-			}
-			for _, channelTag := range songRequestInfo.Settings.BannedTags {
-				if tag.Tag == channelTag && tag.Tag != *channelID+"-restricted" {
-					bannedTag = channelTag
-					tagRestricted = true
-					break
-				}
-			}
-		}
-		if yTrestricted == true {
-			return SongRequestAddResult{YoutubeRestricted: true, Title: libraryItem.Title}
-		}
-		if tagRestricted == true {
-			return SongRequestAddResult{TagRestricted: true, Title: libraryItem.Title, Tag: bannedTag}
-		}
-		if twitchRestricted == true {
-			return SongRequestAddResult{TwitchRestricted: true, Title: libraryItem.Title}
-		}
-		if channelRestricted == true {
-			return SongRequestAddResult{ChannelRestricted: true, Title: libraryItem.Title}
-		}
-	}
 	if libraryError != nil || time.Now().Sub(libraryItem.LastCheck) > 3*60*time.Minute {
 		var videoError error
 		var video = &youtubeAPI.YoutubeVideo{}
@@ -289,18 +248,63 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 			Views:    libraryItem.Views}
 	}
 
+	if parsedVideoIsID == false {
+		libraryItem, libraryError = service.videoLibraryService.GetVideo(&songRequest.VideoID)
+	}
+
+	if libraryError == nil {
+		yTrestricted := false
+		twitchRestricted := false
+		channelRestricted := false
+		tagRestricted := false
+		bannedTag := ""
+		for _, tag := range libraryItem.Tags {
+			if tag.Tag == "youtuberestricted" {
+				yTrestricted = true
+				break
+			}
+			if tag.Tag == "twitchrestricted" {
+				twitchRestricted = true
+				break
+			}
+			logger.Debug(*channelID + "-restricted")
+			if tag.Tag == *channelID+"-restricted" {
+				channelRestricted = true
+				break
+			}
+			for _, channelTag := range songRequestInfo.Settings.BannedTags {
+				if tag.Tag == channelTag && tag.Tag != *channelID+"-restricted" {
+					bannedTag = channelTag
+					tagRestricted = true
+					break
+				}
+			}
+		}
+		if yTrestricted == true {
+			return SongRequestAddResult{YoutubeRestricted: true, Title: libraryItem.Title}
+		}
+		if tagRestricted == true {
+			return SongRequestAddResult{TagRestricted: true, Title: libraryItem.Title, Tag: bannedTag}
+		}
+		if twitchRestricted == true {
+			return SongRequestAddResult{TwitchRestricted: true, Title: libraryItem.Title}
+		}
+		if channelRestricted == true {
+			return SongRequestAddResult{ChannelRestricted: true, Title: libraryItem.Title}
+		}
+	}
+
 	if songRequest.Length.Seconds() > float64(songRequestInfo.Settings.MaxVideoLength) {
 		return SongRequestAddResult{TooLong: true, Title: songRequest.Title, Length: songRequest.Length}
-
 	}
 	if songRequest.Length.Seconds() < float64(songRequestInfo.Settings.MinVideoLength) {
 		return SongRequestAddResult{TooShort: true, Title: songRequest.Title, Length: songRequest.Length}
-
 	}
+
 	if songRequest.Views < songRequestInfo.Settings.VideoViewLimit {
 		return SongRequestAddResult{TooLittleViews: true, Title: songRequest.Title, Length: songRequest.Length}
-
 	}
+
 	if songRequestInfo.Settings.MoreLikes == true && songRequest.Dislikes > songRequest.Likes {
 		return SongRequestAddResult{MoreDislikes: true, Title: songRequest.Title, Length: songRequest.Length}
 	}
@@ -397,7 +401,7 @@ func (service *Service) BubbleUpToSecond(channelID *string, videoID *string) boo
 }
 
 func (service *Service) put(channelID *string, requests SongRequests, volume int) {
-	currentSong, _ := service.formCurrentSong(channelID,  volume, requests)
+	currentSong, _ := service.formCurrentSong(channelID, volume, requests)
 	service.channelInfoService.PutCurrentSong(channelID, currentSong)
 	service.collection.Update(bson.M{"channelid": *channelID}, bson.M{"$set": bson.M{"requests": requests}})
 }
@@ -406,6 +410,9 @@ func (service *Service) PushTag(videoID *string, tag string, userID string, user
 	var channels []ChannelSongRequest
 	var tagResults []TaggedVideoResult
 	track := service.videoLibraryService.PushTag(videoID, tag, userID, user)
+	if track == nil {
+		return []TaggedVideoResult{}
+	}
 	error := service.collection.Find(bson.M{"requests.videoid": *videoID}).All(&channels)
 	if error != nil {
 		return []TaggedVideoResult{}

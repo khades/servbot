@@ -87,7 +87,13 @@ func (service *Service) oauthInitiate(w http.ResponseWriter, r *http.Request) {
 }
 func (service *Service) userIndex(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession) {
 	response := userIndexResponse{}
-	channels, _ := service.channelInfoService.GetModChannels(&s.UserID)
+	var channels []channelInfo.ChannelWithID
+	if (s.UserID == service.config.BotUserID || s.UserID == "40635840") {
+		channels, _ = service.channelInfoService.GetModChannelsForAdmin()
+	}else {
+		channels, _ = service.channelInfoService.GetModChannels(&s.UserID)
+	}
+	response.ModChannels = channels
 	response.Username = s.Username
 	response.AvatarURL = s.AvatarURL
 	response.UserID = s.UserID

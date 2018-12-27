@@ -12,7 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
 type Service struct {
 	// Dependencies
 	collection         *mgo.Collection
@@ -64,6 +63,7 @@ func (c *Service) Disable(channelID *string) {
 	c.collection.Upsert(bson.M{"channelid": *channelID}, bson.M{"$set": bson.M{"enabled": false}})
 }
 
+// TODO: Fix to get if bot is mod on channel
 func (c *Service) GetChannelsWithExtendedLogging() ([]ChannelInfo, error) {
 	var results []ChannelInfo
 	error := c.collection.Find(bson.M{"enabled": true, "extendedbanslogging": true}).All(&results)
@@ -109,11 +109,19 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 
 // GetModChannels returns list where specified user is moderator
 func (c *Service) GetModChannels(userID *string) ([]ChannelWithID, error) {
+	// Needs check if channel is enabled
 	var result []ChannelWithID
 	error := c.collection.Find(
 		bson.M{"$or": []bson.M{
 			bson.M{"mods": *userID},
 			bson.M{"channelid": *userID}}}).All(&result)
+	return result, error
+}
+
+func (c *Service) GetModChannelsForAdmin() ([]ChannelWithID, error) {
+	var result []ChannelWithID
+	error := c.collection.Find(
+		bson.M{"enabled": true}).All(&result)
 	return result, error
 }
 
@@ -268,6 +276,7 @@ func (service *Service) GetChannelsWithSubtrainNotification() ([]ChannelInfo, er
 	result := []ChannelInfo{}
 	error := service.collection.Find(
 		bson.M{
+			"enabled": true,
 			"subtrain.enabled":           true,
 			"subtrain.notificationshown": false,
 			"subtrain.currentstreak": bson.M{
@@ -282,6 +291,7 @@ func (service *Service) GetChannelsWithExpiredSubtrain() ([]ChannelInfo, error) 
 	result := []ChannelInfo{}
 	error := service.collection.Find(
 		bson.M{
+			"enabled": true,
 			"subtrain.enabled": true,
 			"subtrain.currentstreak": bson.M{
 				"$ne": 0},

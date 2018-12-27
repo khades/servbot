@@ -35,7 +35,7 @@ func (service *Service) GetUsers(channelID *string, pattern *string) ([]ChannelU
 
 //Log logs the users chat message on channel with logging its known nicknames
 func (service *Service) Log(message *chatMessage.ChatMessage) {
-	if message.UserID != "" && message.UserID != "" {
+	if message.UserID != ""  {
 		service.userResolveService.Update(&message.UserID, &message.User)
 	}
 

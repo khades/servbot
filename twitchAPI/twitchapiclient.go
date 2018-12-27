@@ -309,7 +309,7 @@ func (tApi *Client) GetGamesByID(gameIDS []string) ([]twitchGameStruct, error) {
 	return twitchResult, nil
 }
 
-func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo , error) {
+func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "twitchAPI",
 		"action":  "GetUserByOauth"})
@@ -344,3 +344,56 @@ func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo , error) {
 	}
 	return &usernameStruct.Data[0], nil
 }
+
+func (tApi *Client) GetAPIKey() (*ApiKeyResponse, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "twitchAPI",
+		"action":  "GetAPIKey"})
+	var timeout = 5 * time.Second
+	var client = http.Client{Timeout: timeout}
+	url := "https://id.twitch.tv/oauth2/token?client_id=" + tApi.config.ClientID + "&client_secret=" + tApi.config.ClientSecret + "&grant_type=client_credentials"
+	logger.Debugf("Url: %s", url)
+	req, reqError := http.NewRequest("POST", url, nil)
+	if reqError != nil {
+		logger.Debug("Twitch Error, General error: " + reqError.Error())
+
+		return nil, reqError
+	}
+	resp, error := client.Do(req)
+	if error == nil {
+		defer resp.Body.Close()
+	} else {
+		logger.Debug("Twitch Error, General error: " + error.Error())
+		return nil, error
+	}
+	var apiKey = twitchAPIKeyResponse{}
+
+	marshallError := json.NewDecoder(resp.Body).Decode(&apiKey)
+	if marshallError != nil {
+		logger.Debug("Twitch Error, Cant marshall username: " + marshallError.Error())
+
+		return nil, errors.New("Twitch Error, Cant marshall response")
+	}
+	expirationDate := time.Now().Add(time.Duration(apiKey.ExpiresIn) * time.Second)
+	logger.Debug("Result: %+v", apiKey)
+	return &ApiKeyResponse{
+		AccessToken:  apiKey.AccessToken,
+		ExpiresIn:    expirationDate,
+	}, nil
+}
+
+// func (tApi *Client) RefreshAPIKey() {
+// 	apiUrl := "https://id.twitch.tv/oauth2/token"
+// 	data := url.Values{}
+// 	data.Set("grant_type", "refresh_token")
+// 	data.Set("refresh_token", tApi.config.APIKeyRefreshToken)
+// 	data.Set("client_id", tApi.config.ClientID)
+// 	data.Set("client_secret", tApi.config.ClientSecret)
+
+// 	client := &http.Client{}
+// 	r, _ := http.NewRequest("POST", apiUrl, strings.NewReader(data.Encode())) // URL-encoded payload
+// 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+// 	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+// 	resp, _ := client.Do(r)
+// }

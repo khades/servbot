@@ -83,3 +83,13 @@ type hub struct {
 	LeaseSeconds string `json:"hub.lease_seconds"`
 	Secret       string `json:"hub.secret"`
 }
+
+type twitchAPIKeyResponse struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn int64 `json:"expires_in"`
+}
+
+type ApiKeyResponse struct {
+	AccessToken string
+	ExpiresIn time.Time
+}
