@@ -36,7 +36,7 @@ func (service *Service) Get(oauthKey *string) (*HTTPSession, error) {
 
 	// TODO: getting user
 	user, error := service.twitchAPIClient.GetUserByOauth(*oauthKey)
-	if error == nil {
+	if error != nil {
 		logger.Debug("User not found on twitch")
 		return  nil, error
 	}
