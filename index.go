@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/khades/servbot/metrics"
 	"sync"
 	"time"
 
@@ -92,6 +93,8 @@ func main() {
 	// Creating waitgroup for timed services
 	var wg sync.WaitGroup
 
+	var metrics = metrics.Init()
+
 	var eventBus = EventBus.New()
 
 	// Creating ticker for websocket ping events
@@ -106,7 +109,8 @@ func main() {
 
 	// Creating twitchAPI service
 	twitchAPIClient := twitchAPI.Init(
-		config)
+		config,
+		metrics)
 	configTasks.Run(twitchAPIClient, config)
 
 	// Creating youtubeAPI service
@@ -127,14 +131,16 @@ func main() {
 	channelInfoService := channelInfo.Init(
 		db,
 		config,
-		userResolveService)
+		userResolveService,
+		metrics)
 
 	// HttpAPI
 	httpAPIService := httpAPI.Init(
 		config,
 		httpSessionService,
 		channelInfoService,
-		eventBus)
+		eventBus,
+		metrics)
 
 	subtrainAPI.Init(
 		httpAPIService,
@@ -294,6 +300,7 @@ func main() {
 		config,
 		channelInfoService,
 		twitchIRCHandler.Handle,
+		metrics,
 		&wg,
 	)
 	twitchIRCCTasks.Run(

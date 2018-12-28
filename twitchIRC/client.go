@@ -2,6 +2,7 @@ package twitchIRC
 
 import (
 	"fmt"
+	"github.com/khades/servbot/metrics"
 	"net"
 	"time"
 
@@ -17,9 +18,11 @@ type Client struct {
 	// Dependencies
 	config             *config.Config
 	channelInfoService *channelInfo.Service
+	metrics            *metrics.Service
+
 	// Own Fields
 	client          *irc.Client
-	handle         func (client *Client, message *irc.Message)
+	handle          func(client *Client, message *irc.Message)
 	bounces         map[string]time.Time
 	ready           bool
 	modChannelIndex int
@@ -97,6 +100,7 @@ func (client *Client) SendMessages(interval int) {
 	if len(client.messageQueue) > 0 {
 		logger.Debugf("Messaged Delayed:", len(client.messageQueue))
 	}
+	client.metrics.LogIRCSchedulerPayload(float64(len(client.messageQueue)))
 }
 
 // SendDebounced prevents from sending data too frequent in public chat sending it to a PM
@@ -126,6 +130,7 @@ func (client *Client) SendPublic(message *OutgoingMessage) {
 		} else {
 			messageString = fmt.Sprintf("PRIVMSG #%s :%s", message.Channel, message.Body)
 		}
+		client.metrics.LogIRCMessageOnChannel(message.Channel)
 		client.PushMessage(messageString)
 	}
 }
@@ -133,7 +138,9 @@ func (client *Client) SendPublic(message *OutgoingMessage) {
 // SendPrivate writes data in private to a user
 func (client *Client) SendPrivate(message *OutgoingMessage) {
 	if client.ready && message.User != "" {
+
 		messageString := fmt.Sprintf("PRIVMSG #jtv :/w %s Channel %s: %s", message.User, message.Channel, message.Body)
+		client.metrics.LogIRCMessageOnChannel("private")
 		client.PushMessage(messageString)
 
 	}
@@ -160,12 +167,12 @@ func (client *Client) Handle(ircclient *irc.Client, message *irc.Message) {
 	client.handle(client, message)
 
 	if message.Command == "001" {
-		ircclient .Write("CAP REQ twitch.tv/tags")
-		ircclient .Write("CAP REQ twitch.tv/membership")
-		ircclient .Write("CAP REQ twitch.tv/commands")
+		ircclient.Write("CAP REQ twitch.tv/tags")
+		ircclient.Write("CAP REQ twitch.tv/membership")
+		ircclient.Write("CAP REQ twitch.tv/commands")
 		activeChannels, _ := client.channelInfoService.GetActiveChannels()
 		for _, value := range activeChannels {
-			ircclient .Write("JOIN #" + value.Channel)
+			ircclient.Write("JOIN #" + value.Channel)
 		}
 		client.ready = true
 		client.SendModsCommand()

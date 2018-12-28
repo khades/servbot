@@ -1,8 +1,9 @@
 package webhookTasks
 
 import (
-	"github.com/khades/servbot/webhook"
 	"time"
+
+	"github.com/khades/servbot/webhook"
 )
 
 func Run(webhookService *webhook.Service) *time.Ticker {
@@ -10,11 +11,9 @@ func Run(webhookService *webhook.Service) *time.Ticker {
 	ticker := time.NewTicker(period)
 	webhookService.Subscribe(period)
 	go func() {
-		for {
-			<-ticker.C
+		for range ticker.C {
 			webhookService.Subscribe(period)
 		}
 	}()
 	return ticker
 }
-

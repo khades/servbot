@@ -1,6 +1,7 @@
 package channelInfo
 
 import (
+	"github.com/khades/servbot/metrics"
 	"strings"
 	"time"
 
@@ -17,6 +18,7 @@ type Service struct {
 	collection         *mgo.Collection
 	config             *config.Config
 	userResolveService *userResolve.Service
+	metrics            *metrics.Service
 
 	// Own Fields
 	dataArray map[string]*ChannelInfo
@@ -94,6 +96,8 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 		"action":  "get"})
 	//	logger.Debugf("Function was called %d times", timesCalled)
 	logger.Debugf("Getting channel :%s", *channelID)
+	c.metrics.LogChannelInfoRetrieval()
+	c.metrics.LogChannelInfoRetrievalPerChannel(*channelID)
 	item, found := c.dataArray[*channelID]
 	if found {
 		return item, nil

@@ -11,12 +11,5 @@ MongoDB
 
 * build the app 
 
-* copy config.json.example to config.json and modify it according to your needs
+* look up at config/Config struct
 
-# Packages names
-
-Things that have *Client suffix (twitchAPICLient, twitchIRCClient etc) are clients to external services
-
-Things that have *API suffix are http API servers for database services with same names.
-
-Things that have *Announce suffix are periodic services that might post messages in channel chat

@@ -1,6 +1,7 @@
 package httpAPI
 
 import (
+	"github.com/khades/servbot/metrics"
 	"net/http"
 	"sync"
 	"time"
@@ -19,12 +20,12 @@ import (
 	"gopkg.in/asaskevich/govalidator.v4"
 )
 
-
 type Service struct {
 	config             *config.Config
 	httpSessionService *httpSession.Service
 	channelInfoService *channelInfo.Service
 	eventBus           EventBus.Bus
+	metrics            *metrics.Service
 	requestsCounter    map[string]requestCounterRecord
 	mux                *goji.Mux
 }
@@ -62,6 +63,7 @@ func (service *Service) auth(next SessionHandlerFunc) SessionHandlerFunc {
 			service.requestsCounter[s.Key] = requestCounterRecord{Count: 1, Date: time.Now().Add(time.Minute)}
 		}
 		authLogger.Debugf("Current request count for user %s is %d", s.UserID, service.requestsCounter[s.Key].Count)
+		service.metrics.LogHTTPApiUserRequest(s.Username)
 
 		if service.requestsCounter[s.Key].Count > 200 {
 			authLogger.Debugf("Rejecting user api request for userID %s ", s.UserID)
@@ -124,6 +126,8 @@ func (service *Service) sessionAndChannel(next SessionAndChannelHandlerFunc) Ses
 			WriteJSONError(w, error.Error(), http.StatusInternalServerError)
 			return
 		}
+		service.metrics.LogHTTPApiChannelRequest(channel.Channel)
+
 		next(w, r, s, channel)
 
 	}
@@ -177,7 +181,7 @@ func (service *Service) Options(w http.ResponseWriter, r *http.Request) {
 func (service *Service) WSEvent(w http.ResponseWriter, r *http.Request, messageID string) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "httpAPI",
-		"action":  "WSEvent:"+messageID})
+		"action":  "WSEvent:" + messageID})
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

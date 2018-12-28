@@ -9,9 +9,7 @@ func Run(twitchIRCClient *twitchIRC.Client) {
 	ircClientTicker := time.NewTicker(time.Second * 3)
 
 	go func() {
-		for {
-
-			<-ircClientTicker.C
+		for range ircClientTicker.C{
 			twitchIRCClient.SendMessages(3)
 		}
 	}()
@@ -19,8 +17,7 @@ func Run(twitchIRCClient *twitchIRC.Client) {
 	modTicker := time.NewTicker(time.Second * 10)
 
 	go func() {
-		for {
-			<-modTicker.C
+		for range modTicker.C {
 			twitchIRCClient.SendModsCommand()
 		}
 	}()

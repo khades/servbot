@@ -19,8 +19,7 @@ func Run(channelInfoService *channelInfo.Service,
 		twitchIRCClient,
 	}
 	go func() {
-		for {
-			<-ticker.C
+		for range ticker.C{
 			service.Send()
 		}
 	}()

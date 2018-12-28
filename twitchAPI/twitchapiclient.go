@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/khades/servbot/metrics"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -17,11 +18,13 @@ import (
 
 type Client struct {
 	config *config.Config
+	metrics *metrics.Service
 }
 
-func Init(config *config.Config) *Client {
+func Init(config *config.Config, metrics *metrics.Service) *Client {
 	return &Client{
 		config: config,
+		metrics: metrics,
 	}
 }
 
@@ -43,6 +46,7 @@ func (tApi *Client) twitchHelixPost(urlStr string, body io.Reader) (*http.Respon
 	if error != nil {
 		return nil, error
 	}
+	tApi.metrics.LogTwitchRequest()
 	return client.Do(req)
 }
 
@@ -60,6 +64,8 @@ func (tApi *Client) twitchHelixOauth(method string, urlStr string, body io.Reade
 	if error != nil {
 		return nil, error
 	}
+
+	tApi.metrics.LogTwitchRequest()
 	res, err := client.Do(req)
 
 	if err != nil {
@@ -114,10 +120,10 @@ func (tApi *Client) twitchHelix(method string, urlStr string, body io.Reader) (*
 // 	return &twitchResponseStruct, nil
 // }
 
-func (tApi *Client) SubscribeToChannelFollwerWebhook(channelID string, secret string) bool {
+func (tApi *Client) SubscribeToChannelFollowerWebhook(channelID string, secret string) bool {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "twitchAPI",
-		"action":  "SubscribeToChannelFollwerWebhook"})
+		"action":  "SubscribeToChannelFollowerWebhook"})
 	form := hub{
 		Mode:         "subscribe",
 		Topic:        "https://api.twitch.tv/helix/users/follows?to_id=" + channelID,
@@ -127,6 +133,7 @@ func (tApi *Client) SubscribeToChannelFollwerWebhook(channelID string, secret st
 
 	body, _ := json.Marshal(form)
 
+	tApi.metrics.LogTwitchSpecificRequest("SubscribeToChannelFollowerWebhook")
 	resp, _ := tApi.twitchHelixPost("webhooks/hub", bytes.NewReader(body))
 	if resp != nil {
 		defer resp.Body.Close()
@@ -147,11 +154,12 @@ func (tApi *Client) SubscribeToChannelFollwerWebhook(channelID string, secret st
 func (tApi *Client) GetUserFollowDate(channelID *string, userID *string) (bool, time.Time) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "twitchAPI",
-		"action":  "getUserFollowDate"})
+		"action":  "GetUserFollowDate"})
 	url := "users/follows?from_id=" + *userID + "&to_id=" + *channelID
 
 	logger.Debugf("Request url is %s", url)
 
+	tApi.metrics.LogTwitchSpecificRequest("GetUserFollowDate")
 	resp, error := tApi.twitchHelix("GET", url, nil)
 	if error != nil {
 		return false, time.Now()
@@ -183,6 +191,8 @@ func (tApi *Client) getUsersByParameterPaged(idSlice []string, idType string) ([
 
 	usersString := "users?" + idType + "=" + strings.Join(idSlice, delimiter)
 	logger.Debugf("Url string to get users from twitch: %s", usersString)
+
+	tApi.metrics.LogTwitchSpecificRequest("getUsersByParameterPaged")
 	resp, error := tApi.twitchHelix("GET", usersString, nil)
 	if error != nil {
 		return nil, error
@@ -236,6 +246,8 @@ func (tApi *Client) getStreamStatusesPaged(channels []string) ([]TwitchStreamSta
 
 	streamsString := "streams?user_id=" + strings.Join(channels, "&user_id=")
 	logger.Debugf("Url: %s", streamsString)
+
+	tApi.metrics.LogTwitchSpecificRequest("getStreamStatusesPaged")
 	resp, error := tApi.twitchHelix("GET", streamsString, nil)
 	if error != nil {
 		logger.Infof("Error: %s", error.Error())
@@ -278,6 +290,8 @@ func (tApi *Client) getGamesByIDPaged(gamesIDS []string) ([]twitchGameStruct, er
 	var twitchResult twitchGameStructResponse
 
 	gamesString := "games?id=" + strings.Join(gamesIDS, "&id=")
+
+	tApi.metrics.LogTwitchSpecificRequest("getGamesByIDPaged")
 	resp, error := tApi.twitchHelix("GET", gamesString, nil)
 	if error != nil {
 		return nil, error
@@ -313,6 +327,8 @@ func (tApi *Client) GetUserByOauth(key string) (*TwitchUserInfo, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"package": "twitchAPI",
 		"action":  "GetUserByOauth"})
+
+	tApi.metrics.LogTwitchSpecificRequest("GetUserByOauth")
 
 	nameResp, err := tApi.twitchHelixOauth("GET", "users", nil, key)
 	if err != nil {
@@ -359,6 +375,9 @@ func (tApi *Client) GetAPIKey() (*ApiKeyResponse, error) {
 
 		return nil, reqError
 	}
+	tApi.metrics.LogTwitchRequest()
+	tApi.metrics.LogTwitchSpecificRequest("GetAPIKey")
+
 	resp, error := client.Do(req)
 	if error == nil {
 		defer resp.Body.Close()

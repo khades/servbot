@@ -53,7 +53,7 @@ func (service *Service) processOneChannel(channel followersToGreet.FollowersToGr
 		return
 	}
 	followers := []string{}
-	logger.Debugf("Looking for followers names: ", strings.Join(channel.Followers, ", "))
+	logger.Debug("Looking for followers names: ", strings.Join(channel.Followers, ", "))
 	followersMap, followersError := service.userResolveService.GetUsernames(channel.Followers)
 	if followersError != nil {
 		logger.Debugf("Followers resolve failed for channel %s", channel.ChannelID)

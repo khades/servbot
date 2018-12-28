@@ -1,11 +1,12 @@
 package vkGroupTasks
 
 import (
+	"time"
+
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
 	"github.com/khades/servbot/twitchIRC"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 func Run(config *config.Config, channelInfoService *channelInfo.Service, twitchIRCClient *twitchIRC.Client) *time.Ticker {
@@ -23,8 +24,7 @@ func Run(config *config.Config, channelInfoService *channelInfo.Service, twitchI
 	ticker := time.NewTicker(time.Second * 60)
 	service := Service{config, channelInfoService, twitchIRCClient}
 	go func() {
-		for {
-			<-ticker.C
+		for range ticker.C {
 			service.Check()
 		}
 	}()

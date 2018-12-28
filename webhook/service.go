@@ -72,7 +72,7 @@ func (service *Service) subToFollowerHook(channelID string) {
 		"package": "webhook",
 		"action":  "SubToFollowerHook"})
 	secret := utils.RandomString(10)
-	success := service.twitchAPIService.SubscribeToChannelFollwerWebhook(channelID, secret)
+	success := service.twitchAPIService.SubscribeToChannelFollowerWebhook(channelID, secret)
 	if success == true {
 		logger.Debugf("Doing update for channel %s", channelID)
 		service.update(&channelID, "follows", &secret, time.Now().Add(10*24*time.Hour))
