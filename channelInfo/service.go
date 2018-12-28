@@ -97,9 +97,10 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 	//	logger.Debugf("Function was called %d times", timesCalled)
 	logger.Debugf("Getting channel :%s", *channelID)
 	c.metrics.LogChannelInfoRetrieval()
-	c.metrics.LogChannelInfoRetrievalPerChannel(*channelID)
 	item, found := c.dataArray[*channelID]
 	if found {
+		c.metrics.LogChannelInfoRetrievalPerChannel(item.Channel)
+
 		return item, nil
 	}
 	var dbObject = ChannelInfo{}
@@ -108,6 +109,7 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 		logger.Debugf("Error %s", error.Error())
 		return nil, error
 	}
+	c.metrics.LogChannelInfoRetrievalPerChannel(dbObject.Channel)
 	c.dataArray[*channelID] = &dbObject
 	return &dbObject, error
 }

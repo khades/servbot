@@ -35,8 +35,8 @@ func (service *Service) LogChannelInfoRetrieval() {
 	service.channelInfoRequests.Inc()
 }
 
-func (service *Service) LogChannelInfoRetrievalPerChannel(channelID string) {
-	service.channelInfoPerChannelRequests.WithLabelValues(channelID).Inc()
+func (service *Service) LogChannelInfoRetrievalPerChannel(channel string) {
+	service.channelInfoPerChannelRequests.WithLabelValues(channel).Inc()
 }
 
 func (service *Service) LogHTTPApiUserRequest(user string) {

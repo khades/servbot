@@ -26,8 +26,8 @@ func Init() *Service {
 		}),
 		channelInfoPerChannelRequests: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "servbot_channel_info_per_channel",
-			Help: "How many channelInfo.Get requests are called, partitioned by channelID.",
-		}, []string{"channelID"}),
+			Help: "How many channelInfo.Get requests are called, partitioned by channel name.",
+		}, []string{"channel"}),
 		httpAPIChannelCounter: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "servbot_httpapi_channel_calls",
 			Help: "How many times httpAPI called for channelInfo, partitioned by channel name.",
