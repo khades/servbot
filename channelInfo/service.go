@@ -19,11 +19,11 @@ type Service struct {
 	userResolveService *userResolve.Service
 
 	// Own Fields
-	dataArray map[string]ChannelInfo
+	dataArray map[string]*ChannelInfo
 }
 
 func (c *Service) forceCreateObject(channelID string, object *ChannelInfo) {
-	c.dataArray[channelID] = *object
+	c.dataArray[channelID] = object
 }
 
 //var с = Service{make(map[string]*models.ChannelInfo)}
@@ -96,7 +96,7 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 	logger.Debugf("Getting channel :%s", *channelID)
 	item, found := c.dataArray[*channelID]
 	if found {
-		return &item, nil
+		return item, nil
 	}
 	var dbObject = ChannelInfo{}
 	error := c.collection.Find(utils.ChannelSelector{ChannelID: *channelID}).One(dbObject)
@@ -104,7 +104,7 @@ func (c *Service) Get(channelID *string) (*ChannelInfo, error) {
 		logger.Debugf("Error %s", error.Error())
 		return nil, error
 	}
-	c.dataArray[*channelID] = dbObject
+	c.dataArray[*channelID] = &dbObject
 	return &dbObject, error
 }
 
@@ -139,9 +139,9 @@ func (c *Service) PreprocessChannels() error {
 		return channelError
 	}
 
-	for _, channel := range channels {
+	for index, channel := range channels {
 		channelIDList = append(channelIDList, channel.ChannelID)
-		c.dataArray[channel.ChannelID] = channel
+		c.dataArray[channel.ChannelID] = &channels[index]
 	}
 
 	users, error := c.userResolveService.GetUsernames(channelIDList)
