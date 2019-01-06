@@ -25,6 +25,8 @@ type Config struct {
 	ClientSecret       string   `valid:"required"`
 	AppOauthURL        string   `valid:"required"`
 	AppURL             string   `valid:"required"`
+	YandexClientID     string
+	YandexClientSecret string
 	Debug              bool
 	VkClientKey        string
 	YoutubeKey         string
@@ -36,8 +38,8 @@ func (config *Config) SaveApiKey(key string, nextApiKeyUpdate time.Time) {
 
 	config.collection.Update(bson.M{"entity": "config"},
 		bson.M{"$set": bson.M{
-			"apikey":             key,
-			"nextapikeyupdate":   nextApiKeyUpdate,
+			"apikey":           key,
+			"nextapikeyupdate": nextApiKeyUpdate,
 		}})
 }
 

@@ -148,6 +148,17 @@ func (service *Service) corsEnabled(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func owner(next SessionAndChannelHandlerFunc) SessionAndChannelHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, session *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
+		if session.UserID == channelInfo.ChannelID {
+			next(w, r, session, channelInfo)
+		} else {
+			WriteJSONError(w, "You're not owner", http.StatusForbidden)
+			return
+		}
+	}
+}
+
 func mod(next SessionAndChannelHandlerFunc) SessionAndChannelHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, session *httpSession.HTTPSession, channelInfo *channelInfo.ChannelInfo) {
 
@@ -162,6 +173,10 @@ func mod(next SessionAndChannelHandlerFunc) SessionAndChannelHandlerFunc {
 
 func (service *Service) WithMod(next SessionAndChannelHandlerFunc) http.HandlerFunc {
 	return service.WithSessionAndChannel(mod(next))
+}
+
+func (service *Service) WithOwner(next SessionAndChannelHandlerFunc) http.HandlerFunc {
+	return service.WithSessionAndChannel(owner(next))
 }
 
 func (service *Service) CorsEnabled(next http.HandlerFunc) http.HandlerFunc {

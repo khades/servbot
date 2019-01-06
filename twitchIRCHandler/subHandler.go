@@ -1,11 +1,13 @@
 package twitchIRCHandler
 
 import (
-	"github.com/khades/servbot/eventbus"
-	"github.com/khades/servbot/subscriptionInfo"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/khades/servbot/event"
+	"github.com/khades/servbot/eventbus"
+	"github.com/khades/servbot/subscriptionInfo"
 
 	"github.com/khades/servbot/twitchIRC"
 
@@ -48,9 +50,40 @@ func (service *TwitchIRCHandler) sub(client *twitchIRC.Client, message *irc.Mess
 				SubPlan:   subplanMsg,
 				Date:      time.Now()}
 
+			value := 500
+			if subplanMsg == "2000" {
+				value = 1000
+			}
+			if subplanMsg == "3000" {
+				value = 250
+			}
+			subMessage := ""
+			if len(message.Params) > 1 {
+				subMessage = strings.TrimSpace(message.Params[1])
+
+			}
+			service.balanceService.Inc(
+				channelID,
+				userID,
+				user,
+				float64(value))
 			if subCount == 1 {
+				service.eventService.Put(channelID, event.Event{
+					User:     user,
+					Type:     event.SUB,
+					Amount:   value,
+					Message:  subMessage,
+					Currency: "USD",
+				})
 				service.sendSubMessage(client, channelInfo, &user, &subplanMsg)
 			} else {
+				service.eventService.Put(channelID, event.Event{
+					User:     user,
+					Type:     event.RESUB,
+					Amount:   value,
+					Message:  subMessage,
+					Currency: "USD",
+				})
 				service.sendResubMessage(client, channelInfo, &user, &subCount, &subplanMsg)
 			}
 			service.subscriptionInfoService.Log(&loggedSubscription)

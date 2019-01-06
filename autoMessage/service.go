@@ -50,7 +50,9 @@ func (service *Service) ListCurrent() ([]AutoMessage, error) {
 		"message":           bson.M{"$ne": ""},
 		"messagethreshold":  bson.M{"$lte": 0},
 		"durationthreshold": bson.M{"$lte": time.Now()}}).All(&result)
-	logger.Infof("AutoMessage: Got %d AutoMessages", len(result))
+	if len(result) > 0 {
+		logger.Infof("AutoMessage: Got %d AutoMessages", len(result))
+	}
 	return result, error
 }
 

@@ -2,9 +2,20 @@ package main
 
 import (
 	"flag"
-	"github.com/khades/servbot/metrics"
 	"sync"
 	"time"
+
+	"github.com/khades/servbot/yandexOAuth"
+
+	"github.com/khades/servbot/donationAPI"
+	"github.com/khades/servbot/donationSource"
+	"github.com/khades/servbot/donationSourceAPI"
+	"github.com/khades/servbot/event"
+
+	"github.com/khades/servbot/balance"
+	"github.com/khades/servbot/currencyConverter"
+	"github.com/khades/servbot/donation"
+	"github.com/khades/servbot/metrics"
 
 	"github.com/asaskevich/EventBus"
 	"github.com/khades/servbot/autoMessageTasks"
@@ -107,6 +118,14 @@ func main() {
 		}
 	}()
 
+	currencyConverterService := currencyConverter.Init()
+
+	balanceService := balance.Init(db)
+
+	eventService := event.Init(db)
+
+	donationService := donation.Init(db, currencyConverterService, balanceService, eventService)
+
 	// Creating twitchAPI service
 	twitchAPIClient := twitchAPI.Init(
 		config,
@@ -150,6 +169,13 @@ func main() {
 		httpAPIService,
 		channelInfoService)
 
+	donationAPI.Init(
+		httpAPIService,
+		donationService)
+
+	donationSourceService := donationSource.Init(db)
+	donationSourceAPI.Init(httpAPIService, donationSourceService)
+	yandexOAuth.Init(httpAPIService, config, donationSourceService)
 	// Creating gameID to game resolution service
 	gameResolveService, _ := gameResolve.Init(
 		db,
@@ -293,6 +319,8 @@ func main() {
 		songRequestService,
 		eventBus,
 		pubsub,
+		eventService,
+		balanceService,
 	)
 
 	// TwitchBot
