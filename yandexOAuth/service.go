@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/config"
 	"github.com/khades/servbot/donationSource"
 	"github.com/khades/servbot/httpAPI"
@@ -20,11 +19,11 @@ type Service struct {
 	donationSourceService *donationSource.Service
 }
 
-func (service *Service) login(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession, channelID *channelInfo.ChannelInfo) {
+func (service *Service) login(w http.ResponseWriter, r *http.Request, s *httpSession.HTTPSession) {
 	code := r.URL.Query().Get("code")
 	key, err := service.getToken(code)
 	if err == nil {
-		service.donationSourceService.SetYandexKey(channelID.ChannelID, key)
+		service.donationSourceService.SetYandexKey(s.UserID, key)
 		json.NewEncoder(w).Encode(httpAPI.OptionResponse{"OK"})
 		return
 	}
