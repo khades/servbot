@@ -33,7 +33,7 @@ func (service *Service) login(w http.ResponseWriter, r *http.Request, s *httpSes
 }
 
 func (service *Service) getToken(code string) (string, error) {
-	apiUrl := "https://money.yandex.ru/api/operation-history"
+	apiUrl := "https://money.yandex.ru/oauth/authorize"
 	data := url.Values{}
 	data.Set("code", code)
 	data.Set("grant_type", "authorization_code")
