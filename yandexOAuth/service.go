@@ -59,6 +59,7 @@ func (service *Service) getToken(code string) (string, error) {
 		log.Printf("Repsonse is %q", dump)
 	} else {
 		log.Printf("error %s", dumpErr.Error())
+		return "", dumpErr
 	}
 	if marshallError != nil {
 		return "", marshallError
