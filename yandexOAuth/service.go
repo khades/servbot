@@ -57,6 +57,8 @@ func (service *Service) getToken(code string) (string, error) {
 	dump, dumpErr := httputil.DumpResponse(resp, true)
 	if dumpErr == nil {
 		log.Printf("Repsonse is %q", dump)
+	} else {
+		log.Printf("error %s", dumpErr.Error())
 	}
 	if marshallError != nil {
 		return "", marshallError
