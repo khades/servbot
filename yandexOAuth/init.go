@@ -11,5 +11,5 @@ func Init(httpAPIService *httpAPI.Service, config *config.Config,
 	donationSourceService *donationSource.Service) {
 	service := Service{config, donationSourceService}
 	mux := httpAPIService.NewMux()
-	mux.HandleFunc(pat.Post("/yandex/oauth"), httpAPIService.WithMod(service.login))
+	mux.HandleFunc(pat.Get("/yandex/oauth"), httpAPIService.WithMod(service.login))
 }
