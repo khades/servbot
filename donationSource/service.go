@@ -14,9 +14,10 @@ type Service struct {
 func (service *Service) SetYandexKey(channelID string, key string) {
 	// TODO Locate expiration date
 	service.collection.Upsert(bson.M{"channelid": channelID}, bson.M{"$set": bson.M{"yandex": DonationSource{
-		Enabled:   true,
-		Key:       key,
-		LastCheck: time.Now(),
+		Enabled:        true,
+		Key:            key,
+		ExpirationDate: time.Now().Add(3 * 365 * 24 * time.Hour),
+		LastCheck:      time.Now(),
 	}}})
 }
 
