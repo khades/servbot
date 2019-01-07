@@ -5,17 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/khades/servbot/paypalIPN"
-	"github.com/khades/servbot/yandexOAuth"
-
-	"github.com/khades/servbot/donationAPI"
-	"github.com/khades/servbot/donationSource"
-	"github.com/khades/servbot/donationSourceAPI"
-	"github.com/khades/servbot/event"
-
-	"github.com/khades/servbot/balance"
-	"github.com/khades/servbot/currencyConverter"
-	"github.com/khades/servbot/donation"
 	"github.com/khades/servbot/metrics"
 
 	"github.com/asaskevich/EventBus"
@@ -119,13 +108,13 @@ func main() {
 		}
 	}()
 
-	currencyConverterService := currencyConverter.Init()
+	// currencyConverterService := currencyConverter.Init()
 
-	balanceService := balance.Init(db)
+	// balanceService := balance.Init(db)
 
-	eventService := event.Init(db)
+	// eventService := event.Init(db)
 
-	donationService := donation.Init(db, currencyConverterService, balanceService, eventService)
+	// donationService := donation.Init(db, currencyConverterService, balanceService, eventService)
 
 	// Creating twitchAPI service
 	twitchAPIClient := twitchAPI.Init(
@@ -161,7 +150,7 @@ func main() {
 		channelInfoService,
 		eventBus,
 		metrics)
-	paypalIPN.Init(httpAPIService)
+	// paypalIPN.Init(httpAPIService)
 	subtrainAPI.Init(
 		httpAPIService,
 		channelInfoService)
@@ -170,13 +159,13 @@ func main() {
 		httpAPIService,
 		channelInfoService)
 
-	donationAPI.Init(
-		httpAPIService,
-		donationService)
+	// donationAPI.Init(
+	// 	httpAPIService,
+	// 	donationService)
 
-	donationSourceService := donationSource.Init(db)
-	donationSourceAPI.Init(httpAPIService, donationSourceService)
-	yandexOAuth.Init(httpAPIService, config, donationSourceService)
+	// donationSourceService := donationSource.Init(db)
+	// donationSourceAPI.Init(httpAPIService, donationSourceService)
+	// yandexOAuth.Init(httpAPIService, config, donationSourceService)
 	// donationSourceTasks.Run(donationService, donationSourceService)
 	// Creating gameID to game resolution service
 	gameResolveService, _ := gameResolve.Init(
@@ -321,8 +310,8 @@ func main() {
 		songRequestService,
 		eventBus,
 		pubsub,
-		eventService,
-		balanceService,
+		// eventService,
+		// balanceService,
 	)
 
 	// TwitchBot

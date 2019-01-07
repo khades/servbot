@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/asaskevich/EventBus"
-	"github.com/khades/servbot/balance"
-	"github.com/khades/servbot/event"
 	"github.com/khades/servbot/eventbus"
 	"github.com/khades/servbot/followers"
 	"github.com/khades/servbot/songRequest"
@@ -40,8 +38,8 @@ type TwitchIRCHandler struct {
 	songRequestService      *songRequest.Service
 	eventBus                EventBus.Bus
 	pubsub                  *pubsub.Client
-	eventService            *event.Service
-	balanceService          *balance.Service
+	// eventService            *event.Service
+	// balanceService          *balance.Service
 }
 
 func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.Message) {
@@ -145,25 +143,25 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 		if isVote == true {
 			service.vote(client, channelInfo, &formedMessage)
 		}
-		bits, bitsFound := message.Tags.GetTag("bits")
-		if bitsFound {
-			parsedBits, parsedBitsError := strconv.Atoi(bits)
-			if parsedBitsError == nil {
+		// bits, bitsFound := message.Tags.GetTag("bits")
+		// if bitsFound {
+		// 	parsedBits, parsedBitsError := strconv.Atoi(bits)
+		// 	if parsedBitsError == nil {
 
-				service.balanceService.Inc(
-					formedMessage.ChannelID,
-					formedMessage.UserID,
-					formedMessage.User,
-					float64(parsedBits))
-				service.eventService.Put(formedMessage.ChannelID, event.Event{
-					User:     message.User,
-					Type:     event.BITS,
-					Amount:   parsedBits,
-					Message:  formedMessage.MessageStruct.MessageBody,
-					Currency: "USD",
-				})
-			}
-		}
+		// 		service.balanceService.Inc(
+		// 			formedMessage.ChannelID,
+		// 			formedMessage.UserID,
+		// 			formedMessage.User,
+		// 			float64(parsedBits))
+		// 		service.eventService.Put(formedMessage.ChannelID, event.Event{
+		// 			User:     message.User,
+		// 			Type:     event.BITS,
+		// 			Amount:   parsedBits,
+		// 			Message:  formedMessage.MessageStruct.MessageBody,
+		// 			Currency: "USD",
+		// 		})
+		// 	}
+		// }
 		if isCommand == true {
 			if message.User == "khadesru" && commandBody.Command == "debugsub" {
 				subPlan := "2000"

@@ -3,10 +3,8 @@ package twitchIRCHandler
 import (
 	"github.com/asaskevich/EventBus"
 	"github.com/khades/servbot/autoMessage"
-	"github.com/khades/servbot/balance"
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/channelLogs"
-	"github.com/khades/servbot/event"
 	"github.com/khades/servbot/followers"
 	"github.com/khades/servbot/pubsub"
 	"github.com/khades/servbot/songRequest"
@@ -29,8 +27,9 @@ func Init(subdayService *subday.Service,
 	songRequestService *songRequest.Service,
 	eventBus EventBus.Bus,
 	pubsub *pubsub.Client,
-	eventService *event.Service,
-	balanceService *balance.Service) *TwitchIRCHandler {
+	// eventService *event.Service,
+	// balanceService *balance.Service
+) *TwitchIRCHandler {
 	return &TwitchIRCHandler{
 		subdayService:           subdayService,
 		channelInfoService:      channelInfoService,
@@ -44,7 +43,7 @@ func Init(subdayService *subday.Service,
 		songRequestService:      songRequestService,
 		eventBus:                eventBus,
 		pubsub:                  pubsub,
-		eventService:            eventService,
-		balanceService:          balanceService,
+		// eventService:            eventService,
+		// balanceService:          balanceService,
 	}
 }

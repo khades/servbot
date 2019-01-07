@@ -42,7 +42,16 @@ func (service *Service) List(channelID string, page int) ([]Donation, error) {
 	return results, error
 }
 
-func (service *Service) SetPaid(id string, channelID string) (string, error) {
+func (service *Service) Get(id string) (*Donation, error){
+	if bson.IsObjectIdHex(id) == false {
+		return nil, nil
+	}
+	result := Donation{}
+	error := service.collection.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
+	return &result, error
+}
+
+func (service *Service) SetPaid(id string) (string, error) {
 	change := mgo.Change{
 		Update:    bson.M{"$set": bson.M{"paid": true}},
 		ReturnNew: true,
@@ -51,7 +60,7 @@ func (service *Service) SetPaid(id string, channelID string) (string, error) {
 		return "", nil
 	}
 	result := Donation{}
-	_, error := service.collection.Find(bson.M{"_id": bson.ObjectIdHex(id), "channelid": channelID}).Apply(change, &result)
+	_, error := service.collection.Find(bson.M{"_id": bson.ObjectIdHex(id)}).Apply(change, &result)
 
 	if error == nil {
 		service.eventService.Put(result.ChannelID, event.Event{

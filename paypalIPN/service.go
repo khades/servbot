@@ -55,6 +55,12 @@ func ipn(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Error reading values: %s", valuesError.Error())
 	}
 	log.Printf("Values: %+v", values)
+
+	paymentStatus := values.Get("payment_status")
+	if paymentStatus == "Completed" {
+		objectID := values.Get("custom")
+		log.Printf("DonationID: %s", objectID)
+	}
 }
 
 func ipnGet(w http.ResponseWriter, r *http.Request) {
