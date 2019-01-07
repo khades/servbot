@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/khades/servbot/donationSourceTasks"
+	"github.com/khades/servbot/paypalIPN"
 	"github.com/khades/servbot/yandexOAuth"
 
 	"github.com/khades/servbot/donationAPI"
@@ -161,7 +161,7 @@ func main() {
 		channelInfoService,
 		eventBus,
 		metrics)
-
+	paypalIPN.Init(httpAPIService)
 	subtrainAPI.Init(
 		httpAPIService,
 		channelInfoService)
@@ -177,7 +177,7 @@ func main() {
 	donationSourceService := donationSource.Init(db)
 	donationSourceAPI.Init(httpAPIService, donationSourceService)
 	yandexOAuth.Init(httpAPIService, config, donationSourceService)
-	donationSourceTasks.Run(donationService, donationSourceService)
+	// donationSourceTasks.Run(donationService, donationSourceService)
 	// Creating gameID to game resolution service
 	gameResolveService, _ := gameResolve.Init(
 		db,

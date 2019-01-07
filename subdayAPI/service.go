@@ -156,7 +156,12 @@ func (service *Service) close(w http.ResponseWriter, r *http.Request, s *httpSes
 		httpAPI.WriteJSONError(w, "subday id is not found", http.StatusNotFound)
 		return
 	}
-	service.subdayService.Close(&channelInfo.ChannelID, &id, &s.Username, &s.UserID)
+	if id == "last" {
+		service.subdayService.CloseAnyActive(&channelInfo.ChannelID, &s.Username, &s.UserID)
+	} else {
+		service.subdayService.Close(&channelInfo.ChannelID, &id, &s.Username, &s.UserID)
+
+	}
 	json.NewEncoder(w).Encode(httpAPI.OptionResponse{"OK"})
 
 }
