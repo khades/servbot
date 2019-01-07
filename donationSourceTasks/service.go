@@ -6,6 +6,7 @@ import (
 	"github.com/khades/servbot/donation"
 	"github.com/khades/servbot/donationSource"
 	"github.com/khades/servbot/yandexMoney"
+	"github.com/sirupsen/logrus"
 )
 
 type Service struct {
@@ -22,6 +23,9 @@ func (service *Service) Process() error {
 }
 
 func (service *Service) processOneChannel(source donationSource.DonationSources) {
+	logger := logrus.WithFields(logrus.Fields{
+		"package": "donationSourceTasks",
+		"action":  "processOneChannel"})
 	if source.Yandex.Enabled == false {
 		return
 	}
@@ -34,7 +38,14 @@ func (service *Service) processOneChannel(source donationSource.DonationSources)
 		if transaction.DateTime.After(lastCheck) {
 			lastCheck = transaction.DateTime
 		}
+		if source.Yandex.LastCheck == transaction.DateTime {
+			logger.Debug("Passing that transaction, its already processed")
+			continue
+		}
 		service.donationService.SetPaid(transaction.Details, source.ChannelID)
+	}
+	if lastCheck.IsZero() {
+		lastCheck = time.Now()
 	}
 	service.donationSourceService.UpdateYandexLastCheck(source.ChannelID, lastCheck)
 }

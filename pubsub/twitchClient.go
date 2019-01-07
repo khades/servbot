@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"encoding/json"
+
 	"github.com/khades/servbot/channelInfo"
 	"github.com/khades/servbot/channelLogs"
 	"github.com/khades/servbot/chatMessage"
@@ -32,7 +33,7 @@ func (client *Client) run() {
 		"action":  "Run"})
 	var timerDur time.Duration = 10 * time.Second
 	var timerIncrement = func() {
-		if (timerDur < 1 * time.Minute) {
+		if timerDur < 1*time.Minute {
 			timerDur = timerDur + (5 * time.Second)
 		}
 	}
@@ -139,27 +140,33 @@ func (client *Client) twitchPubSubClient(topics []string) {
 
 					moderAction := moderationActionMessage{}
 					json.Unmarshal([]byte(messageObj.Data.Message), &moderAction)
-					result := chatMessage.ChatMessage{
-						MessageStruct: chatMessage.MessageStruct{
-							Date:        time.Now(),
-							Username:    moderAction.Data.Args[0],
-							MessageType: strings.ToLower(moderAction.Data.ModeratorAction),
-							BanIssuer:   moderAction.Data.User,
-							BanIssuerID: moderAction.Data.UserID},
-						User:      moderAction.Data.Args[0],
-						ChannelID: channelID,
-						UserID:    moderAction.Data.RecipientID}
+					if len(moderAction.Data.Args) == 0 {
+						logger.Infof("Got unknown action, but cant get its data: %+v", messageObj)
+						logger.Infof("Got unknown action, but cant get its data: %+v", moderAction)
 
-					if moderAction.Data.ModeratorAction == "ban" {
-						result.MessageStruct.BanReason = moderAction.Data.Args[1]
-						client.channelLogsService.Log(&result)
+					} else {
+						result := chatMessage.ChatMessage{
+							MessageStruct: chatMessage.MessageStruct{
+								Date:        time.Now(),
+								Username:    moderAction.Data.Args[0],
+								MessageType: strings.ToLower(moderAction.Data.ModeratorAction),
+								BanIssuer:   moderAction.Data.User,
+								BanIssuerID: moderAction.Data.UserID},
+							User:      moderAction.Data.Args[0],
+							ChannelID: channelID,
+							UserID:    moderAction.Data.RecipientID}
 
-					}
+						if moderAction.Data.ModeratorAction == "ban" {
+							result.MessageStruct.BanReason = moderAction.Data.Args[1]
+							client.channelLogsService.Log(&result)
 
-					if moderAction.Data.ModeratorAction == "timeout" {
-						length, _ := strconv.Atoi(moderAction.Data.Args[1])
-						result.MessageStruct.BanLength = length
-						client.channelLogsService.Log(&result)
+						}
+
+						if moderAction.Data.ModeratorAction == "timeout" {
+							length, _ := strconv.Atoi(moderAction.Data.Args[1])
+							result.MessageStruct.BanLength = length
+							client.channelLogsService.Log(&result)
+						}
 					}
 				}
 			}

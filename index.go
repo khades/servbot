@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/khades/servbot/donationSourceTasks"
 	"github.com/khades/servbot/yandexOAuth"
 
 	"github.com/khades/servbot/donationAPI"
@@ -176,6 +177,7 @@ func main() {
 	donationSourceService := donationSource.Init(db)
 	donationSourceAPI.Init(httpAPIService, donationSourceService)
 	yandexOAuth.Init(httpAPIService, config, donationSourceService)
+	donationSourceTasks.Run(donationService, donationSourceService)
 	// Creating gameID to game resolution service
 	gameResolveService, _ := gameResolve.Init(
 		db,

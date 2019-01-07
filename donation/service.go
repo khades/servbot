@@ -47,6 +47,9 @@ func (service *Service) SetPaid(id string, channelID string) (string, error) {
 		Update:    bson.M{"$set": bson.M{"paid": true}},
 		ReturnNew: true,
 	}
+	if bson.IsObjectIdHex(id) == false {
+		return "", nil
+	}
 	result := Donation{}
 	_, error := service.collection.Find(bson.M{"_id": bson.ObjectIdHex(id), "channelid": channelID}).Apply(change, &result)
 

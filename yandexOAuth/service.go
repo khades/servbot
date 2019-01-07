@@ -2,9 +2,7 @@ package yandexOAuth
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -51,16 +49,10 @@ func (service *Service) getToken(code string) (string, error) {
 	if resp != nil {
 		defer resp.Body.Close()
 	}
+	
 	result := yandexResponse{}
 	marshallError := json.NewDecoder(resp.Body).Decode(&result)
 
-	dump, dumpErr := httputil.DumpResponse(resp, true)
-	if dumpErr == nil {
-		log.Printf("Repsonse is %q", dump)
-	} else {
-		log.Printf("error %s", dumpErr.Error())
-		return "", dumpErr
-	}
 	if marshallError != nil {
 		return "", marshallError
 	}
