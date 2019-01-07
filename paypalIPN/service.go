@@ -14,9 +14,16 @@ import (
 func ipn(w http.ResponseWriter, req *http.Request) {
 	buf, _ := ioutil.ReadAll(req.Body)
 	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
+
 	rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
+
+	incomingBuffer, _ := ioutil.ReadAll(rdr1)
+	valuesToSend := [][]byte{[]byte("_notify-validate"), incomingBuffer}
+	result := bytes.Join(valuesToSend, []byte("&"))
+	log.Printf("To send: %s", string(result))
+
 	client := &http.Client{Timeout: 5 * time.Second}
-	r, _ := http.NewRequest("POST", "https://ipnpb.sandbox.paypal.com/cgi-bin/webscr", rdr1)
+	r, _ := http.NewRequest("POST", "https://ipnpb.sandbox.paypal.com/cgi-bin/webscr", bytes.NewReader(result))
 	r.Header.Set("Content-Type", req.Header.Get("Content-Type"))
 	r.Header.Set("Content-Length", req.Header.Get("Content-Length"))
 	resp, err := client.Do(r)
@@ -29,6 +36,7 @@ func ipn(w http.ResponseWriter, req *http.Request) {
 		log.Println("Error getting data from paypal")
 		return
 	}
+	log.Printf("GOT: %s", string(htmlData))
 	if string(htmlData) == "VERIFIED" {
 		log.Println("ALL GOODMAN")
 	}
