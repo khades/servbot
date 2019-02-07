@@ -21,16 +21,19 @@ func (service *TwitchIRCHandler) sub(client *twitchIRC.Client, message *irc.Mess
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
 	msgID, _ := message.Tags.GetTag("msg-id")
-	msgParamMonths, msgParamMonthsFound := message.Tags.GetTag("msg-param-months")
-	if msgID == "sub" {
-		msgParamMonths = "1"
-		msgParamMonthsFound = true
+	msgParamMonth := 1
+	msgParamMonthsFound := true
+	if msgID == "subgift" || msgID == "anonsubgift" {
+		msgParamMonths, msgParamMonthsFound = message.Tags.GetTag("msg-param-months")
+	}
+	if msgID == "resub" {
+		msgParamMonths, msgParamMonthsFound = message.Tags.GetTag("msg-param-cumulative-months")
 	}
 	user, userFound := message.Tags.GetTag("display-name")
 	if userFound == false || user == "" {
 		user, userFound = message.Tags.GetTag("login")
 	}
-	if msgID == "subgift" {
+	if msgID == "subgift" || msgID == "anonsubgift" {
 		user, userFound = message.Tags.GetTag("msg-param-recipient-display-name")
 	}
 	channelID, channelIDFound := message.Tags.GetTag("room-id")

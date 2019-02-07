@@ -59,6 +59,10 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 			{
 				service.sub(client, message)
 			}
+		case "anonsubgift":
+			{
+				service.sub(client, message)
+			}
 		case "room_mods":
 			{
 				commaIndex := strings.Index(message.Params[1], ":")
