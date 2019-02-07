@@ -21,7 +21,7 @@ func (service *TwitchIRCHandler) sub(client *twitchIRC.Client, message *irc.Mess
 	subplanMsg, subplanMsgFound := message.Tags.GetTag("msg-param-sub-plan")
 	prime := subplanMsgFound && strings.Contains(subplanMsg, "prime")
 	msgID, _ := message.Tags.GetTag("msg-id")
-	msgParamMonth := 1
+	msgParamMonths := 1
 	msgParamMonthsFound := true
 	if msgID == "subgift" || msgID == "anonsubgift" {
 		msgParamMonths, msgParamMonthsFound = message.Tags.GetTag("msg-param-months")
