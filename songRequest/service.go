@@ -310,6 +310,10 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 	}
 
 	service.push(channelID, &songRequest)
+	
+	if (len(songRequestInfo.Requests) == 0) {
+		service.channelInfoService.PutCurrentSong(channelID, &songRequest)
+	}
 
 	service.eventBus.Publish(eventbus.Songrequest(channelID), "update")
 
