@@ -310,9 +310,18 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 	}
 
 	service.push(channelID, &songRequest)
-	
-	if (len(songRequestInfo.Requests) == 0) {
-		service.channelInfoService.PutCurrentSong(channelID, &songRequest)
+
+	if len(songRequestInfo.Requests) == 0 {
+		request := channelInfo.CurrentSong{
+			IsPlaying: true,
+			Title:     songRequest.Title,
+			User:      songRequest.User,
+			Link:      "https://youtu.be/" + songRequest.VideoID,
+			Duration:  l10n.HumanizeDurationFull(songRequest.Length, lang, true),
+			Volume:    songRequestInfo.Settings.Volume,
+			Count:     1,
+			ID:        songRequest.VideoID}
+		service.channelInfoService.PutCurrentSong(channelID, &request)
 	}
 
 	service.eventBus.Publish(eventbus.Songrequest(channelID), "update")
