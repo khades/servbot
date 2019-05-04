@@ -138,9 +138,9 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 	defer logger.Debugf("Releasing Songrequest lock for channel %s", *channelID)
 
 	songRequestInfo := service.Get(channelID)
-	channelInfo, channelInfoError := service.channelInfoService.Get(channelID)
+	channelInfoData, channelInfoError := service.channelInfoService.Get(channelID)
 
-	if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfo.StreamStatus.Online == false) {
+	if channelInfoError != nil || (songRequestInfo.Settings.AllowOffline == false && channelInfoData.StreamStatus.Online == false) {
 		return SongRequestAddResult{Offline: true}
 	}
 
@@ -317,7 +317,7 @@ func (service *Service) Add(user *string, userIsSub bool, userID *string, channe
 			Title:     songRequest.Title,
 			User:      songRequest.User,
 			Link:      "https://youtu.be/" + songRequest.VideoID,
-			Duration:  l10n.HumanizeDurationFull(songRequest.Length, lang, true),
+			Duration:  l10n.HumanizeDurationFull(songRequest.Length, channelInfoData.Lang, true),
 			Volume:    songRequestInfo.Settings.Volume,
 			Count:     1,
 			ID:        songRequest.VideoID}
