@@ -123,7 +123,7 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 	}
 	if message.Command == "PRIVMSG" {
 		//	logger.Debug("Got PRIVMSG, parsing")
-
+		isSub := strings.Contains(message.Tags["@badge-info"].Encode(), "subscriber") || strings.Contains(message.Tags["badges"].Encode(), "founder")
 		formedMessage := chatMessage.ChatMessage{
 			MessageStruct: chatMessage.MessageStruct{
 				Username:    message.User,
@@ -135,8 +135,8 @@ func (service *TwitchIRCHandler) Handle(client *twitchIRC.Client, message *irc.M
 			User:      message.User,
 			UserID:    message.Tags["user-id"].Encode(),
 			IsMod:     message.Tags["mod"] == "1" || message.User == "khadesru" || message.Params[0][1:] == message.User,
-			IsSub:     message.Tags["subscriber"] == "1",
-			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium/1")}
+			IsSub:     isSub,
+			IsPrime:   strings.Contains(message.Tags["badges"].Encode(), "premium")}
 		service.channelLogsService.Log(&formedMessage)
 		channelInfo, _ := service.channelInfoService.Get(&formedMessage.ChannelID)
 		service.autoMessageService.Decrement(channelInfo)
