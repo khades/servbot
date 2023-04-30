@@ -33,7 +33,7 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 		"code":          {code}}
 
 	// https://id.twitch.tv/oauth2/token
-	resp, err := http.PostForm("https://api.twitch.tv/kraken/oauth2/token", postValues)
+	resp, err := http.PostForm("https://id.twitch.tv/oauth2/token'", postValues)
 
 	if err != nil {
 		logger.Infof("Twitch Error: %s", err.Error())
@@ -73,7 +73,7 @@ func (service *Service) oauthInitiate(w http.ResponseWriter, r *http.Request) {
 	if isValidCookie == false {
 
 		//"https://id.twitch.tv/oauth2/authorize"
-		http.Redirect(w, r, "https://api.twitch.tv/kraken/oauth2/authorize"+
+		http.Redirect(w, r, "https://id.twitch.tv/oauth2/authorize"+
 			"?response_type=code"+
 			"&client_id="+service.config.ClientID+
 			"&redirect_uri="+service.config.AppOauthURL+
