@@ -52,6 +52,8 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 		WriteJSONError(w, "Twitch Error, Cant get auth token, Got code 400", http.StatusUnprocessableEntity)
 		return
 	}
+	bs := string(resp.Body)
+	logger.Infof(bs)
 	var tokenStruct = new(tokenResponse)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
