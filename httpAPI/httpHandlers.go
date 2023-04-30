@@ -55,7 +55,7 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(resp.Body)
 	bodyString := string(body)
 	
-	logger.Infof(bodyStringa)
+	logger.Infof(bodyString)
 	var tokenStruct = new(tokenResponse)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
