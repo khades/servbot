@@ -33,7 +33,7 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 		"code":          {code}}
 
 	// https://id.twitch.tv/oauth2/token
-	resp, err := http.PostForm("https://id.twitch.tv/oauth2/token'", postValues)
+	resp, err := http.PostForm("https://id.twitch.tv/oauth2/token", postValues)
 
 	if err != nil {
 		logger.Infof("Twitch Error: %s", err.Error())
@@ -52,10 +52,6 @@ func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
 		WriteJSONError(w, "Twitch Error, Cant get auth token, Got code 400", http.StatusUnprocessableEntity)
 		return
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	bodyString := string(body)
-	
-	logger.Infof(bodyString)
 	var tokenStruct = new(tokenResponse)
 
 	marshallError := json.NewDecoder(resp.Body).Decode(tokenStruct)
