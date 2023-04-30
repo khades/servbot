@@ -13,7 +13,7 @@ import (
 )
 
 type tokenResponse struct {
-	Token string `json:"code"`
+	Token string `json:"access_token"`
 }
 
 func (service *Service) oauth(w http.ResponseWriter, r *http.Request) {
